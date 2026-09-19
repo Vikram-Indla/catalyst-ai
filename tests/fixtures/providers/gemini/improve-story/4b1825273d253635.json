@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"as a PM i want export the board to csv. all columns. the file name shoud include date. also filters applied should be respected\", \"acceptance_criteria\": \"- Given the item 'Export board to CSV', when the described behaviour runs, then the outcome matches the description.\\n- Given the same starting state, when the action runs twice, then the second run changes nothing.\", \"changed\": true, \"rationale\": \"Applied the acceptance_criteria operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 231,
+      "candidatesTokenCount": 126
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

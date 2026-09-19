@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"As a user, I want rotate the signing key, so that the signing key for tokens rotate every 90 days, we need a job that does it and keeps old key valid 24h so nothing breaks.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the user_story operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 212,
+      "candidatesTokenCount": 81
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

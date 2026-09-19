@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Give resource managers a capacity view per team and quarter, comparing committed work to available hours, with a KPI of forecast accuracy above 85%.\", \"acceptance_criteria\": null, \"changed\": false, \"rationale\": \"Already clear; only checked grammar.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 344,
+      "candidatesTokenCount": 66
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

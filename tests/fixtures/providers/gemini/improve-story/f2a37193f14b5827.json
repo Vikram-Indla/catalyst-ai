@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"when a story is deleted mid sprint the burndown go below zero, expected it clamps at 0. happens in chrome and firefox, since release 4.2\", \"acceptance_criteria\": \"- Given the item 'Sprint burndown shows negative', when the described behaviour runs, then the outcome matches the description.\\n- Given the same starting state, when the action runs twice, then the second run changes nothing.\", \"changed\": true, \"rationale\": \"Applied the acceptance_criteria operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 238,
+      "candidatesTokenCount": 131
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

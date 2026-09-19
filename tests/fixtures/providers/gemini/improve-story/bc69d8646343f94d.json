@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"**Steps:** upload a PDF larger than 20 MB, open the preview. **Expected:** the first page renders. **Actual:** a blank panel and a console error. Environment: Chrome 130, staging.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 361,
+      "candidatesTokenCount": 82
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

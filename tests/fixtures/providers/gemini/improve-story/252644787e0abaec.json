@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"This story depends on PROJ-42 and blocks PROJ-57, the limit is 250 items per page and timeout is 30s.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 334,
+      "candidatesTokenCount": 63
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Nightly jobs currently at 00:00 collide with backups, propose 02:00 UTC, need signoff from ops.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 340,
+      "candidatesTokenCount": 61
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

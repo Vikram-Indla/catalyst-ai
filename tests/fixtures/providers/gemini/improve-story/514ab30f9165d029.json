@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Upgrade the production cluster to PostgreSQL 17 during the Saturday window. 1. Take a full backup. 2. Run the upgrade on the replica first. 3. Promote and verify with the smoke suite.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 352,
+      "candidatesTokenCount": 83
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
