@@ -1,0 +1,11 @@
+# gitleaks: the default rules, plus one allowlist for the input scanner's own test, whose fixture
+# lines are deliberately shaped like credentials (an access key, a bearer-like key, a JWT) so the
+# scanner is proven to refuse them. Nothing else is exempt.
+title = "catalyst-ai"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "the input scanner's fixtures are synthetic credential shapes"
+paths = ['''tests/unit/platform/safety/test_input\.py''']

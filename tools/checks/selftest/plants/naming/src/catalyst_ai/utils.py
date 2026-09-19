@@ -1,0 +1,1 @@
+"""Plant: a banned stem."""

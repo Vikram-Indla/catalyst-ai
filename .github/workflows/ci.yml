@@ -1,0 +1,16 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.12.14-slim
+    steps:
+      - uses: actions/checkout@v4
+      - run: apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates && pip install uv==0.12.16
+      - run: make tools
+      - run: make hooks
+      - run: make verify

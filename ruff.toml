@@ -1,0 +1,32 @@
+line-length = 100
+target-version = "py312"
+extend-exclude = ["tools/checks/selftest/plants", "tests/fixtures", ".tools"]
+
+[lint]
+select = [
+  "E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF", "ERA", "T20", "G", "PTH",
+  "S", "PL", "ANN", "D", "ASYNC", "DTZ", "LOG", "PT", "TRY",
+]
+ignore = ["D203", "D213"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pylint]
+max-args = 5
+max-branches = 10
+max-returns = 3
+max-statements = 40
+max-nested-blocks = 3
+
+[lint.pydocstyle]
+convention = "pep257"
+
+[lint.per-file-ignores]
+"tests/**" = ["S101", "D", "PLR2004", "ANN", "E501", "S311"]
+"evals/**" = ["PLR2004", "E501"]
+"tools/**" = ["T201", "D103", "D100", "D105", "S603", "S607", "S101", "PLR2004"]
+"src/catalyst_ai/cli.py" = ["T201"]
+
+[format]
+quote-style = "double"

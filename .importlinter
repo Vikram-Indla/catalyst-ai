@@ -1,0 +1,59 @@
+[importlinter]
+include_external_packages = True
+root_packages =
+    catalyst_ai
+
+[importlinter:contract:layers]
+name = Layers: capabilities above platform, retrieval and the port; contract at the bottom
+type = layers
+layers =
+    catalyst_ai.capabilities
+    catalyst_ai.retrieval | catalyst_ai.providers.gemini | catalyst_ai.providers.recorded | catalyst_ai.providers.faults
+    catalyst_ai.platform
+    catalyst_ai.providers.port
+    catalyst_ai.config
+    catalyst_ai.contract
+
+[importlinter:contract:capabilities-independent]
+name = Capabilities are independent of each other
+type = independence
+modules =
+    catalyst_ai.capabilities.*
+
+[importlinter:contract:contract-leaf]
+name = The contract imports nothing internal
+type = forbidden
+source_modules =
+    catalyst_ai.contract
+forbidden_modules =
+    catalyst_ai.config
+    catalyst_ai.platform
+    catalyst_ai.providers
+    catalyst_ai.retrieval
+    catalyst_ai.capabilities
+    catalyst_ai.app
+    catalyst_ai.cli
+
+[importlinter:contract:capabilities-never-reach-adapters-or-network]
+name = Capabilities never import an adapter, httpx, os or a provider SDK
+type = forbidden
+source_modules =
+    catalyst_ai.capabilities
+forbidden_modules =
+    catalyst_ai.providers.recorded
+    httpx
+    os
+    socket
+
+[importlinter:contract:platform-below-capabilities]
+name = Platform, retrieval and providers never import a capability or the composition roots
+type = forbidden
+source_modules =
+    catalyst_ai.platform
+    catalyst_ai.retrieval
+    catalyst_ai.providers
+    catalyst_ai.config
+forbidden_modules =
+    catalyst_ai.capabilities
+    catalyst_ai.app
+    catalyst_ai.cli

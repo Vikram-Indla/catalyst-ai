@@ -1,0 +1,5 @@
+python 3.12.14
+uv 0.12.16
+gitleaks 8.30.1
+oasdiff 1.32.1
+trivy 0.72.0

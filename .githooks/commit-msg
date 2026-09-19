@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+line="$(head -n1 "$1")"
+pattern='^(feat|fix|refactor|perf|test|eval|prompt|docs|build|ci|chore|gen)(\([a-z0-9._-]+\))?!?: [^ ].{0,79}$'
+if ! [[ "$line" =~ $pattern ]] || [ "${#line}" -gt 80 ]; then
+  echo "commit-msg: '$line' is not a Conventional Commit line of at most 80 characters" >&2
+  exit 1
+fi
+if grep -qiE '^(Co-Authored-By|Signed-off-by):' "$1"; then
+  echo "commit-msg: no trailer is allowed after the one line" >&2
+  exit 1
+fi

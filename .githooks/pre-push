@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [ "$remote_ref" != "refs/heads/main" ]; then
+    echo "pre-push: only main is ever pushed (got $remote_ref)" >&2
+    exit 1
+  fi
+done
+if docker info >/dev/null 2>&1; then
+  make ci
+else
+  echo "pre-push: Docker unavailable — running make verify; parity with the CI image is not proven" >&2
+  make verify
+fi

@@ -1,0 +1,12 @@
+.venv/
+.tools/
+__pycache__/
+*.pyc
+.coverage
+coverage.json
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.evals/
+dist/

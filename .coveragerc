@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = catalyst_ai
+omit =
+    src/catalyst_ai/app.py
+    src/catalyst_ai/cli.py
+
+[report]
+show_missing = True
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    ^\s*\.\.\.$

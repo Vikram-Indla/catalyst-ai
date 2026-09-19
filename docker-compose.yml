@@ -1,0 +1,29 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: catalyst_ai
+      POSTGRES_PASSWORD: catalyst_ai
+      POSTGRES_DB: catalyst_ai
+    ports:
+      - "5433:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalyst_ai"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  ai:
+    build: .
+    env_file: .env
+    environment:
+      CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
+    ports:
+      - "8090:8090"
+      - "9091:9091"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  db: {}
