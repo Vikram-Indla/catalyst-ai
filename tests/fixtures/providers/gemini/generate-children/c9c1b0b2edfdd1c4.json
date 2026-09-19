@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"story\", \"title\": \"Administrators create API keys with scopes\", \"description\": \"Administrators create API keys with scopes, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": \"Administrators create API keys with scopes\"}, {\"type\": \"story\", \"title\": \"Keys expire on a chosen date\", \"description\": \"Keys expire on a chosen date, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Usage per key is shown weekly\", \"description\": \"Usage per key is shown weekly, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Keys can be revoked immediately\", \"description\": \"Keys can be revoked immediately, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Every call with a key is logged\", \"description\": \"Every call with a key is logged, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 274,
+      "candidatesTokenCount": 504
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

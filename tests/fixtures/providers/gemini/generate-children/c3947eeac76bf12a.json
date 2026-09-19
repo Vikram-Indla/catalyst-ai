@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"story\", \"title\": \"Members choose which events notify them\", \"description\": \"Members choose which events notify them, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": \"Members choose which events notify them\"}, {\"type\": \"story\", \"title\": \"Email and in-app channels are separate\", \"description\": \"Email and in-app channels are separate, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"A daily digest replaces single emails when chosen\", \"description\": \"A daily digest replaces single emails when chosen, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Mentions always notify\", \"description\": \"Mentions always notify, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Preferences are saved per organisation\", \"description\": \"Preferences are saved per organisation, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 279,
+      "candidatesTokenCount": 516
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

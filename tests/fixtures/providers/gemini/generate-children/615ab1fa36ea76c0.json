@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Partners publish integrations through a review process\", \"description\": \"Partners publish integrations through a review process, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Customers install an integration in two clicks\", \"description\": \"Customers install an integration in two clicks, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Integration health is visible to administrators\", \"description\": \"Integration health is visible to administrators, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Revenue share is reported quarterly\", \"description\": \"Revenue share is reported quarterly, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 266,
+      "candidatesTokenCount": 238
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

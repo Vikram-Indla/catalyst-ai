@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"story\", \"title\": \"Boards with more than 2000 items load under two seconds\", \"description\": \"Boards with more than 2000 items load under two seconds, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Column scrolling stays smooth\", \"description\": \"Column scrolling stays smooth, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Filters apply without a full reload\", \"description\": \"Filters apply without a full reload, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Realtime updates arrive within one second\", \"description\": \"Realtime updates arrive within one second, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Memory stays flat over a working day\", \"description\": \"Memory stays flat over a working day, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 284,
+      "candidatesTokenCount": 512
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

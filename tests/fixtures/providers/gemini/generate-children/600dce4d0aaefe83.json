@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"story\", \"title\": \"New organisations sign up without a sales call\", \"description\": \"New organisations sign up without a sales call, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": \"New organisations sign up without a sales call\"}, {\"type\": \"story\", \"title\": \"They create the first project from a template\", \"description\": \"They create the first project from a template, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"They invite members by email link\", \"description\": \"They invite members by email link, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"They see a guided tour on the first board\", \"description\": \"They see a guided tour on the first board, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"They can import items from a CSV file\", \"description\": \"They can import items from a CSV file, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 294,
+      "candidatesTokenCount": 526
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

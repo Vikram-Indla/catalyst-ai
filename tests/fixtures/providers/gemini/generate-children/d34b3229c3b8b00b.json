@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Prospects reach a working board within one day of signing up\", \"description\": \"Prospects reach a working board within one day of signing up, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": \"Prospects reach a working board within one day of signing up\"}, {\"type\": \"epic\", \"title\": \"Sales calls are no longer required for the standard plan\", \"description\": \"Sales calls are no longer required for the standard plan, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Support tickets in the first week drop by half\", \"description\": \"Support tickets in the first week drop by half, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Activation is measured weekly\", \"description\": \"Activation is measured weekly, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 280,
+      "candidatesTokenCount": 257
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

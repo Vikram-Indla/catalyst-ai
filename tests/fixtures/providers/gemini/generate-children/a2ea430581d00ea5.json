@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [], \"empty_reason\": \"parent_too_vague\", \"rationale\": \"The parent gives too little to break down.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 253,
+      "candidatesTokenCount": 28
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

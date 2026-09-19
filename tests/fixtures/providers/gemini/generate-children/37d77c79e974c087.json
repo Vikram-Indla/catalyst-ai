@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"story\", \"title\": \"Administrators draw workflow states on a canvas\", \"description\": \"Administrators draw workflow states on a canvas, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}, {\"type\": \"story\", \"title\": \"Transitions carry conditions\", \"description\": \"Transitions carry conditions, as part of the parent.\", \"acceptance_criteria\": [\"Given the parent's context, when the work is delivered, then the outcome in the title holds.\", \"Given an error during the work, when it is retried, then no duplicate side effect appears.\"], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 279,
+      "candidatesTokenCount": 217
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Test coverage per release is visible\", \"description\": \"Test coverage per release is visible, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Defect leakage to production drops each quarter\", \"description\": \"Defect leakage to production drops each quarter, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Incident post-mortems feed the backlog\", \"description\": \"Incident post-mortems feed the backlog, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Release readiness is a checklist, not an opinion\", \"description\": \"Release readiness is a checklist, not an opinion, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 259,
+      "candidatesTokenCount": 231
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Teams forecast releases with a stated confidence\", \"description\": \"Teams forecast releases with a stated confidence, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Capacity is planned per quarter from real availability\", \"description\": \"Capacity is planned per quarter from real availability, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Dependencies between programs are visible early\", \"description\": \"Dependencies between programs are visible early, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Slips are surfaced before the release date\", \"description\": \"Slips are surfaced before the release date, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 278,
+      "candidatesTokenCount": 242
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Customers find answers in a knowledge base before opening a ticket\", \"description\": \"Customers find answers in a knowledge base before opening a ticket, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": \"Customers find answers in a knowledge base before opening a ticket\"}, {\"type\": \"epic\", \"title\": \"Tickets deflected are measured monthly\", \"description\": \"Tickets deflected are measured monthly, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"The knowledge base is searchable from the product\", \"description\": \"The knowledge base is searchable from the product, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Articles are owned by a team\", \"description\": \"Articles are owned by a team, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 280,
+      "candidatesTokenCount": 253
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

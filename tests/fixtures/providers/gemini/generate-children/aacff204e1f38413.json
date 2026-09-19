@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Les tests s'ex\u00e9cutent \u00e0 chaque changement\", \"description\": \"Les tests s'ex\u00e9cutent \u00e0 chaque changement, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Les r\u00e9sultats sont visibles dans la demande\", \"description\": \"Les r\u00e9sultats sont visibles dans la demande, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Un \u00e9chec bloque la fusion\", \"description\": \"Un \u00e9chec bloque la fusion, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Le temps d'ex\u00e9cution reste sous dix minutes\", \"description\": \"Le temps d'ex\u00e9cution reste sous dix minutes, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 255,
+      "candidatesTokenCount": 223
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

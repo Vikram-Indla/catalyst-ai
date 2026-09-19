@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"epic\", \"title\": \"Large customers pass their security reviews\", \"description\": \"Large customers pass their security reviews, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Single sign-on works with the major providers\", \"description\": \"Single sign-on works with the major providers, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Audit trails and retention meet their policies\", \"description\": \"Audit trails and retention meet their policies, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"epic\", \"title\": \"Data residency options exist for two regions\", \"description\": \"Data residency options exist for two regions, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 262,
+      "candidatesTokenCount": 236
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
