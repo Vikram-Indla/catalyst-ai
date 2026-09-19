@@ -1,0 +1,630 @@
+components:
+  schemas:
+    Candidate:
+      additionalProperties: false
+      description: One proposed child; the backend decides whether it becomes an item.
+      properties:
+        acceptance_criteria:
+          items:
+            type: string
+          maxItems: 20
+          title: Acceptance Criteria
+          type: array
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        description:
+          maxLength: 20000
+          title: Description
+          type: string
+        duplicate_of:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          title: Duplicate Of
+        title:
+          maxLength: 500
+          minLength: 1
+          title: Title
+          type: string
+        type:
+          maxLength: 64
+          minLength: 1
+          title: Type
+          type: string
+      required:
+      - type
+      - title
+      - description
+      - confidence
+      title: Candidate
+      type: object
+    GenerateChildrenRequest:
+      additionalProperties: false
+      description: The parent, its context, the hierarchy as data, the siblings, and the bounds.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        child_level:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: The wanted level; absent means the next one down
+          title: Child Level
+        focus_hint:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: What the member asked to focus on
+          title: Focus Hint
+        hierarchy:
+          data_class: INTERNAL
+          description: The organisation's ordered levels, top first
+          items:
+            type: string
+          maxItems: 12
+          minItems: 2
+          title: Hierarchy
+          type: array
+        language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag of the output; absent preserves the input's
+          title: Language
+        max_items:
+          data_class: PUBLIC
+          default: 7
+          description: The most candidates to return
+          maximum: 20.0
+          minimum: 1.0
+          title: Max Items
+          type: integer
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        parent_description:
+          data_class: CONFIDENTIAL
+          description: The parent's description
+          maxLength: 20000
+          title: Parent Description
+          type: string
+        parent_level:
+          data_class: INTERNAL
+          description: The parent's level, one of hierarchy
+          maxLength: 64
+          minLength: 1
+          title: Parent Level
+          type: string
+        parent_title:
+          data_class: CONFIDENTIAL
+          description: The parent's title
+          maxLength: 500
+          title: Parent Title
+          type: string
+        siblings:
+          data_class: CONFIDENTIAL
+          description: Existing children at the wanted level
+          items:
+            $ref: '#/components/schemas/Sibling'
+          maxItems: 100
+          title: Siblings
+          type: array
+        source_texts:
+          data_class: CONFIDENTIAL
+          description: Extracted text the backend attaches
+          items:
+            type: string
+          maxItems: 10
+          title: Source Texts
+          type: array
+        target:
+          $ref: '#/components/schemas/GenerateTarget'
+          data_class: PUBLIC
+          description: Which prompt section and defaults apply
+      required:
+      - organization_id
+      - capability_version
+      - target
+      - hierarchy
+      - parent_level
+      - parent_title
+      - parent_description
+      title: GenerateChildrenRequest
+      type: object
+    GenerateChildrenResponse:
+      additionalProperties: false
+      description: Candidates, or an empty list with the reason; never an item written anywhere.
+      properties:
+        candidates:
+          items:
+            $ref: '#/components/schemas/Candidate'
+          title: Candidates
+          type: array
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          anyOf:
+          - maximum: 1.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          title: Confidence
+        empty_reason:
+          anyOf:
+          - enum:
+            - parent_too_vague
+            - siblings_cover_it
+            - nothing_at_this_level
+            type: string
+          - type: 'null'
+          title: Empty Reason
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - candidates
+      - empty_reason
+      title: GenerateChildrenResponse
+      type: object
+    GenerateTarget:
+      description: 'What the caller wants: stories under an epic, epics under a request, or any next level.'
+      enum:
+      - stories
+      - epics
+      - children
+      title: GenerateTarget
+      type: string
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Detail
+          type: array
+      title: HTTPValidationError
+      type: object
+    ImproveStoryMode:
+      description: The editorial operations; each maps to one instruction block of the prompt.
+      enum:
+      - clarify
+      - expand
+      - acceptance_criteria
+      - user_story
+      - shorten
+      - edge_cases
+      title: ImproveStoryMode
+      type: string
+    ImproveStoryRequest:
+      additionalProperties: false
+      description: 'What the backend sends: the item''s text, classified, and the mode.'
+      properties:
+        acceptance_criteria:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The current acceptance criteria, markdown
+          title: Acceptance Criteria
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        description:
+          data_class: CONFIDENTIAL
+          description: The current description, markdown
+          maxLength: 20000
+          title: Description
+          type: string
+        focus_hint:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: What the member asked to focus on
+          title: Focus Hint
+        item_type:
+          data_class: INTERNAL
+          description: The work item type name, as the product names it
+          maxLength: 64
+          minLength: 1
+          title: Item Type
+          type: string
+        language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag of the output; absent means the input's language is preserved
+          title: Language
+        mode:
+          $ref: '#/components/schemas/ImproveStoryMode'
+          data_class: PUBLIC
+          description: The editorial operation
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        parent_description:
+          anyOf:
+          - maxLength: 20000
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The parent's description, read-only context
+          title: Parent Description
+        parent_title:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The parent's title
+          title: Parent Title
+        title:
+          data_class: CONFIDENTIAL
+          description: The item title
+          maxLength: 500
+          title: Title
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - mode
+      - item_type
+      - title
+      - description
+      title: ImproveStoryRequest
+      type: object
+    ImproveStoryResponse:
+      additionalProperties: false
+      description: 'What the backend receives: a proposal, never a stored fact.'
+      properties:
+        acceptance_criteria:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Acceptance Criteria
+        capability_version:
+          title: Capability Version
+          type: string
+        changed:
+          title: Changed
+          type: boolean
+        confidence:
+          anyOf:
+          - maximum: 1.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          title: Confidence
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        improved_description:
+          title: Improved Description
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        rationale:
+          title: Rationale
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - improved_description
+      - acceptance_criteria
+      - rationale
+      - changed
+      title: ImproveStoryResponse
+      type: object
+    LiveResponse:
+      additionalProperties: false
+      description: Return the process is up.
+      properties:
+        status:
+          const: live
+          title: Status
+          type: string
+      required:
+      - status
+      title: LiveResponse
+      type: object
+    ReadyResponse:
+      additionalProperties: false
+      description: 'Return the process can serve: configuration loaded and every dependency it needs answers.'
+      properties:
+        checks:
+          additionalProperties:
+            type: boolean
+          title: Checks
+          type: object
+        status:
+          enum:
+          - ready
+          - not_ready
+          title: Status
+          type: string
+      required:
+      - status
+      - checks
+      title: ReadyResponse
+      type: object
+    Sibling:
+      additionalProperties: false
+      description: An existing child the candidates must not repeat.
+      properties:
+        key:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: The item key
+          title: Key
+        title:
+          data_class: CONFIDENTIAL
+          description: The title
+          maxLength: 500
+          minLength: 1
+          title: Title
+          type: string
+      required:
+      - title
+      title: Sibling
+      type: object
+    Usage:
+      additionalProperties: false
+      description: Tokens, cost and latency of one call; cost in micro-dollars, latency in milliseconds.
+      properties:
+        cache_hit:
+          title: Cache Hit
+          type: boolean
+        cost_micros:
+          minimum: 0.0
+          title: Cost Micros
+          type: integer
+        input_tokens:
+          minimum: 0.0
+          title: Input Tokens
+          type: integer
+        latency_ms:
+          minimum: 0.0
+          title: Latency Ms
+          type: integer
+        output_tokens:
+          minimum: 0.0
+          title: Output Tokens
+          type: integer
+      required:
+      - input_tokens
+      - output_tokens
+      - cost_micros
+      - latency_ms
+      - cache_hit
+      title: Usage
+      type: object
+    ValidationError:
+      properties:
+        ctx:
+          title: Context
+          type: object
+        input:
+          title: Input
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          title: Location
+          type: array
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+info:
+  description: One contract for the Go backend; see ENGINEERING.md.
+  title: Catalyst One AI service
+  version: 0.1.0
+openapi: 3.1.0
+paths:
+  /healthz:
+    get:
+      description: Report that the process is up.
+      operationId: health.live
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveResponse'
+          description: Successful Response
+          x-example: see the contract tests
+      summary: Live
+      tags:
+      - health
+      x-capability: platform
+      x-capability-version: 0.1.0
+      x-error-codes: []
+  /readyz:
+    get:
+      description: Report whether the process can serve; every dependency it has answers.
+      operationId: health.ready
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+          description: Successful Response
+          x-example: see the contract tests
+      summary: Ready
+      tags:
+      - health
+      x-capability: platform
+      x-capability-version: 0.1.0
+      x-error-codes: []
+  /v1/generate-children:
+    post:
+      description: Propose typed children of the parent at the next level; the backend decides creation.
+      operationId: generate_children.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateChildrenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateChildrenResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Generate Children
+      tags:
+      - capabilities
+      x-capability: generate-children
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
+  /v1/improve-story:
+    post:
+      description: Rewrite the item's text under the requested mode; a proposal the backend decides on.
+      operationId: improve_story.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImproveStoryRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImproveStoryResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Improve Story
+      tags:
+      - capabilities
+      x-capability: improve-story
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
