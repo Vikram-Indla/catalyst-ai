@@ -1,0 +1,10 @@
+schema_valid: 1.0
+no_forbidden_content: 1.0
+identifiers_kept: 1.0
+language_preserved: 1.0
+length_bounds: 0.95
+rationale_present: 0.95
+mode_shape: 0.95
+overall: 0.95
+p95_latency_ms: 4000
+p95_cost_micros: 2000
