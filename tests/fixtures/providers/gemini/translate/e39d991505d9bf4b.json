@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"yrsl almlkhs alywmy fy alsaaa 07:00 btwqyt aladw.\\n\\naliadad: `DIGEST_HOUR=7` wybqa alansr alnaib `{ name }` kma hw.\\n\\nalrabt: https://example.internal/digest\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 112,
+      "candidatesTokenCount": 73
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

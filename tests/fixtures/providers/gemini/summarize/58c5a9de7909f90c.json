@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"3 comment(s) from p2, p3, p4; the latest, by p4, says: Open question: do we keep the old digest endpoint for one release?\\n\\n- p2 \u2014 decision: Agreed with the plan; I will take the digest part on Monday.\\n- p4 \u2014 open question: Open question: do we keep the old digest endpoint for one release?\", \"participants_mentioned\": [\"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 228,
+      "candidatesTokenCount": 114
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

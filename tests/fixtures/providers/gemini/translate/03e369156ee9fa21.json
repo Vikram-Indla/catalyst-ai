@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"zr tsjyl aldkhwl matl ala alhatf (PRJ-930)\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 73,
+      "candidatesTokenCount": 44
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

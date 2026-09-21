@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"tsdyr allwha ila CSV\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 68,
+      "candidatesTokenCount": 38
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

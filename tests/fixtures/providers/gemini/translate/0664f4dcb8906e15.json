@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"tdwyr shhada altwqya qbl 2026-10-01\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 71,
+      "candidatesTokenCount": 42
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

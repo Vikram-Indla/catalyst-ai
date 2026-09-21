@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"PRJ-636: rsala almlkhs alywmy fy alsaaa 07:00 (PRJ-936)\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 76,
+      "candidatesTokenCount": 47
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

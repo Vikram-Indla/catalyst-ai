@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"3 comment(s) from p2, p3, p4; the latest, by p4, says: The design for billing is attached in the shared folder, feedback welcome.\\n\\n- p2 \u2014 blocker: Not a blocker any more, the billing setting is deployed.\\n- p3 \u2014 action item: Action item: write the billing runbook before the release.\", \"participants_mentioned\": [\"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 228,
+      "candidatesTokenCount": 112
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

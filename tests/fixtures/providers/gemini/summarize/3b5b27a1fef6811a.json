@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"5 comment(s) from p1, p2, p3, p4; the latest, by p4, says: The design for certificate is attached in the shared folder, feedback welcome.\\n\\n- p4 \u2014 open question: Open question: do we keep the old certificate endpoint for one release?\\n- p2 \u2014 blocker: Not a blocker any more, the certificate setting is deployed.\\n- p3 \u2014 action item: Action item: write the certificate runbook before the release.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 312,
+      "candidatesTokenCount": 142
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

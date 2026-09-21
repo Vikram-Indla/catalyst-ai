@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"bsfty qaid mshrwa, aryd tsdyr allwha ila CSV hta ykwn altqryr alasbway sryaa.\\n\\nmaayyr alqbwl:\\n- tsdr kl alaamda\\n- tbqa almurshfa kharj altsdyr\\n- anzr PRJ-125\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 113,
+      "candidatesTokenCount": 74
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

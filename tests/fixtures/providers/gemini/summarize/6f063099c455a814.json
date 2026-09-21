@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"2 comment(s) from p1, p2; the latest, by p2, says: We decided to ship the locale change behind a flag first.\\n\\n- p2 \u2014 decision: We decided to ship the locale change behind a flag first.\", \"participants_mentioned\": [\"p1\", \"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 203,
+      "candidatesTokenCount": 86
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p1; the latest, by p1, says: I looked at the locale flow this morning; the failing step is the last one.\\n\\n- p1 moved it from To Do to In Progress\\n- p2 moved it from In Progress to In Review\", \"participants_mentioned\": [\"p1\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 239,
+      "candidatesTokenCount": 91
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
