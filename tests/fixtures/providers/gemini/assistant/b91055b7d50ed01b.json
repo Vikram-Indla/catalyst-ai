@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"After fifteen minutes without acknowledgement th\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"e lead is paged. [1] After thirty minutes a brid\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ge call is opened and the status page is updated\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \". [1]\\n---\\n{\\\"not_found\\\": false, \\\"rationale\\\": \\\"The\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 299, \"candidatesTokenCount\": 54}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

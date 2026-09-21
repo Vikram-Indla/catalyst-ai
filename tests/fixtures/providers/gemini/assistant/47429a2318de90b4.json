@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"New members receive a laptop on the first day. [\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"1]\\n---\\n{\\\"not_found\\\": false, \\\"rationale\\\": \\\"The be\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"st-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 277, \"candidatesTokenCount\": 29}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Injected page\", \"facts\": [], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 46,
+      "candidatesTokenCount": 19
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

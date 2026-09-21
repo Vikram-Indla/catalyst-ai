@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"New members receive a laptop on the first day. [\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"1] Every new member pairs with a buddy for the f\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"irst week. [1]\\n---\\n{\\\"not_found\\\": false, \\\"rationa\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"le\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 153, \"candidatesTokenCount\": 44}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

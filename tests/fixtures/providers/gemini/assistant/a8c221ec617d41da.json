@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The old gateway stays in read-only mode for nine\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ty days. [1]\\n---\\n{\\\"not_found\\\": false, \\\"rationale\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 294, \"candidatesTokenCount\": 32}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

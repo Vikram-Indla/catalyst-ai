@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The login button does nothing on small screens since the 2026-09-10 release.\", \"facts\": [{\"label\": \"status\", \"value\": \"in_progress\"}, {\"label\": \"date\", \"value\": \"2026-09-10\"}, {\"label\": \"size\", \"value\": \"3 pages\"}], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 60,
+      "candidatesTokenCount": 66
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

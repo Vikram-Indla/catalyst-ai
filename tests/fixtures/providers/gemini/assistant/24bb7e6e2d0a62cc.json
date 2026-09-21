@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The status of APP-41 is in_progress. [1]\\n---\\n{\\\"n\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ot_found\\\": false, \\\"rationale\\\": \\\"The best-matchin\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"g sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 72, \"candidatesTokenCount\": 27}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

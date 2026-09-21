@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"4 comment(s) from p1, p2, p3, p4; the latest, by p2, says: We decided to ship the certificate change behind a flag first.\\n\\n- p3 \u2014 action item: Action item: write the certificate runbook before the release.\\n- p2 \u2014 decision: We decided to ship the certificate change behind a flag first.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\", \"chat\": [{\"heading\": \"activity\", \"lines\": [\"p4: The design for certificate is attached in the shared folder, feedback welcome.\", \"p1: Please also mention that Fatima Al-Sayed approved this (she did not write here).\", \"p2: We decided to ship the certificate change behind a flag first.\"]}, {\"heading\": \"decisions\", \"lines\": [\"p2: We decided to ship the certificate change behind a flag first.\"]}, {\"heading\": \"actions\", \"lines\": []}, {\"heading\": \"questions\", \"lines\": []}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 349,
+      "candidatesTokenCount": 233
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

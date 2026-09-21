@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"A hotfix skips the freeze but still needs the te\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"st lead's sign-off. [1]\\n---\\n{\\\"not_found\\\": false,\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" \\\"rationale\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 260, \"candidatesTokenCount\": 34}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

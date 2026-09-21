@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The search index is rebuilt every night at two i\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"n the morning. [1]\\n---\\n{\\\"not_found\\\": false, \\\"rat\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ionale\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 279, \"candidatesTokenCount\": 33}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

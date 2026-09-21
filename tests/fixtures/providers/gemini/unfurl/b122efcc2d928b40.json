@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Every release needs a rollback plan and a smoke test before the announcement on 2026-10-01.\", \"facts\": [{\"label\": \"date\", \"value\": \"2026-10-01\"}], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 52,
+      "candidatesTokenCount": 49
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

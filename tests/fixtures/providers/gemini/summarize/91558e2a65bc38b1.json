@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"5 comment(s) from p1, p2, p3, p4; the latest, by p3, says: Action item: write the certificate runbook before the release.\\n\\n- p4 \u2014 open question: Open question: do we keep the old certificate endpoint for one release?\\n- p2 \u2014 blocker: Not a blocker any more, the certificate setting is deployed.\\n- p3 \u2014 action item: Action item: write the certificate runbook before the release.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\", \"chat\": [{\"heading\": \"activity\", \"lines\": [\"p1: Decision: the certificate report keeps its current columns until Q4.\", \"p2: Not a blocker any more, the certificate setting is deployed.\", \"p3: Action item: write the certificate runbook before the release.\"]}, {\"heading\": \"decisions\", \"lines\": []}, {\"heading\": \"actions\", \"lines\": []}, {\"heading\": \"questions\", \"lines\": [\"p4: Open question: do we keep the old certificate endpoint for one release?\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 371,
+      "candidatesTokenCount": 251
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

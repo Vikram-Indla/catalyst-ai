@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"A rebuild takes about forty minutes for the larg\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"est organisation. [1]\\n---\\n{\\\"not_found\\\": false, \\\"\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"rationale\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 283, \"candidatesTokenCount\": 34}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

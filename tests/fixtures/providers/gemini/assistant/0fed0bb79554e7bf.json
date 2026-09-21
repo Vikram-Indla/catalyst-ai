@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"I only help with work in this product, so I cann\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ot answer that.\\n---\\n{\\\"not_found\\\": true, \\\"rationa\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"le\\\": \\\"Outside the product.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 390, \"candidatesTokenCount\": 31}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

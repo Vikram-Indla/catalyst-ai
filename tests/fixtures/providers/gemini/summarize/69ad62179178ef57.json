@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"3 comment(s) from p2, p3, p4; the latest, by p4, says: Open question: do we keep the old export endpoint for one release?\\n\\n- p2 \u2014 decision: Agreed with the plan; I will take the export part on Monday.\\n- p4 \u2014 open question: Open question: do we keep the old export endpoint for one release?\", \"participants_mentioned\": [\"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\", \"chat\": [{\"heading\": \"activity\", \"lines\": [\"p2: Agreed with the plan; I will take the export part on Monday.\", \"p3: Reproduced on build 4201: the export page shows an empty state.\", \"p4: Open question: do we keep the old export endpoint for one release?\"]}, {\"heading\": \"decisions\", \"lines\": [\"p2: Agreed with the plan; I will take the export part on Monday.\"]}, {\"heading\": \"actions\", \"lines\": [\"p2: Agreed with the plan; I will take the export part on Monday.\"]}, {\"heading\": \"questions\", \"lines\": [\"p4: Open question: do we keep the old export endpoint for one release?\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 315,
+      "candidatesTokenCount": 259
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

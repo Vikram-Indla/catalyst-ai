@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The sources I was given do not answer that.\\n---\\n\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"{\\\"not_found\\\": true, \\\"rationale\\\": \\\"No overlap.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 38, \"candidatesTokenCount\": 23}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

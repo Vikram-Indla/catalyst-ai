@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"A release freeze starts on the Monday before the\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" release. [1] Sign-off is recorded in the releas\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"e hub before the freeze ends. [2]\\n---\\n{\\\"not_foun\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"d\\\": false, \\\"rationale\\\": \\\"The best-matching sourc\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"es.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 279, \"candidatesTokenCount\": 49}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

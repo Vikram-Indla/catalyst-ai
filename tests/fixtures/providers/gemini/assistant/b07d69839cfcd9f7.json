@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The status of APP-41 is in_progress. [1] The sta\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"tus of APP-77 is open. [2]\\n---\\n{\\\"not_found\\\": fal\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"se, \\\"rationale\\\": \\\"The best-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 139, \"candidatesTokenCount\": 35}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

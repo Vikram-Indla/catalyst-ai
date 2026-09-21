@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Empty description\", \"facts\": [{\"label\": \"status\", \"value\": \"todo\"}], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 32,
+      "candidatesTokenCount": 29
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

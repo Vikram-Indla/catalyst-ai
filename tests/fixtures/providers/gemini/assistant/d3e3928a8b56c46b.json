@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Drafts are kept in the browser for seven days. [\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"1]\\n---\\n{\\\"not_found\\\": false, \\\"rationale\\\": \\\"The be\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"st-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 271, \"candidatesTokenCount\": 29}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

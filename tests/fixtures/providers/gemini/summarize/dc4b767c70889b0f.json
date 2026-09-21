@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p4; the latest, by p4, says: Can someone confirm whether the certificate numbers include archived items?\\n\\n- p4 \u2014 open question: Can someone confirm whether the certificate numbers include archived items?\", \"participants_mentioned\": [\"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\", \"chat\": [{\"heading\": \"activity\", \"lines\": [\"p4: Can someone confirm whether the certificate numbers include archived items?\"]}, {\"heading\": \"decisions\", \"lines\": []}, {\"heading\": \"actions\", \"lines\": []}, {\"heading\": \"questions\", \"lines\": [\"p4: Can someone confirm whether the certificate numbers include archived items?\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 265,
+      "candidatesTokenCount": 175
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The board export times out above 5000 rows.\", \"facts\": [{\"label\": \"status\", \"value\": \"open\"}, {\"label\": \"size\", \"value\": \"5000 rows\"}], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 48,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

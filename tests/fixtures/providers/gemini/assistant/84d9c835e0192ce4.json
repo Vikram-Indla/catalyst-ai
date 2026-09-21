@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"Billing moves to the new gateway on the first of\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \" November. [1] # Billing gateway [1]\\n---\\n{\\\"not_f\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ound\\\": false, \\\"rationale\\\": \\\"The best-matching so\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"urces.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 116, \"candidatesTokenCount\": 38}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

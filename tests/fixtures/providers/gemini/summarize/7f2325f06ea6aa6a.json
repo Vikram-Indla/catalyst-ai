@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"5 comment(s) from p1, p2, p3, p4; the latest, by p3, says: Reproduced on build 4222: the digest page shows an empty state.\\n\\n- p3 \u2014 blocker: Blocked: the digest environment is missing the new setting.\\n- p4 \u2014 open question: Can someone confirm whether the digest numbers include archived items?\\n- p2 \u2014 decision: Agreed with the plan; I will take the digest part on Monday.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\", \"chat\": [{\"heading\": \"activity\", \"lines\": [\"p1: The fix for digest is in review, see PRJ-222.\", \"p2: Agreed with the plan; I will take the digest part on Monday.\", \"p3: Reproduced on build 4222: the digest page shows an empty state.\"]}, {\"heading\": \"decisions\", \"lines\": [\"p2: Agreed with the plan; I will take the digest part on Monday.\"]}, {\"heading\": \"actions\", \"lines\": [\"p2: Agreed with the plan; I will take the digest part on Monday.\"]}, {\"heading\": \"questions\", \"lines\": [\"p4: Can someone confirm whether the digest numbers include archived items?\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 363,
+      "candidatesTokenCount": 276
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

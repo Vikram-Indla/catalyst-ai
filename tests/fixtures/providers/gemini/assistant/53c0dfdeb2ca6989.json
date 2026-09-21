@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The bridge call now opens itself after thirty mi\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"nutes without acknowledgement. [3]\\n---\\n{\\\"not_fou\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"nd\\\": false, \\\"rationale\\\": \\\"The best-matching sour\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"ces.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 145, \"candidatesTokenCount\": 37}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

@@ -1,0 +1,7 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "text/event-stream"
+  },
+  "raw": "data: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"The on-call rota changes every Sunday at 09:00. \"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"[1]\\n---\\n{\\\"not_found\\\": false, \\\"rationale\\\": \\\"The b\"}]}}]}\n\ndata: {\"candidates\": [{\"content\": {\"parts\": [{\"text\": \"est-matching sources.\\\"}\"}]}, \"finishReason\": \"STOP\"}], \"usageMetadata\": {\"promptTokenCount\": 263, \"candidatesTokenCount\": 29}, \"modelVersion\": \"authored-stand-in\"}\n\n"
+}

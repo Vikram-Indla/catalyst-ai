@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Alerts page the on-call engineer through the paging service.\", \"facts\": [], \"rationale\": \"From the text alone.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 51,
+      "candidatesTokenCount": 31
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
