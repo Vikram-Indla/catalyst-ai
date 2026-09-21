@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across release, incident, work_item, comment, test_run. Most notable: Release 2.492 was tagged with the locale change.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"release\", \"changes\": [\"Release 2.492 was tagged with the locale change\", \"Release 2.502 was tagged with the locale change\", \"Release 2.507 moved to Frozen; the locale fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-493 on locale was opened at severity 2\", \"INC-498 on locale was resolved after the rollback\", \"INC-508 on locale was resolved after the rollback\", \"INC-513 on locale was opened at severity 2\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-495 moved from In Progress to Done (locale)\", \"PRJ-505 was created: locale onboarding checklist\", \"PRJ-510 moved from In Progress to Done (locale)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-496: the locale fix is ready for review\", \"Comment on PRJ-501: still blocked on the locale setting\", \"Comment on PRJ-511: still blocked on the locale setting\"]}, {\"kind\": \"test_run\", \"changes\": [\"The locale smoke run on build 5192 failed on two cases\", \"The locale regression run on build 5192 passed\", \"The locale regression run on build 5192 passed\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 681,
+      "candidatesTokenCount": 327
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

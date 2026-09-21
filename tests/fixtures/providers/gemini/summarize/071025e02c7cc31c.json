@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across comment, release, test_run, work_item. Most notable: Comment on PRJ-486: the billing fix is ready for review.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-486: the billing fix is ready for review\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.487 moved to Frozen; the billing fix is in it\"]}, {\"kind\": \"test_run\", \"changes\": [\"The billing smoke run on build 5186 failed on two cases\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-490 was created: billing onboarding checklist\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 375,
+      "candidatesTokenCount": 164
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

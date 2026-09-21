@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the certificate export step; PRJ-344 is merged\"], \"doing\": [], \"blocked\": []}, {\"participant\": \"p2\", \"done\": [], \"doing\": [\"writing the certificate tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [\"the usual\"], \"blocked\": []}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-347\"], \"doing\": [\"the certificate migration script\"], \"blocked\": []}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 378,
+      "candidatesTokenCount": 158
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

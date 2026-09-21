@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"drafted\", \"label\": \"\u0645\u0633\u0648\u062f\u0629\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"sort_order\": 0}, {\"key\": \"submitted\", \"label\": \"\u0645\u064f\u0642\u062f\u064e\u0651\u0645\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"sort_order\": 1}, {\"key\": \"approved\", \"label\": \"\u0645\u064f\u0639\u062a\u0645\u064e\u062f\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"sort_order\": 2}, {\"key\": \"rejected\", \"label\": \"\u0645\u0631\u0641\u0648\u0636\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 3}, {\"key\": \"scheduled\", \"label\": \"\u0645\u064f\u062c\u062f\u0648\u064e\u0644\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"sort_order\": 4}, {\"key\": \"implemented\", \"label\": \"\u0645\u064f\u0646\u0641\u064e\u0651\u0630\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 5}], \"transitions\": [{\"from_key\": \"drafted\", \"to_key\": \"submitted\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u0633\u0648\u062f\u0629 \u0625\u0644\u0649 \u0645\u064f\u0642\u062f\u064e\u0651\u0645.\"}, {\"from_key\": \"submitted\", \"to_key\": \"approved\", \"kind\": \"forward\", \"guards\": [\"approval_recorded\"], \"requires_approval\": true, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0642\u062f\u064e\u0651\u0645 \u0625\u0644\u0649 \u0645\u064f\u0639\u062a\u0645\u064e\u062f.\"}, {\"from_key\": \"submitted\", \"to_key\": \"rejected\", \"kind\": \"reject\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"reject_to_rejected\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0642\u062f\u064e\u0651\u0645 \u0625\u0644\u0649 \u0645\u0631\u0641\u0648\u0636.\"}, {\"from_key\": \"approved\", \"to_key\": \"scheduled\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0639\u062a\u0645\u064e\u062f \u0625\u0644\u0649 \u0645\u064f\u062c\u062f\u0648\u064e\u0644.\"}, {\"from_key\": \"scheduled\", \"to_key\": \"implemented\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u062c\u062f\u0648\u064e\u0644 \u0625\u0644\u0649 \u0645\u064f\u0646\u0641\u064e\u0651\u0630.\"}, {\"from_key\": \"scheduled\", \"to_key\": \"approved\", \"kind\": \"backward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"backward_to_approved\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u062c\u062f\u0648\u064e\u0644 \u0625\u0644\u0649 \u0645\u064f\u0639\u062a\u0645\u064e\u062f.\"}, {\"from_key\": \"rejected\", \"to_key\": \"drafted\", \"kind\": \"reopen\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"reopen_to_drafted\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u0631\u0641\u0648\u0636 \u0625\u0644\u0649 \u0645\u0633\u0648\u062f\u0629.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 161,
+      "candidatesTokenCount": 557
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

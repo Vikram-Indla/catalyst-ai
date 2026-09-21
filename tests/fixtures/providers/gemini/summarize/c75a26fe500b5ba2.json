@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across release, incident, test_run, work_item, comment. Most notable: Release 2.487 moved to Frozen; the billing fix is in it.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"release\", \"changes\": [\"Release 2.487 moved to Frozen; the billing fix is in it\", \"Release 2.492 was tagged with the billing change\", \"Release 2.497 moved to Frozen; the billing fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-488 on billing was resolved after the rollback\", \"INC-493 on billing was opened at severity 2\", \"INC-498 on billing was resolved after the rollback\"]}, {\"kind\": \"test_run\", \"changes\": [\"The billing smoke run on build 5187 failed on two cases\", \"The billing regression run on build 5187 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-490 was created: billing onboarding checklist\", \"PRJ-495 moved from In Progress to Done (billing)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-491: still blocked on the billing setting\", \"Comment on PRJ-496: the billing fix is ready for review\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 583,
+      "candidatesTokenCount": 283
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

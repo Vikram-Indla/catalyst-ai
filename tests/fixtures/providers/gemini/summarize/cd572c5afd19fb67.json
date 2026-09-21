@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across comment, release, incident. Most notable: Comment on PRJ-461: still blocked on the export setting.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-461: still blocked on the export setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.462 was tagged with the export change\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-463 on export was opened at severity 2\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 337,
+      "candidatesTokenCount": 134
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

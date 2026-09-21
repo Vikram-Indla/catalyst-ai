@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across test_run, work_item, comment, release, incident. Most notable: The search smoke run on build 5179 failed on two cases.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"test_run\", \"changes\": [\"The search smoke run on build 5179 failed on two cases\", \"The search regression run on build 5179 passed\", \"The search smoke run on build 5179 failed on two cases\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-480 moved from In Progress to Done (search)\", \"PRJ-485 was reassigned and its priority raised (search)\", \"PRJ-490 was created: search onboarding checklist\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-481: still blocked on the search setting\", \"Comment on PRJ-486: the search fix is ready for review\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.482 was tagged with the search change\", \"Release 2.487 moved to Frozen; the search fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-483 on search was opened at severity 2\", \"INC-488 on search was resolved after the rollback\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 582,
+      "candidatesTokenCount": 281
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p2, p3, p4 reported in this window. Blocked: p4.\", \"participants_mentioned\": [\"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p2\", \"done\": [\"the search runbook is written and linked from PRJ-317\"], \"doing\": [], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": []}, {\"participant\": \"p4\", \"done\": [], \"doing\": [], \"blocked\": [\"search needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 348,
+      "candidatesTokenCount": 134
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, work_item, comment, release. Most notable: INC-483 on digest was opened at severity 2.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-483 on digest was opened at severity 2\", \"INC-488 on digest was resolved after the rollback\", \"INC-493 on digest was opened at severity 2\"]}, {\"kind\": \"test_run\", \"changes\": [\"The digest regression run on build 5183 passed\", \"The digest smoke run on build 5183 failed on two cases\", \"The digest regression run on build 5183 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-485 was reassigned and its priority raised (digest)\", \"PRJ-490 was created: digest onboarding checklist\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-486: the digest fix is ready for review\", \"Comment on PRJ-491: still blocked on the digest setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.487 moved to Frozen; the digest fix is in it\", \"Release 2.492 was tagged with the digest change\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 578,
+      "candidatesTokenCount": 275
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

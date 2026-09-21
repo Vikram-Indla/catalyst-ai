@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, work_item, comment, release. Most notable: INC-463 on export was opened at severity 2.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-463 on export was opened at severity 2\", \"INC-468 on export was resolved after the rollback\", \"INC-473 on export was opened at severity 2\"]}, {\"kind\": \"test_run\", \"changes\": [\"The export regression run on build 5163 passed\", \"The export smoke run on build 5163 failed on two cases\", \"The export regression run on build 5163 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-465 moved from In Progress to Done (export)\", \"PRJ-470 was reassigned and its priority raised (export)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-466: the export fix is ready for review\", \"Comment on PRJ-471: still blocked on the export setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.467 moved to Frozen; the export fix is in it\", \"Release 2.472 was tagged with the export change\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 578,
+      "candidatesTokenCount": 274
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across release, incident, test_run. Most notable: Release 2.477 moved to Frozen; the search fix is in it.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"release\", \"changes\": [\"Release 2.477 moved to Frozen; the search fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-478 on search was resolved after the rollback\"]}, {\"kind\": \"test_run\", \"changes\": [\"The search smoke run on build 5177 failed on two cases\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 340,
+      "candidatesTokenCount": 137
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

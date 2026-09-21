@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p2; the latest, by p2, says: We decided to ship the export change behind a flag first.\\n\\n- p2 \u2014 decision: We decided to ship the export change behind a flag first.\", \"participants_mentioned\": [\"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 224,
+      "candidatesTokenCount": 84
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

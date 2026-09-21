@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window. Blocked: p1, p3, p4.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the offline export step; PRJ-344 is merged\"], \"doing\": [\"pairing on the offline page\", \"pairing on the offline page\"], \"blocked\": [\"the staging build 5139 is broken\", \"the staging build 5139 is broken\"]}, {\"participant\": \"p2\", \"done\": [\"the offline runbook is written and linked from PRJ-341\", \"the offline runbook is written and linked from PRJ-349\"], \"doing\": [\"writing the offline tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the offline setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-339\", \"reviewed PRJ-347\"], \"doing\": [\"the offline migration script\", \"the offline migration script\"], \"blocked\": [\"offline needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 604,
+      "candidatesTokenCount": 262
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

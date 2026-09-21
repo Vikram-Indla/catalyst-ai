@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across test_run, work_item, comment, release. Most notable: The certificate regression run on build 5204 passed.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"test_run\", \"changes\": [\"The certificate regression run on build 5204 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-505 was created: certificate onboarding checklist\"]}, {\"kind\": \"comment\", \"changes\": [\"Doing: the usual\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.507 moved to Frozen; the certificate fix is in it\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 381,
+      "candidatesTokenCount": 154
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

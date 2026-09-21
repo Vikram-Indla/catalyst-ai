@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"2 comment(s) from p1, p2; the latest, by p2, says: Agreed with the plan; I will take the digest part on Monday.\\n\\n- p2 \u2014 decision: Agreed with the plan; I will take the digest part on Monday.\", \"participants_mentioned\": [\"p1\", \"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 213,
+      "candidatesTokenCount": 88
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

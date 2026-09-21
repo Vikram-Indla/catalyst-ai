@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across test_run, work_item, release, incident. Most notable: The roadmap regression run on build 5194 passed.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"test_run\", \"changes\": [\"The roadmap regression run on build 5194 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-495 moved from In Progress to Done (roadmap)\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.497 moved to Frozen; the roadmap fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-498 on roadmap was resolved after the rollback\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 372,
+      "candidatesTokenCount": 159
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

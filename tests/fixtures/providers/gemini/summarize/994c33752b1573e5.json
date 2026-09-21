@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p2; the latest, by p2, says: Not a blocker any more, the search setting is deployed.\\n\\n- p2 \u2014 blocker: Not a blocker any more, the search setting is deployed.\\n- p1 moved it from In Progress to In Review\\n- p2 moved it from In Review to Done\", \"participants_mentioned\": [\"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 254,
+      "candidatesTokenCount": 103
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

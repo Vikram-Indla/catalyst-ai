@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, work_item. Most notable: INC-493 on roadmap was opened at severity 2.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-493 on roadmap was opened at severity 2\"]}, {\"kind\": \"test_run\", \"changes\": [\"The roadmap regression run on build 5193 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-495 moved from In Progress to Done (roadmap)\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 337,
+      "candidatesTokenCount": 131
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

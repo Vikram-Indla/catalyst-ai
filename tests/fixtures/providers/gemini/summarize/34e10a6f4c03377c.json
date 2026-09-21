@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"4 comment(s) from p1, p2, p3, p4; the latest, by p3, says: Blocked: the export environment is missing the new setting.\\n\\n- p3 \u2014 blocker: Blocked: the export environment is missing the new setting.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 280,
+      "candidatesTokenCount": 92
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

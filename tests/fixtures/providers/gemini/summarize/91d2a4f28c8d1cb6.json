@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window. Blocked: p1, p3, p4.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the roadmap export step; PRJ-336 is merged\", \"finished the roadmap export step; PRJ-352 is merged\"], \"doing\": [\"pairing on the roadmap page\", \"pairing on the roadmap page\"], \"blocked\": [\"the staging build 5136 is broken\", \"the staging build 5136 is broken\"]}, {\"participant\": \"p2\", \"done\": [\"the roadmap runbook is written and linked from PRJ-349\", \"the roadmap runbook is written and linked from PRJ-357\"], \"doing\": [\"writing the roadmap tests today\", \"writing the roadmap tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the roadmap setting from the platform team\", \"waiting on the roadmap setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-339\", \"reviewed PRJ-355\"], \"doing\": [\"the roadmap migration script\", \"the roadmap migration script\"], \"blocked\": [\"roadmap needs a decision on the old endpoint before I continue\", \"roadmap needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 714,
+      "candidatesTokenCount": 315
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across comment, release, incident, test_run. Most notable: Comment on PRJ-501: still blocked on the export setting.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-501: still blocked on the export setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.502 was tagged with the export change\"]}, {\"kind\": \"incident\", \"changes\": [\"Done: everything\"]}, {\"kind\": \"test_run\", \"changes\": [\"The export regression run on build 5201 passed\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 376,
+      "candidatesTokenCount": 151
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

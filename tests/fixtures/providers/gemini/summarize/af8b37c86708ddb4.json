@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across release, incident, work_item, comment. Most notable: Release 2.462 was tagged with the export change.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"release\", \"changes\": [\"Release 2.462 was tagged with the export change\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-463 on export was opened at severity 2\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-465 moved from In Progress to Done (export)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-466: the export fix is ready for review\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 369,
+      "candidatesTokenCount": 156
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

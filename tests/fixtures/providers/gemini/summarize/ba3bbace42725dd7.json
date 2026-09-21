@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p4; the latest, by p4, says: Open question: do we keep the old billing endpoint for one release?\\n\\n- p4 \u2014 open question: Open question: do we keep the old billing endpoint for one release?\", \"participants_mentioned\": [\"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 193,
+      "candidatesTokenCount": 90
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

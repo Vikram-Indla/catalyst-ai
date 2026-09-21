@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [], \"transitions\": [], \"empty_reason\": \"description_too_vague\", \"rationale\": \"The description names no starting state.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 83,
+      "candidatesTokenCount": 33
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

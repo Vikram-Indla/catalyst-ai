@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, comment, release. Most notable: INC-478 on search was resolved after the rollback.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-478 on search was resolved after the rollback\"]}, {\"kind\": \"test_run\", \"changes\": [\"The search smoke run on build 5178 failed on two cases\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-481: still blocked on the search setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.482 was tagged with the search change\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 373,
+      "candidatesTokenCount": 160
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

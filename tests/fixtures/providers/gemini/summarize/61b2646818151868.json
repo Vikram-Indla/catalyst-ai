@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"\u062a\u063a\u064a\u064a\u0631\u0627\u062a \u0641\u064a work_item\u060c comment\u060c incident\u060c test_run. \u0623\u0628\u0631\u0632\u0647\u0627: \u0627\u0646\u062a\u0642\u0644 PRJ-470 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630 \u0625\u0644\u0649 \u0645\u0646\u062c\u0632 (\u0627\u0644\u0645\u0631\u0634\u062d\u0627\u062a).\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"work_item\", \"changes\": [\"\u0627\u0646\u062a\u0642\u0644 PRJ-470 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630 \u0625\u0644\u0649 \u0645\u0646\u062c\u0632 (\u0627\u0644\u0645\u0631\u0634\u062d\u0627\u062a)\"]}, {\"kind\": \"comment\", \"changes\": [\"\u062a\u0639\u0644\u064a\u0642 \u0639\u0644\u0649 PRJ-471: \u0625\u0635\u0644\u0627\u062d \u0627\u0644\u0645\u0631\u0634\u062d\u0627\u062a \u062c\u0627\u0647\u0632 \u0644\u0644\u0645\u0631\u0627\u062c\u0639\u0629\"]}, {\"kind\": \"incident\", \"changes\": [\"\u0639\u0648\u0644\u062c INC-473 \u0627\u0644\u062e\u0627\u0635 \u0628\u0640 \u0627\u0644\u0645\u0631\u0634\u062d\u0627\u062a \u0628\u0639\u062f \u0627\u0644\u062a\u0631\u0627\u062c\u0639\"]}, {\"kind\": \"test_run\", \"changes\": [\"\u0646\u062c\u062d \u062a\u0634\u063a\u064a\u0644 \u0627\u0646\u062d\u062f\u0627\u0631 \u0627\u0644\u0645\u0631\u0634\u062d\u0627\u062a \u0639\u0644\u0649 \u0627\u0644\u0628\u0646\u0627\u0621 5170\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 366,
+      "candidatesTokenCount": 151
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

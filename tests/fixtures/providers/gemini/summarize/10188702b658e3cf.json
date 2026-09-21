@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window. Blocked: p1, p3, p4.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the billing export step; PRJ-328 is merged\", \"finished the billing export step; PRJ-344 is merged\"], \"doing\": [\"pairing on the billing page\", \"pairing on the billing page\"], \"blocked\": [\"the staging build 5128 is broken\", \"the staging build 5128 is broken\"]}, {\"participant\": \"p2\", \"done\": [\"the billing runbook is written and linked from PRJ-341\", \"the billing runbook is written and linked from PRJ-349\"], \"doing\": [\"writing the billing tests today\", \"writing the billing tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the billing setting from the platform team\", \"waiting on the billing setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-331\", \"reviewed PRJ-347\"], \"doing\": [\"the billing migration script\", \"the billing migration script\"], \"blocked\": [\"billing needs a decision on the old endpoint before I continue\", \"billing needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 714,
+      "candidatesTokenCount": 315
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

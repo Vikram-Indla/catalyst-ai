@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across test_run, work_item, comment. Most notable: The filters smoke run on build 5169 failed on two cases.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"test_run\", \"changes\": [\"The filters smoke run on build 5169 failed on two cases\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-470 was reassigned and its priority raised (filters)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-471: still blocked on the filters setting\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 343,
+      "candidatesTokenCount": 141
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

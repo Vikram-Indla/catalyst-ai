@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p3; the latest, by p3, says: Reproduced on build 4106: the login page shows an empty state.\\n\\n- p1 moved it from In Review to Done\\n- p2 moved it from Blocked to In Progress\", \"participants_mentioned\": [\"p3\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 260,
+      "candidatesTokenCount": 86
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"\", \"participants_mentioned\": [], \"empty_reason\": \"nothing_to_summarize\", \"rationale\": \"The window holds nothing.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 263,
+      "candidatesTokenCount": 31
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

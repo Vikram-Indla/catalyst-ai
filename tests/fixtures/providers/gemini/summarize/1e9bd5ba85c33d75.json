@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, work_item, comment. Most notable: INC-503 on filters was opened at severity 2.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-503 on filters was opened at severity 2\"]}, {\"kind\": \"test_run\", \"changes\": [\"The filters regression run on build 5203 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"Blocked: nothing\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-506: the filters fix is ready for review\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 372,
+      "candidatesTokenCount": 148
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"4 comment(s) from p1, p2, p3, p4; the latest, by p2, says: Agreed with the plan; I will take the certificate part on Monday.\\n\\n- p3 \u2014 blocker: Blocked: the certificate environment is missing the new setting.\\n- p4 \u2014 open question: Can someone confirm whether the certificate numbers include archived items?\\n- p2 \u2014 decision: Agreed with the plan; I will take the certificate part on Monday.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 278,
+      "candidatesTokenCount": 140
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

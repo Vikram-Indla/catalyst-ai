@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the export export step; PRJ-344 is merged\"], \"doing\": [], \"blocked\": []}, {\"participant\": \"p2\", \"done\": [\"the export runbook is written and linked from PRJ-341\"], \"doing\": [], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": []}, {\"participant\": \"p4\", \"done\": [\"everything\"], \"doing\": [], \"blocked\": []}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 379,
+      "candidatesTokenCount": 149
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

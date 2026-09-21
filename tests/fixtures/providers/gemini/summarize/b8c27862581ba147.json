@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across comment, release, incident, test_run, work_item. Most notable: Comment on PRJ-491: still blocked on the locale setting.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-491: still blocked on the locale setting\", \"Comment on PRJ-496: the locale fix is ready for review\", \"Comment on PRJ-501: still blocked on the locale setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.492 was tagged with the locale change\", \"Release 2.497 moved to Frozen; the locale fix is in it\", \"Release 2.502 was tagged with the locale change\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-493 on locale was opened at severity 2\", \"INC-498 on locale was resolved after the rollback\"]}, {\"kind\": \"test_run\", \"changes\": [\"The locale regression run on build 5191 passed\", \"The locale smoke run on build 5191 failed on two cases\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-495 moved from In Progress to Done (locale)\", \"PRJ-500 was reassigned and its priority raised (locale)\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 581,
+      "candidatesTokenCount": 281
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p2, p3, p4 reported in this window. Blocked: p3.\", \"participants_mentioned\": [\"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p2\", \"done\": [], \"doing\": [\"writing the certificate tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the certificate setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-315\"], \"doing\": [\"the certificate migration script\"], \"blocked\": []}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 344,
+      "candidatesTokenCount": 141
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

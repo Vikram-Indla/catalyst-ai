@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window. Blocked: p1, p3, p4.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the search export step; PRJ-320 is merged\", \"finished the search export step; PRJ-328 is merged\"], \"doing\": [\"pairing on the search page\"], \"blocked\": [\"the staging build 5119 is broken\"]}, {\"participant\": \"p2\", \"done\": [\"the search runbook is written and linked from PRJ-325\"], \"doing\": [\"writing the search tests today\", \"writing the search tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the search setting from the platform team\", \"waiting on the search setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-323\"], \"doing\": [\"the search migration script\"], \"blocked\": [\"search needs a decision on the old endpoint before I continue\", \"search needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 594,
+      "candidatesTokenCount": 268
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

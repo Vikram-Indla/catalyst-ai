@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"proposed\", \"label\": \"\u0645\u064f\u0642\u062a\u0631\u064e\u062d\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"sort_order\": 0}, {\"key\": \"under_review\", \"label\": \"\u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"sort_order\": 1}, {\"key\": \"accepted\", \"label\": \"\u0645\u0642\u0628\u0648\u0644\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 2}, {\"key\": \"declined\", \"label\": \"\u0645\u064f\u0633\u062a\u0628\u0639\u064e\u062f\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 3}, {\"key\": \"parked\", \"label\": \"\u0645\u064f\u0624\u062c\u064e\u0651\u0644\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"sort_order\": 4}], \"transitions\": [{\"from_key\": \"proposed\", \"to_key\": \"under_review\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0642\u062a\u0631\u064e\u062d \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629.\"}, {\"from_key\": \"under_review\", \"to_key\": \"accepted\", \"kind\": \"forward\", \"guards\": [\"approval_recorded\"], \"requires_approval\": true, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629 \u0625\u0644\u0649 \u0645\u0642\u0628\u0648\u0644.\"}, {\"from_key\": \"under_review\", \"to_key\": \"declined\", \"kind\": \"reject\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"reject_to_declined\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629 \u0625\u0644\u0649 \u0645\u064f\u0633\u062a\u0628\u0639\u064e\u062f.\"}, {\"from_key\": \"under_review\", \"to_key\": \"parked\", \"kind\": \"defer\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629 \u0625\u0644\u0649 \u0645\u064f\u0624\u062c\u064e\u0651\u0644.\"}, {\"from_key\": \"parked\", \"to_key\": \"under_review\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0624\u062c\u064e\u0651\u0644 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062f\u0631\u0627\u0633\u0629.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 147,
+      "candidatesTokenCount": 433
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across comment, release, incident. Most notable: Comment on PRJ-481: still blocked on the digest setting.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-481: still blocked on the digest setting\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.482 was tagged with the digest change\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-483 on digest was opened at severity 2\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 337,
+      "candidatesTokenCount": 134
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

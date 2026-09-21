@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"drafted\", \"label\": \"Drafted\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"sort_order\": 0}, {\"key\": \"submitted\", \"label\": \"Submitted\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"sort_order\": 1}, {\"key\": \"approved\", \"label\": \"Approved\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"sort_order\": 2}, {\"key\": \"rejected\", \"label\": \"Rejected\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 3}, {\"key\": \"scheduled\", \"label\": \"Scheduled\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"sort_order\": 4}, {\"key\": \"implemented\", \"label\": \"Implemented\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"sort_order\": 5}], \"transitions\": [{\"from_key\": \"drafted\", \"to_key\": \"submitted\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"The description says it moves from Drafted to Submitted.\"}, {\"from_key\": \"submitted\", \"to_key\": \"approved\", \"kind\": \"forward\", \"guards\": [\"approval_recorded\"], \"requires_approval\": true, \"reason_code\": null, \"rationale\": \"The description says it moves from Submitted to Approved.\"}, {\"from_key\": \"submitted\", \"to_key\": \"rejected\", \"kind\": \"reject\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"reject_to_rejected\", \"rationale\": \"The description says it moves from Submitted to Rejected.\"}, {\"from_key\": \"approved\", \"to_key\": \"scheduled\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"The description says it moves from Approved to Scheduled.\"}, {\"from_key\": \"scheduled\", \"to_key\": \"implemented\", \"kind\": \"forward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": null, \"rationale\": \"The description says it moves from Scheduled to Implemented.\"}, {\"from_key\": \"scheduled\", \"to_key\": \"approved\", \"kind\": \"backward\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"backward_to_approved\", \"rationale\": \"The description says it moves from Scheduled to Approved.\"}, {\"from_key\": \"rejected\", \"to_key\": \"drafted\", \"kind\": \"reopen\", \"guards\": [], \"requires_approval\": false, \"reason_code\": \"reopen_to_drafted\", \"rationale\": \"The description says it moves from Rejected to Drafted.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 196,
+      "candidatesTokenCount": 587
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

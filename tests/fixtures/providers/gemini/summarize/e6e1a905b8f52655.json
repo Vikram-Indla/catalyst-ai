@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"p1, p2, p3, p4 reported in this window. Blocked: p1, p3, p4.\", \"participants_mentioned\": [\"p1\", \"p2\", \"p3\", \"p4\"], \"empty_reason\": null, \"rationale\": \"One entry per token; the cued parts of each update; nothing counted.\", \"standup\": [{\"participant\": \"p1\", \"done\": [\"finished the digest export step; PRJ-328 is merged\"], \"doing\": [\"pairing on the digest page\", \"pairing on the digest page\"], \"blocked\": [\"the staging build 5123 is broken\", \"the staging build 5123 is broken\"]}, {\"participant\": \"p2\", \"done\": [\"the digest runbook is written and linked from PRJ-325\", \"the digest runbook is written and linked from PRJ-333\"], \"doing\": [\"writing the digest tests today\"], \"blocked\": []}, {\"participant\": \"p3\", \"done\": [], \"doing\": [], \"blocked\": [\"waiting on the digest setting from the platform team\"]}, {\"participant\": \"p4\", \"done\": [\"reviewed PRJ-323\", \"reviewed PRJ-331\"], \"doing\": [\"the digest migration script\", \"the digest migration script\"], \"blocked\": [\"digest needs a decision on the old endpoint before I continue\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 601,
+      "candidatesTokenCount": 259
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

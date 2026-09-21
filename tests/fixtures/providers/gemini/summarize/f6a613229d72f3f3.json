@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across incident, test_run, work_item. Most notable: INC-473 on certificate was opened at severity 2.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"incident\", \"changes\": [\"INC-473 on certificate was opened at severity 2\"]}, {\"kind\": \"test_run\", \"changes\": [\"The certificate regression run on build 5173 passed\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-475 was created: certificate onboarding checklist\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 340,
+      "candidatesTokenCount": 135
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

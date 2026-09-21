@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across test_run, work_item, comment, release, incident. Most notable: The offline smoke run on build 5199 failed on two cases.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"test_run\", \"changes\": [\"The offline smoke run on build 5199 failed on two cases\", \"The offline regression run on build 5199 passed\", \"The offline smoke run on build 5199 failed on two cases\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-500 was reassigned and its priority raised (offline)\", \"PRJ-505 was created: offline onboarding checklist\", \"PRJ-510 moved from In Progress to Done (offline)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-501: still blocked on the offline setting\", \"Comment on PRJ-506: the offline fix is ready for review\"]}, {\"kind\": \"release\", \"changes\": [\"Release 2.502 was tagged with the offline change\", \"Release 2.507 moved to Frozen; the offline fix is in it\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-503 on offline was opened at severity 2\", \"INC-508 on offline was resolved after the rollback\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 585,
+      "candidatesTokenCount": 284
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

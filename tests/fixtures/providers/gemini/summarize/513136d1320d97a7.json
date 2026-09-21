@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"1 comment(s) from p2; the latest, by p2, says: Agreed with the plan; I will take the roadmap part on Monday.\\n\\n- p2 \u2014 decision: Agreed with the plan; I will take the roadmap part on Monday.\", \"participants_mentioned\": [\"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 228,
+      "candidatesTokenCount": 86
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"Changes across release, incident, work_item, comment. Most notable: Release 2.482 was tagged with the digest change.\", \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Grouped by the kind each item carries; the product states the counts.\", \"digest\": [{\"kind\": \"release\", \"changes\": [\"Release 2.482 was tagged with the digest change\"]}, {\"kind\": \"incident\", \"changes\": [\"INC-483 on digest was opened at severity 2\"]}, {\"kind\": \"work_item\", \"changes\": [\"PRJ-485 was reassigned and its priority raised (digest)\"]}, {\"kind\": \"comment\", \"changes\": [\"Comment on PRJ-486: the digest fix is ready for review\"]}]}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 371,
+      "candidatesTokenCount": 158
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"3 comment(s) from p1, p2, p4; the latest, by p2, says: Agreed with the plan; I will take the export part on Monday.\\n\\n- p4 \u2014 open question: Can someone confirm whether the export numbers include archived items?\\n- p2 \u2014 decision: Agreed with the plan; I will take the export part on Monday.\\n- p1 moved it from Blocked to In Progress\\n- p2 moved it from To Do to In Progress\", \"participants_mentioned\": [\"p1\", \"p2\", \"p4\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 306,
+      "candidatesTokenCount": 135
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
