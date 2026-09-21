@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-9-1\", \"text\": \"PRJ-409: Login button did nothing on the first tap on phones (p1)\"}]}, {\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-9-2\", \"text\": \"PRJ-410: Move billing to the new gateway\"}]}, {\"kind\": \"task\", \"entries\": [{\"source_id\": \"chg-9-3\", \"text\": \"PRJ-411: Rename an internal module (no user-facing effect) (p3)\"}]}], \"highlights\": [{\"source_id\": \"chg-9-1\", \"text\": \"Login button did nothing on the first tap on phones\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 210,
+      "candidatesTokenCount": 159
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

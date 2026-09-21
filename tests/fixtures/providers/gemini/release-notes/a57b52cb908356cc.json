@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"story\", \"entries\": [{\"source_id\": \"chg-8-1\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-5\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-9\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-13\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-17\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-21\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-25\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-29\", \"text\": \"Export the board to CSV with every visible column\"}]}, {\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-8-2\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-8-6\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-8-10\", \"text\": \"Report locale column showed the wrong language code\"}, {\"source_id\": \"chg-8-14\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-8-18\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-8-22\", \"text\": \"Report locale column showed the wrong language code\"}, {\"source_id\": \"chg-8-26\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-8-30\", \"text\": \"Search returned archived items in the default view\"}]}, {\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-8-3\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-7\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-11\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-15\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-19\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-23\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-8-27\", \"text\": \"Move billing to the new gateway\"}]}], \"highlights\": [{\"source_id\": \"chg-8-1\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-8-2\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-8-5\", \"text\": \"Export the board to CSV with every visible column\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 780,
+      "candidatesTokenCount": 608
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

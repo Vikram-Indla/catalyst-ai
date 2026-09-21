@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"task\", \"entries\": [{\"source_id\": \"chg-27-1\", \"text\": \"PRJ-427: Rename an internal module (no user-facing effect) (p1)\"}, {\"source_id\": \"chg-27-5\", \"text\": \"PRJ-431: Rename an internal module (no user-facing effect) (p2)\"}, {\"source_id\": \"chg-27-9\", \"text\": \"PRJ-435: Rename an internal module (no user-facing effect) (p3)\"}, {\"source_id\": \"chg-27-13\", \"text\": \"PRJ-439: Rename an internal module (no user-facing effect) (p1)\"}]}, {\"kind\": \"story\", \"entries\": [{\"source_id\": \"chg-27-2\", \"text\": \"PRJ-428: Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-27-6\", \"text\": \"PRJ-432: Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-27-10\", \"text\": \"PRJ-436: Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-27-14\", \"text\": \"PRJ-440: Export the board to CSV with every visible column\"}]}, {\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-27-3\", \"text\": \"PRJ-429: Report locale column showed the wrong language code (p3)\"}, {\"source_id\": \"chg-27-7\", \"text\": \"PRJ-433: Login button did nothing on the first tap on phones (p1)\"}, {\"source_id\": \"chg-27-11\", \"text\": \"PRJ-437: Search returned archived items in the default view (p2)\"}, {\"source_id\": \"chg-27-15\", \"text\": \"PRJ-441: Report locale column showed the wrong language code (p3)\"}]}], \"highlights\": [{\"source_id\": \"chg-27-2\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-27-3\", \"text\": \"Report locale column showed the wrong language code\"}, {\"source_id\": \"chg-27-6\", \"text\": \"Export the board to CSV with every visible column\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 470,
+      "candidatesTokenCount": 436
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

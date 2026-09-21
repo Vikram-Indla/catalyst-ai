@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [], \"gaps\": [], \"outline\": [{\"heading\": \"Scope\", \"lines\": [\"The cases listed, run manually on the staging environment\"], \"covers\": [\"tc-59-1\", \"tc-59-2\", \"tc-59-3\", \"tc-59-4\", \"tc-59-5\", \"tc-59-6\", \"tc-59-7\", \"tc-59-8\"]}, {\"heading\": \"Approach\", \"lines\": [\"One pass per case; a failure opens a defect with the case id\"], \"covers\": [\"tc-59-1\", \"tc-59-2\", \"tc-59-3\", \"tc-59-4\", \"tc-59-5\", \"tc-59-6\", \"tc-59-7\", \"tc-59-8\"]}, {\"heading\": \"Environments\", \"lines\": [\"Staging with the release candidate build\"], \"covers\": [\"tc-59-1\", \"tc-59-2\", \"tc-59-3\", \"tc-59-4\", \"tc-59-5\", \"tc-59-6\", \"tc-59-7\", \"tc-59-8\"]}, {\"heading\": \"Risks\", \"lines\": [\"Test data drift between runs\"], \"covers\": [\"tc-59-1\", \"tc-59-2\", \"tc-59-3\", \"tc-59-4\", \"tc-59-5\", \"tc-59-6\", \"tc-59-7\", \"tc-59-8\"]}, {\"heading\": \"Exit criteria\", \"lines\": [\"Every case passed or its defect accepted\"], \"covers\": [\"tc-59-1\", \"tc-59-2\", \"tc-59-3\", \"tc-59-4\", \"tc-59-5\", \"tc-59-6\", \"tc-59-7\", \"tc-59-8\"]}], \"data_tables\": [{\"name\": \"Values for Verify an expired certificate is refused at sign-in \u2014 An expired certificate is refused at sign-in\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-1\"]}, {\"name\": \"Values for Verify every visible column is exported \u2014 Every visible column is exported\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-2\"]}, {\"name\": \"Values for Verify archived items stay out of the export \u2014 Archived items stay out of the export\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-3\"]}, {\"name\": \"Values for Verify the file downloads within five seconds for 1000 rows \u2014 The file downloads within five seconds for 1000 rows\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-4\"]}, {\"name\": \"Values for Verify a member without the export permission sees no export button \u2014 A member without the export permission sees no export button\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-5\"]}, {\"name\": \"Values for Verify sharing carries view or edit permission \u2014 Sharing carries view or edit permission\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-6\"]}, {\"name\": \"Values for Verify unsharing removes the filter from everyone else \u2014 Unsharing removes the filter from everyone else\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-7\"]}, {\"name\": \"Values for Verify the digest goes out at 07:00 in the member's locale \u2014 The digest goes out at 07:00 in the member's locale\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-59-8\"]}], \"empty_reason\": null, \"rationale\": \"A five-section plan and one table per case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 574,
+      "candidatesTokenCount": 805
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

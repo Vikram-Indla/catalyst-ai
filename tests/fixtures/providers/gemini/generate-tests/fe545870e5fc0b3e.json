@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"empty_reason\": \"nothing_to_test\", \"rationale\": \"The story states no behaviour.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 151,
+      "candidatesTokenCount": 20
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

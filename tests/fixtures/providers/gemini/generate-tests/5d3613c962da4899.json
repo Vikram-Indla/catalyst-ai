@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [], \"gaps\": [], \"outline\": [{\"heading\": \"Scope\", \"lines\": [\"The cases listed, run manually on the staging environment\"], \"covers\": [\"tc-63-1\", \"tc-63-2\", \"tc-63-3\", \"tc-63-4\", \"tc-63-5\", \"tc-63-6\", \"tc-63-7\", \"tc-63-8\"]}, {\"heading\": \"Approach\", \"lines\": [\"One pass per case; a failure opens a defect with the case id\"], \"covers\": [\"tc-63-1\", \"tc-63-2\", \"tc-63-3\", \"tc-63-4\", \"tc-63-5\", \"tc-63-6\", \"tc-63-7\", \"tc-63-8\"]}, {\"heading\": \"Environments\", \"lines\": [\"Staging with the release candidate build\"], \"covers\": [\"tc-63-1\", \"tc-63-2\", \"tc-63-3\", \"tc-63-4\", \"tc-63-5\", \"tc-63-6\", \"tc-63-7\", \"tc-63-8\"]}, {\"heading\": \"Risks\", \"lines\": [\"Test data drift between runs\"], \"covers\": [\"tc-63-1\", \"tc-63-2\", \"tc-63-3\", \"tc-63-4\", \"tc-63-5\", \"tc-63-6\", \"tc-63-7\", \"tc-63-8\"]}, {\"heading\": \"Exit criteria\", \"lines\": [\"Every case passed or its defect accepted\"], \"covers\": [\"tc-63-1\", \"tc-63-2\", \"tc-63-3\", \"tc-63-4\", \"tc-63-5\", \"tc-63-6\", \"tc-63-7\", \"tc-63-8\"]}], \"data_tables\": [{\"name\": \"Values for Verify a member without the export permission sees no export button \u2014 A member without the export permission sees no export button\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-1\"]}, {\"name\": \"Values for Verify sharing carries view or edit permission \u2014 Sharing carries view or edit permission\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-2\"]}, {\"name\": \"Values for Verify unsharing removes the filter from everyone else \u2014 Unsharing removes the filter from everyone else\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-3\"]}, {\"name\": \"Values for Verify the digest goes out at 07:00 in the member's locale \u2014 The digest goes out at 07:00 in the member's locale\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-4\"]}, {\"name\": \"Values for Verify a member with no activity gets no digest \u2014 A member with no activity gets no digest\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-5\"]}, {\"name\": \"Values for Verify a draft survives a page reload while offline \u2014 A draft survives a page reload while offline\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-6\"]}, {\"name\": \"Values for Verify a draft is sent once when the connection returns \u2014 A draft is sent once when the connection returns\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-7\"]}, {\"name\": \"Values for Verify the certificate rotates without a restart \u2014 The certificate rotates without a restart\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-63-8\"]}], \"empty_reason\": null, \"rationale\": \"A five-section plan and one table per case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 576,
+      "candidatesTokenCount": 809
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

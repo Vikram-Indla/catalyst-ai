@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Search cluster: landed so far \u2014 Move billing to the new gateway, Rename an internal module (no user-facing effect), Export the board to CSV with every visible column.\\n\\n- Still open before the date: Search returned archived items in the default view, Report locale column showed the wrong language code\", \"attention\": [{\"source_id\": \"chg-58-4\", \"text\": \"PRJ-461 is still in_progress\"}, {\"source_id\": \"chg-58-8\", \"text\": \"PRJ-465 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 327,
+      "candidatesTokenCount": 153
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

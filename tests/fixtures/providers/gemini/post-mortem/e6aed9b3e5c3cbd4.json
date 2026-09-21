@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-17T08:00:00+00:00 to 2026-10-17T08:18:00+00:00. Config flag for drafts found switched on in production but not in staging.\", \"facts\": [{\"source_id\": \"ev-33-1\", \"text\": \"Config flag for drafts found switched on in production but not in staging\"}, {\"source_id\": \"ev-33-2\", \"text\": \"Rollback of deploy 7033 started\"}, {\"source_id\": \"ev-33-3\", \"text\": \"Rollback complete; error rate back under 1%\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-33-1\", \"ev-33-2\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-33-1\", \"ev-33-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 112,
+      "candidatesTokenCount": 212
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-07T08:00:00+00:00 to 2026-10-07T09:39:00+00:00. Config flag for certificate found switched on in production but not in staging.\", \"facts\": [{\"source_id\": \"ev-23-1\", \"text\": \"Config flag for certificate found switched on in production but not in staging\"}, {\"source_id\": \"ev-23-2\", \"text\": \"Rollback of deploy 7023 started\"}, {\"source_id\": \"ev-23-3\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-23-4\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-23-5\", \"text\": \"Root cause confirmed: the certificate cache key ignored the organisation\"}, {\"source_id\": \"ev-23-6\", \"text\": \"Follow-up ticket PRJ-723 opened for the cache key fix\"}, {\"source_id\": \"ev-23-7\", \"text\": \"Monitoring added for the certificate error rate\"}, {\"source_id\": \"ev-23-8\", \"text\": \"Alert fired: error rate above 5% on the certificate endpoint\"}, {\"source_id\": \"ev-23-9\", \"text\": \"On-call acknowledged and started looking at the certificate dashboards\"}, {\"source_id\": \"ev-23-10\", \"text\": \"Deploy 7023 identified as the last change before the alert\"}, {\"source_id\": \"ev-23-11\", \"text\": \"Config flag for certificate found switched on in production but not in staging\"}, {\"source_id\": \"ev-23-12\", \"text\": \"Rollback of deploy 7023 started\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-23-1\", \"ev-23-2\", \"ev-23-5\", \"ev-23-6\", \"ev-23-10\", \"ev-23-11\", \"ev-23-12\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-23-1\", \"ev-23-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 341,
+      "candidatesTokenCount": 443
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

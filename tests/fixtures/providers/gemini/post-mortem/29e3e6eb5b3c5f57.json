@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-01T08:00:00+00:00 to 2026-10-01T08:18:00+00:00. Root cause confirmed: the billing cache key ignored the organisation.\", \"facts\": [{\"source_id\": \"ev-17-1\", \"text\": \"Root cause confirmed: the billing cache key ignored the organisation\"}, {\"source_id\": \"ev-17-2\", \"text\": \"Follow-up ticket PRJ-717 opened for the cache key fix\"}, {\"source_id\": \"ev-17-3\", \"text\": \"Monitoring added for the billing error rate\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-17-1\", \"ev-17-2\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-17-1\", \"ev-17-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 115,
+      "candidatesTokenCount": 215
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

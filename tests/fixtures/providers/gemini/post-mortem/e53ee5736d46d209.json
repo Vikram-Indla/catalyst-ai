@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-27T08:00:00+00:00 to 2026-10-27T08:36:00+00:00. Config flag for digest found switched on in production but not in staging.\", \"facts\": [{\"source_id\": \"ev-43-1\", \"text\": \"Config flag for digest found switched on in production but not in staging\"}, {\"source_id\": \"ev-43-2\", \"text\": \"Rollback of deploy 7043 started\"}, {\"source_id\": \"ev-43-4\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-43-5\", \"text\": \"Root cause confirmed: the digest cache key ignored the organisation\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-43-1\", \"ev-43-2\", \"ev-43-5\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-43-1\", \"ev-43-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 161,
+      "candidatesTokenCount": 240
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

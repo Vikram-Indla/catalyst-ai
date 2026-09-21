@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-09-22T08:00:00+00:00 to 2026-09-22T10:51:00+00:00. Follow-up ticket PRJ-708 opened for the cache key fix.\", \"facts\": [{\"source_id\": \"ev-8-1\", \"text\": \"Follow-up ticket PRJ-708 opened for the cache key fix\"}, {\"source_id\": \"ev-8-2\", \"text\": \"Monitoring added for the sign-in error rate\"}, {\"source_id\": \"ev-8-3\", \"text\": \"Alert fired: error rate above 5% on the sign-in endpoint\"}, {\"source_id\": \"ev-8-4\", \"text\": \"On-call acknowledged and started looking at the sign-in dashboards\"}, {\"source_id\": \"ev-8-5\", \"text\": \"Deploy 7008 identified as the last change before the alert\"}, {\"source_id\": \"ev-8-6\", \"text\": \"Config flag for sign-in found switched on in production but not in staging\"}, {\"source_id\": \"ev-8-7\", \"text\": \"Rollback of deploy 7008 started\"}, {\"source_id\": \"ev-8-8\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-8-9\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-8-10\", \"text\": \"Root cause confirmed: the sign-in cache key ignored the organisation\"}, {\"source_id\": \"ev-8-11\", \"text\": \"Follow-up ticket PRJ-708 opened for the cache key fix\"}, {\"source_id\": \"ev-8-12\", \"text\": \"Monitoring added for the sign-in error rate\"}, {\"source_id\": \"ev-8-13\", \"text\": \"Alert fired: error rate above 5% on the sign-in endpoint\"}, {\"source_id\": \"ev-8-14\", \"text\": \"On-call acknowledged and started looking at the sign-in dashboards\"}, {\"source_id\": \"ev-8-15\", \"text\": \"Deploy 7008 identified as the last change before the alert\"}, {\"source_id\": \"ev-8-16\", \"text\": \"Config flag for sign-in found switched on in production but not in staging\"}, {\"source_id\": \"ev-8-17\", \"text\": \"Rollback of deploy 7008 started\"}, {\"source_id\": \"ev-8-18\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-8-19\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-8-20\", \"text\": \"Root cause confirmed: the sign-in cache key ignored the organisation\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-8-1\", \"ev-8-5\", \"ev-8-6\", \"ev-8-7\", \"ev-8-10\", \"ev-8-11\", \"ev-8-15\", \"ev-8-16\", \"ev-8-17\", \"ev-8-20\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-8-1\", \"ev-8-5\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 526,
+      "candidatesTokenCount": 617
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

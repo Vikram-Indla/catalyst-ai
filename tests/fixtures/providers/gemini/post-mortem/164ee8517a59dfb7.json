@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-10T08:00:00+00:00 to 2026-10-10T08:45:00+00:00. Customers notified through the status page.\", \"facts\": [{\"source_id\": \"ev-26-1\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-26-2\", \"text\": \"Root cause confirmed: the locale cache key ignored the organisation\"}, {\"source_id\": \"ev-26-3\", \"text\": \"Follow-up ticket PRJ-726 opened for the cache key fix\"}, {\"source_id\": \"ev-26-4\", \"text\": \"Monitoring added for the locale error rate\"}, {\"source_id\": \"ev-26-5\", \"text\": \"Alert fired: error rate above 5% on the locale endpoint\"}, {\"source_id\": \"ev-26-6\", \"text\": \"On-call acknowledged and started looking at the locale dashboards\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-26-2\", \"ev-26-3\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-26-2\", \"ev-26-3\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 188,
+      "candidatesTokenCount": 277
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

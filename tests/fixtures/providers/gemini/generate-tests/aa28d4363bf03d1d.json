@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [], \"gaps\": [], \"outline\": [{\"heading\": \"Scope\", \"lines\": [\"The cases listed, run manually on the staging environment\"], \"covers\": [\"tc-54-1\", \"tc-54-2\", \"tc-54-3\", \"tc-54-4\", \"tc-54-5\"]}, {\"heading\": \"Approach\", \"lines\": [\"One pass per case; a failure opens a defect with the case id\"], \"covers\": [\"tc-54-1\", \"tc-54-2\", \"tc-54-3\", \"tc-54-4\", \"tc-54-5\"]}, {\"heading\": \"Environments\", \"lines\": [\"Staging with the release candidate build\"], \"covers\": [\"tc-54-1\", \"tc-54-2\", \"tc-54-3\", \"tc-54-4\", \"tc-54-5\"]}, {\"heading\": \"Risks\", \"lines\": [\"Test data drift between runs\"], \"covers\": [\"tc-54-1\", \"tc-54-2\", \"tc-54-3\", \"tc-54-4\", \"tc-54-5\"]}, {\"heading\": \"Exit criteria\", \"lines\": [\"Every case passed or its defect accepted\"], \"covers\": [\"tc-54-1\", \"tc-54-2\", \"tc-54-3\", \"tc-54-4\", \"tc-54-5\"]}], \"data_tables\": [{\"name\": \"Values for Verify the digest goes out at 07:00 in the member's locale \u2014 The digest goes out at 07:00 in the member's locale\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-54-1\"]}, {\"name\": \"Values for Verify a member with no activity gets no digest \u2014 A member with no activity gets no digest\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-54-2\"]}, {\"name\": \"Values for Verify a draft survives a page reload while offline \u2014 A draft survives a page reload while offline\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-54-3\"]}, {\"name\": \"Values for Verify a draft is sent once when the connection returns \u2014 A draft is sent once when the connection returns\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-54-4\"]}, {\"name\": \"Values for Verify the certificate rotates without a restart \u2014 The certificate rotates without a restart\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-54-5\"]}], \"empty_reason\": null, \"rationale\": \"A five-section plan and one table per case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 413,
+      "candidatesTokenCount": 560
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

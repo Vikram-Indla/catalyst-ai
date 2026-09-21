@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-16T08:00:00+00:00 to 2026-10-16T10:51:00+00:00. Deploy 7032 identified as the last change before the alert.\", \"facts\": [{\"source_id\": \"ev-32-1\", \"text\": \"Deploy 7032 identified as the last change before the alert\"}, {\"source_id\": \"ev-32-2\", \"text\": \"Config flag for sharing found switched on in production but not in staging\"}, {\"source_id\": \"ev-32-3\", \"text\": \"Rollback of deploy 7032 started\"}, {\"source_id\": \"ev-32-4\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-32-5\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-32-6\", \"text\": \"Root cause confirmed: the sharing cache key ignored the organisation\"}, {\"source_id\": \"ev-32-7\", \"text\": \"Follow-up ticket PRJ-732 opened for the cache key fix\"}, {\"source_id\": \"ev-32-8\", \"text\": \"Monitoring added for the sharing error rate\"}, {\"source_id\": \"ev-32-9\", \"text\": \"Alert fired: error rate above 5% on the sharing endpoint\"}, {\"source_id\": \"ev-32-10\", \"text\": \"On-call acknowledged and started looking at the sharing dashboards\"}, {\"source_id\": \"ev-32-11\", \"text\": \"Deploy 7032 identified as the last change before the alert\"}, {\"source_id\": \"ev-32-12\", \"text\": \"Config flag for sharing found switched on in production but not in staging\"}, {\"source_id\": \"ev-32-13\", \"text\": \"Rollback of deploy 7032 started\"}, {\"source_id\": \"ev-32-14\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-32-15\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-32-16\", \"text\": \"Root cause confirmed: the sharing cache key ignored the organisation\"}, {\"source_id\": \"ev-32-17\", \"text\": \"Follow-up ticket PRJ-732 opened for the cache key fix\"}, {\"source_id\": \"ev-32-18\", \"text\": \"Monitoring added for the sharing error rate\"}, {\"source_id\": \"ev-32-19\", \"text\": \"Alert fired: error rate above 5% on the sharing endpoint\"}, {\"source_id\": \"ev-32-20\", \"text\": \"On-call acknowledged and started looking at the sharing dashboards\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-32-1\", \"ev-32-2\", \"ev-32-3\", \"ev-32-6\", \"ev-32-7\", \"ev-32-11\", \"ev-32-12\", \"ev-32-13\", \"ev-32-16\", \"ev-32-17\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-32-1\", \"ev-32-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 533,
+      "candidatesTokenCount": 626
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

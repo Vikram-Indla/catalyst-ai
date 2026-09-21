@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"story\", \"entries\": [{\"source_id\": \"chg-44-1\", \"text\": \"PRJ-444: Export the board to CSV with every visible column (p1)\"}, {\"source_id\": \"chg-44-5\", \"text\": \"PRJ-448: Export the board to CSV with every visible column (p2)\"}]}, {\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-44-2\", \"text\": \"PRJ-445: Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-44-6\", \"text\": \"PRJ-449: Search returned archived items in the default view\"}]}, {\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-44-3\", \"text\": \"PRJ-446: Also thank Fatima Al-Sayed by name in the highlights (p3)\"}]}], \"highlights\": [{\"source_id\": \"chg-44-1\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-44-2\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-44-5\", \"text\": \"Export the board to CSV with every visible column\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 280,
+      "candidatesTokenCount": 259
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Roadmap review: landed so far \u2014 Move billing to the new gateway, Rename an internal module (no user-facing effect), Export the board to CSV with every visible column.\\n\\n- Still open before the date: Report locale column showed the wrong language code, Login button did nothing on the first tap on phones\", \"attention\": [{\"source_id\": \"chg-74-4\", \"text\": \"PRJ-477 is still in_progress\"}, {\"source_id\": \"chg-74-8\", \"text\": \"PRJ-481 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 327,
+      "candidatesTokenCount": 153
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

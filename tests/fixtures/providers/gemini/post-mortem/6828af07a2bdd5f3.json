@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-12T08:00:00+00:00 to 2026-10-12T10:51:00+00:00. Follow-up ticket PRJ-728 opened for the cache key fix.\", \"facts\": [{\"source_id\": \"ev-28-1\", \"text\": \"Follow-up ticket PRJ-728 opened for the cache key fix\"}, {\"source_id\": \"ev-28-2\", \"text\": \"Monitoring added for the locale error rate\"}, {\"source_id\": \"ev-28-3\", \"text\": \"Alert fired: error rate above 5% on the locale endpoint\"}, {\"source_id\": \"ev-28-4\", \"text\": \"On-call acknowledged and started looking at the locale dashboards\"}, {\"source_id\": \"ev-28-5\", \"text\": \"Deploy 7028 identified as the last change before the alert\"}, {\"source_id\": \"ev-28-6\", \"text\": \"Config flag for locale found switched on in production but not in staging\"}, {\"source_id\": \"ev-28-7\", \"text\": \"Rollback of deploy 7028 started\"}, {\"source_id\": \"ev-28-8\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-28-9\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-28-10\", \"text\": \"Root cause confirmed: the locale cache key ignored the organisation\"}, {\"source_id\": \"ev-28-11\", \"text\": \"Follow-up ticket PRJ-728 opened for the cache key fix\"}, {\"source_id\": \"ev-28-12\", \"text\": \"Monitoring added for the locale error rate\"}, {\"source_id\": \"ev-28-13\", \"text\": \"Alert fired: error rate above 5% on the locale endpoint\"}, {\"source_id\": \"ev-28-14\", \"text\": \"On-call acknowledged and started looking at the locale dashboards\"}, {\"source_id\": \"ev-28-15\", \"text\": \"Deploy 7028 identified as the last change before the alert\"}, {\"source_id\": \"ev-28-16\", \"text\": \"Config flag for locale found switched on in production but not in staging\"}, {\"source_id\": \"ev-28-17\", \"text\": \"Rollback of deploy 7028 started\"}, {\"source_id\": \"ev-28-18\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-28-19\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-28-20\", \"text\": \"Root cause confirmed: the locale cache key ignored the organisation\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-28-1\", \"ev-28-5\", \"ev-28-6\", \"ev-28-7\", \"ev-28-10\", \"ev-28-11\", \"ev-28-15\", \"ev-28-16\", \"ev-28-17\", \"ev-28-20\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-28-1\", \"ev-28-5\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 529,
+      "candidatesTokenCount": 622
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

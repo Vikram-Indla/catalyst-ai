@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-06T08:00:00+00:00 to 2026-10-06T08:45:00+00:00. Deploy 7022 identified as the last change before the alert.\", \"facts\": [{\"source_id\": \"ev-22-1\", \"text\": \"Deploy 7022 identified as the last change before the alert\"}, {\"source_id\": \"ev-22-2\", \"text\": \"Config flag for certificate found switched on in production but not in staging\"}, {\"source_id\": \"ev-22-3\", \"text\": \"Rollback of deploy 7022 started\"}, {\"source_id\": \"ev-22-4\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-22-5\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-22-6\", \"text\": \"Root cause confirmed: the certificate cache key ignored the organisation\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-22-1\", \"ev-22-2\", \"ev-22-3\", \"ev-22-6\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-22-1\", \"ev-22-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 189,
+      "candidatesTokenCount": 286
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

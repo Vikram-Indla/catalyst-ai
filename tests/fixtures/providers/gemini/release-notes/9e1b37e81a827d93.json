@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-37-1\", \"text\": \"PRJ-437: Search returned archived items in the default view (p1)\"}]}, {\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-37-2\", \"text\": \"PRJ-438: Move billing to the new gateway\"}]}, {\"kind\": \"task\", \"entries\": [{\"source_id\": \"chg-37-3\", \"text\": \"PRJ-439: Rename an internal module (no user-facing effect) (p3)\"}]}], \"highlights\": [{\"source_id\": \"chg-37-1\", \"text\": \"Search returned archived items in the default view\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 211,
+      "candidatesTokenCount": 159
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

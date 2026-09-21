@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Daily digest: landed so far \u2014 Rename an internal module (no user-facing effect), Export the board to CSV with every visible column, Report locale column showed the wrong language code.\\n\\n- Still open before the date: Move billing to the new gateway, Move billing to the new gateway, Move billing to the new gateway\", \"attention\": [{\"source_id\": \"chg-63-4\", \"text\": \"PRJ-466 is still in_progress\"}, {\"source_id\": \"chg-63-8\", \"text\": \"PRJ-470 is still in_progress\"}, {\"source_id\": \"chg-63-12\", \"text\": \"PRJ-474 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 478,
+      "candidatesTokenCount": 173
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

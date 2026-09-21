@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify a draft survives a page reload while offline\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft survives a page reload while offline\", \"then\": \"It holds: a draft survives a page reload while offline\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-44-1\"], \"inferred\": false}, {\"title\": \"Verify the certificate rotates without a restart\", \"given\": \"A signed-in member on the page\", \"when\": \"The certificate rotates without a restart\", \"then\": \"It holds: the certificate rotates without a restart\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-44-3\"], \"inferred\": false}, {\"title\": \"Verify an expired certificate is refused at sign-in\", \"given\": \"A signed-in member on the page\", \"when\": \"An expired certificate is refused at sign-in\", \"then\": \"It holds: an expired certificate is refused at sign-in\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-44-4\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 226,
+      "candidatesTokenCount": 339
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

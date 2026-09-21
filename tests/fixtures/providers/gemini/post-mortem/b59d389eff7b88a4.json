@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-26T08:00:00+00:00 to 2026-10-26T08:36:00+00:00. Deploy 7042 identified as the last change before the alert.\", \"facts\": [{\"source_id\": \"ev-42-1\", \"text\": \"Deploy 7042 identified as the last change before the alert\"}, {\"source_id\": \"ev-42-2\", \"text\": \"Config flag for sign-in found switched on in production but not in staging\"}, {\"source_id\": \"ev-42-4\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-42-5\", \"text\": \"Customers notified through the status page\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-42-1\", \"ev-42-2\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-42-1\", \"ev-42-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 167,
+      "candidatesTokenCount": 235
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

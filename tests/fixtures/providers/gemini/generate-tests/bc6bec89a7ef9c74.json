@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify the file downloads within five seconds for 1000 rows\", \"given\": \"A signed-in member on the page\", \"when\": \"The file downloads within five seconds for 1000 rows\", \"then\": \"It holds: the file downloads within five seconds for 1000 rows\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-2-1\"], \"inferred\": false}, {\"title\": \"Verify a member without the export permission sees no export button\", \"given\": \"A signed-in member on the page\", \"when\": \"A member without the export permission sees no export button\", \"then\": \"It holds: a member without the export permission sees no export button\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-2-2\"], \"inferred\": false}, {\"title\": \"Verify sharing carries view or edit permission\", \"given\": \"A signed-in member on the page\", \"when\": \"Sharing carries view or edit permission\", \"then\": \"It holds: sharing carries view or edit permission\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-2-3\"], \"inferred\": false}, {\"title\": \"Verify unsharing removes the filter from everyone else\", \"given\": \"A signed-in member on the page\", \"when\": \"Unsharing removes the filter from everyone else\", \"then\": \"It holds: unsharing removes the filter from everyone else\", \"priority\": \"low\", \"area\": \"security\", \"covers\": [\"ac-2-4\"], \"inferred\": false}, {\"title\": \"Verify the digest goes out at 07:00 in the member's locale\", \"given\": \"A signed-in member on the page\", \"when\": \"The digest goes out at 07:00 in the member's locale\", \"then\": \"It holds: the digest goes out at 07:00 in the member's locale\", \"priority\": \"critical\", \"area\": \"performance\", \"covers\": [\"ac-2-5\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 248,
+      "candidatesTokenCount": 520
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

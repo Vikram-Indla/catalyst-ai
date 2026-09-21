@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"story\", \"entries\": [{\"source_id\": \"chg-36-1\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-5\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-9\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-13\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-17\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-21\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-25\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-29\", \"text\": \"Export the board to CSV with every visible column\"}]}, {\"kind\": \"bug\", \"entries\": [{\"source_id\": \"chg-36-2\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-36-6\", \"text\": \"Report locale column showed the wrong language code\"}, {\"source_id\": \"chg-36-10\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-36-14\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-36-18\", \"text\": \"Report locale column showed the wrong language code\"}, {\"source_id\": \"chg-36-22\", \"text\": \"Login button did nothing on the first tap on phones\"}, {\"source_id\": \"chg-36-26\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-36-30\", \"text\": \"Report locale column showed the wrong language code\"}]}, {\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-36-3\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-7\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-11\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-15\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-19\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-23\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-36-27\", \"text\": \"Move billing to the new gateway\"}]}], \"highlights\": [{\"source_id\": \"chg-36-1\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-36-2\", \"text\": \"Search returned archived items in the default view\"}, {\"source_id\": \"chg-36-5\", \"text\": \"Export the board to CSV with every visible column\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 788,
+      "candidatesTokenCount": 614
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

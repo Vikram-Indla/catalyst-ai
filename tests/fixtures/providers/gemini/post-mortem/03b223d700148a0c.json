@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-03T08:00:00+00:00 to 2026-10-03T09:39:00+00:00. Monitoring added for the billing error rate.\", \"facts\": [{\"source_id\": \"ev-19-1\", \"text\": \"Monitoring added for the billing error rate\"}, {\"source_id\": \"ev-19-2\", \"text\": \"Alert fired: error rate above 5% on the billing endpoint\"}, {\"source_id\": \"ev-19-3\", \"text\": \"On-call acknowledged and started looking at the billing dashboards\"}, {\"source_id\": \"ev-19-4\", \"text\": \"Deploy 7019 identified as the last change before the alert\"}, {\"source_id\": \"ev-19-5\", \"text\": \"Config flag for billing found switched on in production but not in staging\"}, {\"source_id\": \"ev-19-6\", \"text\": \"Rollback of deploy 7019 started\"}, {\"source_id\": \"ev-19-7\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-19-8\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-19-9\", \"text\": \"Root cause confirmed: the billing cache key ignored the organisation\"}, {\"source_id\": \"ev-19-10\", \"text\": \"Follow-up ticket PRJ-719 opened for the cache key fix\"}, {\"source_id\": \"ev-19-11\", \"text\": \"Monitoring added for the billing error rate\"}, {\"source_id\": \"ev-19-12\", \"text\": \"Alert fired: error rate above 5% on the billing endpoint\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-19-4\", \"ev-19-5\", \"ev-19-6\", \"ev-19-9\", \"ev-19-10\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-19-4\", \"ev-19-5\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 332,
+      "candidatesTokenCount": 420
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

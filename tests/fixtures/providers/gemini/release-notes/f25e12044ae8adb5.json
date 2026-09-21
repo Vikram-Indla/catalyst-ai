@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [{\"kind\": \"change\", \"entries\": [{\"source_id\": \"chg-6-1\", \"text\": \"Move billing to the new gateway\"}, {\"source_id\": \"chg-6-5\", \"text\": \"Move billing to the new gateway\"}]}, {\"kind\": \"task\", \"entries\": [{\"source_id\": \"chg-6-2\", \"text\": \"Rename an internal module (no user-facing effect)\"}, {\"source_id\": \"chg-6-6\", \"text\": \"Rename an internal module (no user-facing effect)\"}]}, {\"kind\": \"story\", \"entries\": [{\"source_id\": \"chg-6-3\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-6-7\", \"text\": \"Export the board to CSV with every visible column\"}]}], \"highlights\": [{\"source_id\": \"chg-6-3\", \"text\": \"Export the board to CSV with every visible column\"}, {\"source_id\": \"chg-6-7\", \"text\": \"Export the board to CSV with every visible column\"}], \"summary\": \"\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"One entry per done change, grouped by kind; nothing not done is noted.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 316,
+      "candidatesTokenCount": 231
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

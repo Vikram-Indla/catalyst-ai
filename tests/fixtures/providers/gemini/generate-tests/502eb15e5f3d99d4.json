@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify unsharing removes the filter from everyone else\", \"given\": \"A signed-in member on the page\", \"when\": \"Unsharing removes the filter from everyone else\", \"then\": \"It holds: unsharing removes the filter from everyone else\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-29-1\"], \"inferred\": false}, {\"title\": \"Verify the digest goes out at 07:00 in the member's locale\", \"given\": \"A signed-in member on the page\", \"when\": \"The digest goes out at 07:00 in the member's locale\", \"then\": \"It holds: the digest goes out at 07:00 in the member's locale\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-29-2\"], \"inferred\": false}, {\"title\": \"Verify a member with no activity gets no digest\", \"given\": \"A signed-in member on the page\", \"when\": \"A member with no activity gets no digest\", \"then\": \"It holds: a member with no activity gets no digest\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-29-3\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 211,
+      "candidatesTokenCount": 346
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

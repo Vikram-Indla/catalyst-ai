@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Certificate rotation: landed so far \u2014 Export the board to CSV with every visible column, Search returned archived items in the default view, Also thank Fatima Al-Sayed by name in the highlights.\\n\\n- Still open before the date: Rename an internal module (no user-facing effect)\", \"attention\": [{\"source_id\": \"chg-84-4\", \"text\": \"PRJ-487 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 289,
+      "candidatesTokenCount": 129
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

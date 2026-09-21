@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify archived items stay out of the export\", \"given\": \"A signed-in member on the page\", \"when\": \"Archived items stay out of the export\", \"then\": \"It holds: archived items stay out of the export\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-1-1\"], \"inferred\": false}, {\"title\": \"Verify the file downloads within five seconds for 1000 rows\", \"given\": \"A signed-in member on the page\", \"when\": \"The file downloads within five seconds for 1000 rows\", \"then\": \"It holds: the file downloads within five seconds for 1000 rows\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-1-2\"], \"inferred\": false}, {\"title\": \"Verify a member without the export permission sees no export button\", \"given\": \"A signed-in member on the page\", \"when\": \"A member without the export permission sees no export button\", \"then\": \"It holds: a member without the export permission sees no export button\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-1-3\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 218,
+      "candidatesTokenCount": 354
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

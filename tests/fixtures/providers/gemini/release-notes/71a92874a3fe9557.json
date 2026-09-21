@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Certificate rotation: landed so far \u2014 Move billing to the new gateway, Rename an internal module (no user-facing effect), Export the board to CSV with every visible column.\\n\\n- Still open before the date: Login button did nothing on the first tap on phones, Search returned archived items in the default view\", \"attention\": [{\"source_id\": \"chg-54-4\", \"text\": \"PRJ-457 is still in_progress\"}, {\"source_id\": \"chg-54-8\", \"text\": \"PRJ-461 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 328,
+      "candidatesTokenCount": 154
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

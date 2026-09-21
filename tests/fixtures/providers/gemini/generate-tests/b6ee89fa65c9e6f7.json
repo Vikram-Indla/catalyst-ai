@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [], \"gaps\": [], \"outline\": [{\"heading\": \"Scope\", \"lines\": [\"The cases listed, run manually on the staging environment\"], \"covers\": [\"tc-57-1\", \"tc-57-2\", \"tc-57-3\"]}, {\"heading\": \"Approach\", \"lines\": [\"One pass per case; a failure opens a defect with the case id\"], \"covers\": [\"tc-57-1\", \"tc-57-2\", \"tc-57-3\"]}, {\"heading\": \"Environments\", \"lines\": [\"Staging with the release candidate build\"], \"covers\": [\"tc-57-1\", \"tc-57-2\", \"tc-57-3\"]}, {\"heading\": \"Risks\", \"lines\": [\"Test data drift between runs\"], \"covers\": [\"tc-57-1\", \"tc-57-2\", \"tc-57-3\"]}, {\"heading\": \"Exit criteria\", \"lines\": [\"Every case passed or its defect accepted\"], \"covers\": [\"tc-57-1\", \"tc-57-2\", \"tc-57-3\"]}], \"data_tables\": [{\"name\": \"Values for Verify a draft is sent once when the connection returns \u2014 A draft is sent once when the connection returns\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-57-1\"]}, {\"name\": \"Values for Verify the certificate rotates without a restart \u2014 The certificate rotates without a restart\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-57-2\"]}, {\"name\": \"Values for Verify an expired certificate is refused at sign-in \u2014 An expired certificate is refused at sign-in\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-57-3\"]}], \"empty_reason\": null, \"rationale\": \"A five-section plan and one table per case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 315,
+      "candidatesTokenCount": 398
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

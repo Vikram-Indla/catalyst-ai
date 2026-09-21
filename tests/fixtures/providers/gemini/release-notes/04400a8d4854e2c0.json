@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Daily digest: landed so far \u2014 Export the board to CSV with every visible column, Report locale column showed the wrong language code, Move billing to the new gateway.\\n\\n- Still open before the date: Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect), Rename an internal module (no user-facing effect)\", \"attention\": [{\"source_id\": \"chg-64-4\", \"text\": \"PRJ-467 is still in_progress\"}, {\"source_id\": \"chg-64-8\", \"text\": \"PRJ-471 is still in_progress\"}, {\"source_id\": \"chg-64-12\", \"text\": \"PRJ-475 is still in_progress\"}, {\"source_id\": \"chg-64-16\", \"text\": \"PRJ-479 is still in_progress\"}, {\"source_id\": \"chg-64-20\", \"text\": \"PRJ-483 is still in_progress\"}, {\"source_id\": \"chg-64-24\", \"text\": \"PRJ-487 is still in_progress\"}, {\"source_id\": \"chg-64-28\", \"text\": \"PRJ-491 is still in_progress\"}], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 796,
+      "candidatesTokenCount": 301
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-09-23T08:00:00+00:00 to 2026-09-23T08:18:00+00:00. Monitoring added for the digest error rate.\", \"facts\": [{\"source_id\": \"ev-9-1\", \"text\": \"Monitoring added for the digest error rate\"}, {\"source_id\": \"ev-9-2\", \"text\": \"Alert fired: error rate above 5% on the digest endpoint\"}, {\"source_id\": \"ev-9-3\", \"text\": \"On-call acknowledged and started looking at the digest dashboards\"}], \"contributing_factors\": [], \"action_items\": [], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 114,
+      "candidatesTokenCount": 153
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

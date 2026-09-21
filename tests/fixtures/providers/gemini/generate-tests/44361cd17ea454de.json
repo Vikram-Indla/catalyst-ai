@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [], \"gaps\": [], \"outline\": [{\"heading\": \"Scope\", \"lines\": [\"The cases listed, run manually on the staging environment\"], \"covers\": [\"tc-83-1\", \"tc-83-2\", \"tc-83-3\", \"tc-83-4\"]}, {\"heading\": \"Approach\", \"lines\": [\"One pass per case; a failure opens a defect with the case id\"], \"covers\": [\"tc-83-1\", \"tc-83-2\", \"tc-83-3\", \"tc-83-4\"]}, {\"heading\": \"Environments\", \"lines\": [\"Staging with the release candidate build\"], \"covers\": [\"tc-83-1\", \"tc-83-2\", \"tc-83-3\", \"tc-83-4\"]}, {\"heading\": \"Risks\", \"lines\": [\"Test data drift between runs\"], \"covers\": [\"tc-83-1\", \"tc-83-2\", \"tc-83-3\", \"tc-83-4\"]}, {\"heading\": \"Exit criteria\", \"lines\": [\"Every case passed or its defect accepted\"], \"covers\": [\"tc-83-1\", \"tc-83-2\", \"tc-83-3\", \"tc-83-4\"]}], \"data_tables\": [{\"name\": \"Values for Verify an expired certificate is refused at sign-in \u2014 An expired certificate is refused at sign-in\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-83-1\"]}, {\"name\": \"Values for Verify archived items stay out of the export \u2014 Archived items stay out of the export\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-83-3\"]}, {\"name\": \"Values for Verify the file downloads within five seconds for 1000 rows \u2014 The file downloads within five seconds for 1000 rows\", \"columns\": [\"variant\", \"value\", \"expected\"], \"rows\": [[\"baseline\", \"sample-1\", \"holds\"], [\"edge\", \"sample-2\", \"holds\"]], \"covers\": [\"tc-83-4\"]}], \"empty_reason\": null, \"rationale\": \"A five-section plan and one table per case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 364,
+      "candidatesTokenCount": 412
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"sections\": [], \"highlights\": [], \"summary\": \"Release Saved filters: landed so far \u2014 Search returned archived items in the default view, Move billing to the new gateway, Rename an internal module (no user-facing effect).\\n\\n- Still open before the date: nothing\", \"attention\": [], \"empty_reason\": null, \"rationale\": \"The release's state from its changes; open items need attention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 220,
+      "candidatesTokenCount": 96
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

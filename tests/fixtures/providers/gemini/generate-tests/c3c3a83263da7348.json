@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify a draft is sent once when the connection returns\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft is sent once when the connection returns\", \"then\": \"It holds: a draft is sent once when the connection returns\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-33-1\"], \"inferred\": false}, {\"title\": \"Verify the certificate rotates without a restart\", \"given\": \"A signed-in member on the page\", \"when\": \"The certificate rotates without a restart\", \"then\": \"It holds: the certificate rotates without a restart\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-33-2\"], \"inferred\": false}, {\"title\": \"Verify works well\", \"given\": \"A signed-in member on the page\", \"when\": \"Works well\", \"then\": \"It holds: works well\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-33-3\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 204,
+      "candidatesTokenCount": 317
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

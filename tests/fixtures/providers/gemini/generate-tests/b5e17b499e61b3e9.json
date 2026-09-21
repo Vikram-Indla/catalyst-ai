@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify a draft survives a page reload while offline\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft survives a page reload while offline\", \"then\": \"It holds: a draft survives a page reload while offline\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-8-1\", \"ac-8-11\"], \"inferred\": false}, {\"title\": \"Verify a draft is sent once when the connection returns\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft is sent once when the connection returns\", \"then\": \"It holds: a draft is sent once when the connection returns\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-8-2\", \"ac-8-12\"], \"inferred\": false}, {\"title\": \"Verify the certificate rotates without a restart\", \"given\": \"A signed-in member on the page\", \"when\": \"The certificate rotates without a restart\", \"then\": \"It holds: the certificate rotates without a restart\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-8-3\"], \"inferred\": false}, {\"title\": \"Verify an expired certificate is refused at sign-in\", \"given\": \"A signed-in member on the page\", \"when\": \"An expired certificate is refused at sign-in\", \"then\": \"It holds: an expired certificate is refused at sign-in\", \"priority\": \"low\", \"area\": \"security\", \"covers\": [\"ac-8-4\"], \"inferred\": false}, {\"title\": \"Verify every visible column is exported\", \"given\": \"A signed-in member on the page\", \"when\": \"Every visible column is exported\", \"then\": \"It holds: every visible column is exported\", \"priority\": \"critical\", \"area\": \"performance\", \"covers\": [\"ac-8-5\"], \"inferred\": false}, {\"title\": \"Verify archived items stay out of the export\", \"given\": \"A signed-in member on the page\", \"when\": \"Archived items stay out of the export\", \"then\": \"It holds: archived items stay out of the export\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [\"ac-8-6\"], \"inferred\": false}, {\"title\": \"Verify the file downloads within five seconds for 1000 rows\", \"given\": \"A signed-in member on the page\", \"when\": \"The file downloads within five seconds for 1000 rows\", \"then\": \"It holds: the file downloads within five seconds for 1000 rows\", \"priority\": \"medium\", \"area\": \"happy\", \"covers\": [\"ac-8-7\"], \"inferred\": false}, {\"title\": \"Verify a member without the export permission sees no export button\", \"given\": \"A signed-in member on the page\", \"when\": \"A member without the export permission sees no export button\", \"then\": \"It holds: a member without the export permission sees no export button\", \"priority\": \"low\", \"area\": \"negative\", \"covers\": [\"ac-8-8\"], \"inferred\": false}, {\"title\": \"Verify sharing carries view or edit permission\", \"given\": \"A signed-in member on the page\", \"when\": \"Sharing carries view or edit permission\", \"then\": \"It holds: sharing carries view or edit permission\", \"priority\": \"critical\", \"area\": \"boundary\", \"covers\": [\"ac-8-9\"], \"inferred\": false}, {\"title\": \"Verify unsharing removes the filter from everyone else\", \"given\": \"A signed-in member on the page\", \"when\": \"Unsharing removes the filter from everyone else\", \"then\": \"It holds: unsharing removes the filter from everyone else\", \"priority\": \"high\", \"area\": \"security\", \"covers\": [\"ac-8-10\"], \"inferred\": false}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 337,
+      "candidatesTokenCount": 833
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

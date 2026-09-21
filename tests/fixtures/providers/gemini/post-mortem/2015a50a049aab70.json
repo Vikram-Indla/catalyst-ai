@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-09-30T08:00:00+00:00 to 2026-09-30T10:51:00+00:00. Customers notified through the status page.\", \"facts\": [{\"source_id\": \"ev-16-1\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-16-2\", \"text\": \"Root cause confirmed: the export cache key ignored the organisation\"}, {\"source_id\": \"ev-16-3\", \"text\": \"Follow-up ticket PRJ-716 opened for the cache key fix\"}, {\"source_id\": \"ev-16-4\", \"text\": \"Monitoring added for the export error rate\"}, {\"source_id\": \"ev-16-5\", \"text\": \"Alert fired: error rate above 5% on the export endpoint\"}, {\"source_id\": \"ev-16-6\", \"text\": \"On-call acknowledged and started looking at the export dashboards\"}, {\"source_id\": \"ev-16-7\", \"text\": \"Deploy 7016 identified as the last change before the alert\"}, {\"source_id\": \"ev-16-8\", \"text\": \"Config flag for export found switched on in production but not in staging\"}, {\"source_id\": \"ev-16-9\", \"text\": \"Rollback of deploy 7016 started\"}, {\"source_id\": \"ev-16-10\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-16-11\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-16-12\", \"text\": \"Root cause confirmed: the export cache key ignored the organisation\"}, {\"source_id\": \"ev-16-13\", \"text\": \"Follow-up ticket PRJ-716 opened for the cache key fix\"}, {\"source_id\": \"ev-16-14\", \"text\": \"Monitoring added for the export error rate\"}, {\"source_id\": \"ev-16-15\", \"text\": \"Alert fired: error rate above 5% on the export endpoint\"}, {\"source_id\": \"ev-16-16\", \"text\": \"On-call acknowledged and started looking at the export dashboards\"}, {\"source_id\": \"ev-16-17\", \"text\": \"Deploy 7016 identified as the last change before the alert\"}, {\"source_id\": \"ev-16-18\", \"text\": \"Config flag for export found switched on in production but not in staging\"}, {\"source_id\": \"ev-16-19\", \"text\": \"Rollback of deploy 7016 started\"}, {\"source_id\": \"ev-16-20\", \"text\": \"Rollback complete; error rate back under 1%\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-16-2\", \"ev-16-3\", \"ev-16-7\", \"ev-16-8\", \"ev-16-9\", \"ev-16-12\", \"ev-16-13\", \"ev-16-17\", \"ev-16-18\", \"ev-16-19\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-16-2\", \"ev-16-3\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 529,
+      "candidatesTokenCount": 619
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

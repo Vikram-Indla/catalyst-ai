@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"cases\": [{\"title\": \"Verify a member with no activity gets no digest\", \"given\": \"A signed-in member on the page\", \"when\": \"A member with no activity gets no digest\", \"then\": \"It holds: a member with no activity gets no digest\", \"priority\": \"critical\", \"area\": \"happy\", \"covers\": [\"ac-19-1\"], \"inferred\": false}, {\"title\": \"Verify a draft survives a page reload while offline\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft survives a page reload while offline\", \"then\": \"It holds: a draft survives a page reload while offline\", \"priority\": \"high\", \"area\": \"negative\", \"covers\": [\"ac-19-2\"], \"inferred\": false}, {\"title\": \"Verify a draft is sent once when the connection returns\", \"given\": \"A signed-in member on the page\", \"when\": \"A draft is sent once when the connection returns\", \"then\": \"It holds: a draft is sent once when the connection returns\", \"priority\": \"medium\", \"area\": \"boundary\", \"covers\": [\"ac-19-3\"], \"inferred\": false}, {\"title\": \"Verify the certificate rotates without a restart\", \"given\": \"A signed-in member on the page\", \"when\": \"The certificate rotates without a restart\", \"then\": \"It holds: the certificate rotates without a restart\", \"priority\": \"low\", \"area\": \"security\", \"covers\": [\"ac-19-4\"], \"inferred\": false}, {\"title\": \"Verify an expired certificate is refused at sign-in\", \"given\": \"A signed-in member on the page\", \"when\": \"An expired certificate is refused at sign-in\", \"then\": \"It holds: an expired certificate is refused at sign-in\", \"priority\": \"critical\", \"area\": \"performance\", \"covers\": [\"ac-19-5\"], \"inferred\": false}, {\"title\": \"Verify every visible column is exported\", \"given\": \"A signed-in member on the page\", \"when\": \"Every visible column is exported\", \"then\": \"It holds: every visible column is exported\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [\"ac-19-6\"], \"inferred\": false}, {\"title\": \"Verify archived items stay out of the export\", \"given\": \"A signed-in member on the page\", \"when\": \"Archived items stay out of the export\", \"then\": \"It holds: archived items stay out of the export\", \"priority\": \"medium\", \"area\": \"happy\", \"covers\": [\"ac-19-7\"], \"inferred\": false}, {\"title\": \"Verify the file downloads within five seconds for 1000 rows\", \"given\": \"A signed-in member on the page\", \"when\": \"The file downloads within five seconds for 1000 rows\", \"then\": \"It holds: the file downloads within five seconds for 1000 rows\", \"priority\": \"low\", \"area\": \"negative\", \"covers\": [\"ac-19-8\"], \"inferred\": false}, {\"title\": \"Verify the story's headline behaviour end to end\", \"given\": \"A signed-in member\", \"when\": \"The story's main flow runs\", \"then\": \"The outcome the story describes is observed\", \"priority\": \"high\", \"area\": \"integration\", \"covers\": [], \"inferred\": true}], \"gaps\": [], \"outline\": [], \"data_tables\": [], \"empty_reason\": null, \"rationale\": \"One case per criterion, areas blended, one inferred end-to-end case.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 278,
+      "candidatesTokenCount": 724
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

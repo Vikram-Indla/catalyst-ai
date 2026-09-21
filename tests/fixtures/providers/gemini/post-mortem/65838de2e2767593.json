@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-09-26T08:00:00+00:00 to 2026-09-26T10:51:00+00:00. Deploy 7012 identified as the last change before the alert.\", \"facts\": [{\"source_id\": \"ev-12-1\", \"text\": \"Deploy 7012 identified as the last change before the alert\"}, {\"source_id\": \"ev-12-2\", \"text\": \"Config flag for digest found switched on in production but not in staging\"}, {\"source_id\": \"ev-12-3\", \"text\": \"Rollback of deploy 7012 started\"}, {\"source_id\": \"ev-12-4\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-12-5\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-12-6\", \"text\": \"Root cause confirmed: the digest cache key ignored the organisation\"}, {\"source_id\": \"ev-12-7\", \"text\": \"Follow-up ticket PRJ-712 opened for the cache key fix\"}, {\"source_id\": \"ev-12-8\", \"text\": \"Monitoring added for the digest error rate\"}, {\"source_id\": \"ev-12-9\", \"text\": \"Alert fired: error rate above 5% on the digest endpoint\"}, {\"source_id\": \"ev-12-10\", \"text\": \"On-call acknowledged and started looking at the digest dashboards\"}, {\"source_id\": \"ev-12-11\", \"text\": \"Deploy 7012 identified as the last change before the alert\"}, {\"source_id\": \"ev-12-12\", \"text\": \"Config flag for digest found switched on in production but not in staging\"}, {\"source_id\": \"ev-12-13\", \"text\": \"Rollback of deploy 7012 started\"}, {\"source_id\": \"ev-12-14\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-12-15\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-12-16\", \"text\": \"Root cause confirmed: the digest cache key ignored the organisation\"}, {\"source_id\": \"ev-12-17\", \"text\": \"Follow-up ticket PRJ-712 opened for the cache key fix\"}, {\"source_id\": \"ev-12-18\", \"text\": \"Monitoring added for the digest error rate\"}, {\"source_id\": \"ev-12-19\", \"text\": \"Alert fired: error rate above 5% on the digest endpoint\"}, {\"source_id\": \"ev-12-20\", \"text\": \"On-call acknowledged and started looking at the digest dashboards\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-12-1\", \"ev-12-2\", \"ev-12-3\", \"ev-12-6\", \"ev-12-7\", \"ev-12-11\", \"ev-12-12\", \"ev-12-13\", \"ev-12-16\", \"ev-12-17\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-12-1\", \"ev-12-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 528,
+      "candidatesTokenCount": 623
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

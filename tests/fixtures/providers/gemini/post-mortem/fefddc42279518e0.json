@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-10-22T08:00:00+00:00 to 2026-10-22T08:45:00+00:00. Follow-up ticket PRJ-738 opened for the cache key fix.\", \"facts\": [{\"source_id\": \"ev-38-1\", \"text\": \"Follow-up ticket PRJ-738 opened for the cache key fix\"}, {\"source_id\": \"ev-38-2\", \"text\": \"Monitoring added for the roadmap error rate\"}, {\"source_id\": \"ev-38-3\", \"text\": \"Alert fired: error rate above 5% on the roadmap endpoint\"}, {\"source_id\": \"ev-38-4\", \"text\": \"On-call acknowledged and started looking at the roadmap dashboards\"}, {\"source_id\": \"ev-38-5\", \"text\": \"Deploy 7038 identified as the last change before the alert\"}, {\"source_id\": \"ev-38-6\", \"text\": \"Config flag for roadmap found switched on in production but not in staging\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-38-1\", \"ev-38-5\", \"ev-38-6\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-38-1\", \"ev-38-5\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 193,
+      "candidatesTokenCount": 289
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

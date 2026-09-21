@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"The incident ran from 2026-09-16T08:00:00+00:00 to 2026-09-16T08:45:00+00:00. Deploy 7002 identified as the last change before the alert.\", \"facts\": [{\"source_id\": \"ev-2-1\", \"text\": \"Deploy 7002 identified as the last change before the alert\"}, {\"source_id\": \"ev-2-2\", \"text\": \"Config flag for search found switched on in production but not in staging\"}, {\"source_id\": \"ev-2-3\", \"text\": \"Rollback of deploy 7002 started\"}, {\"source_id\": \"ev-2-4\", \"text\": \"Rollback complete; error rate back under 1%\"}, {\"source_id\": \"ev-2-5\", \"text\": \"Customers notified through the status page\"}, {\"source_id\": \"ev-2-6\", \"text\": \"Root cause confirmed: the search cache key ignored the organisation\"}], \"contributing_factors\": [{\"text\": \"A deploy or configuration change preceded the failure\", \"evidence\": [\"ev-2-1\", \"ev-2-2\", \"ev-2-3\", \"ev-2-6\"]}], \"action_items\": [{\"text\": \"Add a pre-deploy check for the configuration flag\", \"evidence\": [\"ev-2-1\", \"ev-2-2\"], \"confidence\": 0.7}], \"participants_mentioned\": [], \"empty_reason\": null, \"rationale\": \"Every entry restated with its id; one factor by cue; one action per factor.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 184,
+      "candidatesTokenCount": 281
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
