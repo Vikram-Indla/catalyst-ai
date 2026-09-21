@@ -15,7 +15,11 @@ from testcontainers.core.utils import inside_container
 from testcontainers.postgres import PostgresContainer
 
 from catalyst_ai.capabilities.generate_children import run as generate_children
+from catalyst_ai.capabilities.generate_tests import run as generate_tests
 from catalyst_ai.capabilities.improve_story import run as improve_story
+from catalyst_ai.capabilities.post_mortem import run as post_mortem
+from catalyst_ai.capabilities.propose_workflow import run as propose_workflow
+from catalyst_ai.capabilities.release_notes import run as release_notes
 from catalyst_ai.capabilities.search import run as search_run
 from catalyst_ai.capabilities.search import run_upsert
 from catalyst_ai.capabilities.summarize import run as summarize
@@ -23,7 +27,11 @@ from catalyst_ai.capabilities.translate import run as translate
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope
 from catalyst_ai.contract.generate_children import GenerateChildrenRequest
+from catalyst_ai.contract.generate_tests import GenerateTestsRequest
 from catalyst_ai.contract.improve_story import ImproveStoryRequest
+from catalyst_ai.contract.post_mortem import PostMortemRequest
+from catalyst_ai.contract.propose_workflow import ProposeWorkflowRequest
+from catalyst_ai.contract.release_notes import ReleaseNotesRequest
 from catalyst_ai.contract.search import IndexUpsertRequest, SearchRequest
 from catalyst_ai.contract.summarize import SummarizeRequest
 from catalyst_ai.contract.translate import TranslateRequest
@@ -173,6 +181,10 @@ REGISTRY: dict[str, SetSpec] = {
     "search": SetSpec(SearchRequest, search_run, setup=index_corpus, needs_database=True),
     "summarize": SetSpec(SummarizeRequest, summarize),
     "translate": SetSpec(TranslateRequest, translate),
+    "propose-workflow": SetSpec(ProposeWorkflowRequest, propose_workflow),
+    "release-notes": SetSpec(ReleaseNotesRequest, release_notes),
+    "generate-tests": SetSpec(GenerateTestsRequest, generate_tests),
+    "post-mortem": SetSpec(PostMortemRequest, post_mortem),
 }
 
 

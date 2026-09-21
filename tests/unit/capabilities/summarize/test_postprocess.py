@@ -8,11 +8,11 @@ from catalyst_ai.capabilities.summarize.postprocess import (
     confidence,
     covered_range,
     strip_structure,
-    tokens_in,
     word_count,
 )
 from catalyst_ai.capabilities.summarize.schema import ModelOutput
 from catalyst_ai.platform.errors import Error
+from catalyst_ai.platform.language.records import tokens_in
 from tests.unit.capabilities.summarize.conftest import make_request
 
 

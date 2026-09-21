@@ -23,7 +23,7 @@ def test_every_request_field_is_classified() -> None:
         {"items": [item(1, "")]},
         {"target_words": 10},
         {"target_words": 401},
-        {"mode": "digest"},
+        {"mode": "recap"},
         {"language": "English"},
         {"unknown": 1},
     ],

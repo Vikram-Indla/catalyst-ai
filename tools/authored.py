@@ -6,7 +6,9 @@ import re
 from typing import Any
 
 from tools.authored_envelope import envelope
+from tools.authored_hubs import answer_incident, answer_release, answer_tests
 from tools.authored_threads import answer_summary, answer_translation
+from tools.authored_workflow import answer_workflow
 
 CHARS_PER_TOKEN = 4
 FENCE = re.compile(r"<<<(?P<name>[a-z_]+)>>>\n(?P<body>.*?)\n<<<end (?P=name)>>>", re.S)
@@ -265,5 +267,9 @@ def answer_embed(body: dict[str, Any]) -> dict[str, Any]:
 DISPATCH = (
     ("<<<child_level>>>", answer_children),
     ("<<<thread>>>", answer_summary),
+    ("<<<description>>>", answer_workflow),
+    ("<<<changes>>>", answer_release),
+    ("<<<criteria>>>", answer_tests),
+    ("<<<timeline>>>", answer_incident),
     ("Target language:", answer_translation),
 )

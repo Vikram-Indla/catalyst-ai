@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from tools import rules
+from tools.evalsets_windows import window_cases
 from tools.thread_terms import (
     COMMENT_LINES_AR,
     COMMENT_LINES_EN,
@@ -131,7 +132,7 @@ def summarize_cases() -> list[dict[str, object]]:
                 cases.append(_case(f"{mode}-{name}-empty", empty, [mode, "empty"], {"empty": True}))
         cases += _injection_thread_cases(mode, seed + 1)
         seed += len(INJECTION_COMMENTS)
-    return cases
+    return cases + window_cases()
 
 
 def _translate_request(mode: str, text: str, target: str, **extra: object) -> dict[str, object]:

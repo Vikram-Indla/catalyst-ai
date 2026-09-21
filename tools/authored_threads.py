@@ -5,8 +5,11 @@ import re
 from typing import Any
 
 from tools.authored_envelope import envelope
+from tools.authored_windows import answer_window
 
-THREAD_LINE = re.compile(r"^\[(?P<id>[^\]]+)\] (?P<token>p\d+) @ (?P<at>\S+): (?P<text>.*)$")
+THREAD_LINE = re.compile(
+    r"^\[(?P<id>[^\]]+)\] (?P<token>p\d+)(?: \([a-z_]+\))? @ (?P<at>\S+): (?P<text>.*)$"
+)
 STATUS_LINE = re.compile(r"^(?P<token>p\d+) moved it from (?P<old>.+?) to (?P<new>.+?) at ")
 TARGET_LINE = re.compile(r"^Target length: about (?P<n>\d+) words", re.M)
 TARGET_LANGUAGE_LINE = re.compile(r"^Target language: (?P<lang>\S+)", re.M)
@@ -134,6 +137,10 @@ def answer_summary(body: dict[str, Any]) -> dict[str, Any]:
     """Build a provider-shaped summary: a lead paragraph, bullets by cue, status changes, a cap."""
     turn = "".join(part.get("text", "") for part in body["contents"][0]["parts"])
     fields = {m.group("name"): m.group("body") for m in FENCE.finditer(turn)}
+    mode = MODE_LINE.search(turn)
+    if mode and mode.group("mode") in ("standup", "digest"):
+        thread = fields.get("thread", "")
+        return answer_window(body, mode.group("mode"), thread, "Target language: ar" in turn)
     items = _thread(fields.get("thread", ""))
     target = TARGET_LINE.search(turn)
     limit = int(target.group("n")) if target else 150

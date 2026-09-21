@@ -10,7 +10,11 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
+from catalyst_ai.capabilities.generate_tests import router as generate_tests_router
 from catalyst_ai.capabilities.improve_story import router as improve_story_router
+from catalyst_ai.capabilities.post_mortem import router as post_mortem_router
+from catalyst_ai.capabilities.propose_workflow import router as propose_workflow_router
+from catalyst_ai.capabilities.release_notes import router as release_notes_router
 from catalyst_ai.capabilities.search import router as search_router
 from catalyst_ai.capabilities.summarize import router as summarize_router
 from catalyst_ai.capabilities.translate import router as translate_router
@@ -21,7 +25,11 @@ from catalyst_ai.platform.auth import ServiceTokenMiddleware
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.clock import SystemClock
-from catalyst_ai.platform.httpserver import RequestIdMiddleware, install_error_handlers
+from catalyst_ai.platform.httpserver import (
+    RequestIdMiddleware,
+    install_error_handlers,
+    with_error_responses,
+)
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
@@ -92,7 +100,7 @@ def render_openapi(app: FastAPI) -> dict[str, Any]:
         routes=app.routes,
         description="One contract for the Go backend; see ENGINEERING.md.",
     )
-    return _with_examples(document)
+    return with_error_responses(_with_examples(document))
 
 
 PROVIDER_CLIENT_TIMEOUT_S = 30.0
@@ -149,4 +157,8 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(search_router)
     app.include_router(summarize_router)
     app.include_router(translate_router)
+    app.include_router(propose_workflow_router)
+    app.include_router(release_notes_router)
+    app.include_router(generate_tests_router)
+    app.include_router(post_mortem_router)
     return app

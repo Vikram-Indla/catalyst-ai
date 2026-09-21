@@ -4,9 +4,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from catalyst_ai.capabilities.summarize import descriptor
+from catalyst_ai.capabilities.summarize.modes import (
+    counts_text,
+    require_window,
+    window_text,
+    within_window,
+)
 from catalyst_ai.capabilities.summarize.postprocess import from_cache, to_response
-from catalyst_ai.capabilities.summarize.schema import ModelOutput, output_schema
-from catalyst_ai.contract.summarize import SummarizeRequest, SummarizeResponse
+from catalyst_ai.capabilities.summarize.schema import ModelOutput, output_schema, prose_of
+from catalyst_ai.contract.summarize import SummarizeRequest, SummarizeResponse, ThreadItem
 from catalyst_ai.platform.pipeline import Door, Stages, admit, parse_with_repair, run_stages
 from catalyst_ai.platform.prompts import PromptFile, fill
 from catalyst_ai.platform.runtime import RuntimeContext
@@ -29,12 +35,14 @@ class Parsed:
     user_texts: dict[str, str | None]
 
 
+def _item_line(item: ThreadItem) -> str:
+    kind = f" ({item.kind})" if item.kind else ""
+    return f"[{item.id}] {item.participant}{kind} @ {item.at.isoformat()}: {item.text}"
+
+
 def thread_text(request: SummarizeRequest) -> str:
-    """One line per item: the id, the token, the time, the text — the shape the prompt reads."""
-    return "\n".join(
-        f"[{item.id}] {item.participant} @ {item.at.isoformat()}: {item.text}"
-        for item in request.items
-    )
+    """One line per item: the id, the token, the kind, the time, the text — as the prompt reads."""
+    return "\n".join(_item_line(item) for item in request.items)
 
 
 def status_text(request: SummarizeRequest) -> str:
@@ -47,7 +55,8 @@ def status_text(request: SummarizeRequest) -> str:
 
 
 def parse(request: SummarizeRequest, request_id: str, idempotency: str | None) -> Parsed:
-    """Stage 1: the typed request becomes the pipeline's input; the thread becomes one text."""
+    """Stage 1: the typed request, cut to its window, becomes the input; the thread one text."""
+    request = within_window(request)
     texts: dict[str, str | None] = {
         "thread": thread_text(request) or None,
         "status_changes": status_text(request) or None,
@@ -57,7 +66,8 @@ def parse(request: SummarizeRequest, request_id: str, idempotency: str | None) -
 
 
 def validate(parsed: Parsed, runtime: RuntimeContext) -> str:
-    """Stage 2: the door — switch, version, scanner, tenant cap; return the cache key."""
+    """Stage 2: the window the mode needs, then the door — switch, version, scanner, cap."""
+    require_window(parsed.request)
     door = Door(
         name=descriptor.name,
         version=descriptor.version,
@@ -95,6 +105,8 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
             "target_words": str(request.target_words),
             "max_words": str(int(request.target_words * CAP_SHARE)),
             "language": request.language or PRESERVE,
+            "window": window_text(request) or ABSENT,
+            "counts": counts_text(request) or ABSENT,
             "instructions": _mode_section(prompt, request.mode.value),
         },
     )
@@ -136,7 +148,7 @@ async def validate_output(
     """Stage 6: parse against the schema with one repair attempt; then the leakage scan."""
     output, current = await parse_with_repair(result, ModelOutput, lambda: call(generate, runtime))
     texts = [text for text in parsed.user_texts.values() if text]
-    refuse_if_unsafe(output.summary, texts, parsed.request_id)
+    refuse_if_unsafe(prose_of(output), texts, parsed.request_id)
     return output, current
 
 

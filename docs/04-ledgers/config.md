@@ -26,6 +26,22 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `CAPABILITY_GENERATE_CHILDREN__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_GENERATE_CHILDREN__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
 | `CAPABILITY_GENERATE_CHILDREN__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_RELEASE_NOTES` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `release-notes` |
+| `CAPABILITY_RELEASE_NOTES__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_RELEASE_NOTES__CACHE_TTL_SECONDS` | int | no | the descriptor's 900 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_RELEASE_NOTES__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_GENERATE_TESTS` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `generate-tests` |
+| `CAPABILITY_GENERATE_TESTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_GENERATE_TESTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_GENERATE_TESTS__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_POST_MORTEM` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `post-mortem` |
+| `CAPABILITY_POST_MORTEM__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_POST_MORTEM__CACHE_TTL_SECONDS` | int | no | the descriptor's 900 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_POST_MORTEM__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_PROPOSE_WORKFLOW` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `propose-workflow` |
+| `CAPABILITY_PROPOSE_WORKFLOW__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_PROPOSE_WORKFLOW__CACHE_TTL_SECONDS` | int | no | the descriptor's 600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_PROPOSE_WORKFLOW__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
 | `CAPABILITY_SEARCH` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `search` and the index operations |
 | `CAPABILITY_SEARCH__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch; off also skips the retrieve stage of `generate-children` |
 | `CAPABILITY_SEARCH__CACHE_TTL_SECONDS` | int | no | the descriptor's 0 | ≥ 0 | PUBLIC | Unused by v1 — search results are never cached |

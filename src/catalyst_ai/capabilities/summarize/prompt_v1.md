@@ -40,6 +40,8 @@ Work item type: {item_type}
 Focus: {focus}
 Target length: about {target_words} words; never more than {max_words}
 Target language: {language}
+Window: {window}
+Counts by kind, as recorded by the product: {counts}
 
 Mode instructions:
 {instructions}
@@ -60,6 +62,22 @@ resolved is presented as open.
 Lead with one short paragraph on what the discussion is about and where it ended. Then bullet
 points for the positions taken (by token), the agreements reached, and the questions left open.
 No action items unless the thread states them.
+
+[mode:standup]
+The items are one window of updates from several members, each named by token. Fill "standup":
+one entry per token that appears in the data, with "done" (what the token reports as finished in
+the window), "doing" (what is in hand) and "blocked" (what stops them and on what), each a short
+plain line in the token's own words — no line for what the data does not say, an empty list where
+there is nothing. Name an item only by the key the data carries. "summary" is two or three
+sentences on the window as a whole: what moved, what is blocked, nothing counted or invented.
+
+[mode:digest]
+The items are what changed in one scope over the window, each with its kind. Fill "digest": one
+entry per kind that appears in the data, with "changes" — short plain lines stating what changed,
+each naming the item's key where the data has one and the token of who changed it where that
+matters. Never state a count or a total of any kind: the product counted and will show its own
+numbers next to yours. "summary" is two or three sentences on the window: what moved most, what
+needs attention, in the data's own words.
 
 [focus:default]
 Key points, decisions, blockers.

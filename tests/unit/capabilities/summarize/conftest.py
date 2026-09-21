@@ -1,6 +1,7 @@
 """Doubles for summarize: a request builder and well-formed completions."""
 
 import json
+from typing import Any
 
 from catalyst_ai.contract.summarize import SummarizeRequest
 from tests.unit.capabilities.improve_story.conftest import ORG
@@ -39,6 +40,8 @@ def summary_text(
     "- p3 — blocker: the environment is missing the setting.\n- p1 — open question: archived items?",
     mentioned: tuple[str, ...] = ("p1", "p2", "p3"),
     empty_reason: str | None = None,
+    standup: list[dict[str, Any]] | None = None,
+    digest: list[dict[str, Any]] | None = None,
 ) -> str:
     return json.dumps(
         {
@@ -46,5 +49,7 @@ def summary_text(
             "participants_mentioned": list(mentioned),
             "empty_reason": empty_reason,
             "rationale": "Kept the decision, the blocker and the question.",
+            "standup": standup or [],
+            "digest": digest or [],
         }
     )

@@ -2,7 +2,7 @@
 id: ARCH-003
 title: Capabilities and the pipeline shape
 status: Locked
-version: 1.0.0
+version: 1.0.1
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -11,10 +11,12 @@ created: 2026-09-18
 
 ## 1. A capability is a package
 
-`src/catalyst_ai/capabilities/<name>/` is one capability: one operation in the contract, one
-pipeline, one or more versioned prompt files, one output schema, one eval set under
-`evals/<name>/`, one budget. The package is the unit of ownership, of versioning
-(`capability_version`), of the kill switch, and of the ledger row. Two capabilities never import
+`src/catalyst_ai/capabilities/<name>/` is one capability: one *concern* in the contract — usually
+one operation, sometimes the few operations that concern needs (an index is written, deleted and
+searched) — one pipeline per operation, one or more versioned prompt files, one output schema
+family, one eval set under `evals/<name>/`, one budget. The package is the unit of ownership, of
+versioning (`capability_version`), of the kill switch, and of the ledger row; its operations share
+the descriptor, the set and the budget. (Reworded from "one operation" on 2026-09-21, `D-023`.) Two capabilities never import
 each other (`ARCH-012 §2`); what they share lives in `platform/` or `retrieval/` under a name.
 
 ```
@@ -25,7 +27,7 @@ capabilities/<name>/
   schema.py         the output model the provider's text must validate against
   prompt_v1.md      the prompt, versioned, with the header RULE-008 §1 requires
   postprocess.py    deterministic transforms after validation (optional)
-  routes.py         the FastAPI router: one operation, thin, pydantic in and out
+  routes.py         the FastAPI router: the concern's operations, thin, pydantic in and out
 ```
 
 ## 2. The pipeline — seven stages, one sampled

@@ -164,3 +164,42 @@ async def test_summarize_run_provider_failures(fault: Fault, code: str) -> None:
     client = _client(runtime, settings)
     response = await client.post(PATH, json=_body())
     assert response.json()["error"]["code"] == code
+
+
+async def test_summarize_run_standup_and_digest_from_the_recorded_fixtures(
+    recorded: httpx.AsyncClient,
+) -> None:
+    cases = {c.id: c for c in evalkit.load_cases(REPO_ROOT / "evals" / "summarize" / "set.jsonl")}
+    standup = await recorded.post(PATH, json=cases["standup-export-6"].input)
+    assert standup.status_code == 200, standup.text
+    entries = SummarizeResponse.model_validate(standup.json()).standup
+    items = cases["standup-export-6"].input["items"]
+    assert isinstance(items, list)
+    inside = cases["standup-export-6"].expected["inside_ids"]
+    assert isinstance(inside, list)
+    tokens = sorted({str(i["participant"]) for i in items if i["id"] in inside})
+    assert [e.participant for e in entries] == tokens
+    digest = await recorded.post(PATH, json=cases["digest-export-6"].input)
+    assert digest.status_code == 200, digest.text
+    body = SummarizeResponse.model_validate(digest.json())
+    counts = cases["digest-export-6"].input["counts"]
+    assert isinstance(counts, list)
+    assert [(g.kind, g.count) for g in body.digest] == [(c["kind"], c["count"]) for c in counts]
+    inside_digest = cases["digest-export-6"].expected["inside_ids"]
+    assert isinstance(inside_digest, list)
+    assert body.covered_range.count == len(inside_digest)
+
+
+async def test_summarize_run_window_modes_refuse_without_their_pieces() -> None:
+    client, provider = _scripted([summary_text()])
+    no_window = await client.post(PATH, json=_body(mode="standup"))
+    assert no_window.status_code == 422
+    assert no_window.json()["error"]["details"][0]["code"] == "window_required"
+    window = {"from_at": "2026-09-01T00:00:00+00:00", "to_at": "2026-09-01T23:59:00+00:00"}
+    no_counts = await client.post(PATH, json=_body(mode="digest", window=window))
+    assert no_counts.json()["error"]["details"][0]["code"] == "counts_required"
+    assert provider.calls == []
+    backwards = await client.post(
+        PATH, json=_body(mode="standup", window={**window, "to_at": "2025-01-01T00:00:00+00:00"})
+    )
+    assert backwards.status_code == 400

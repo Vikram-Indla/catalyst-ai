@@ -8,6 +8,10 @@ identifiers_kept: 1.0
 no_forbidden_content: 1.0
 empty_when_nothing: 1.0
 status_changes_reflected: 0.95
+standup_shape: 1.0
+digest_shape_and_count_echo: 1.0
+window_respected: 1.0
+no_counts_invented: 1.0
 overall: 0.97
 p95_latency_ms: 8000
 p95_cost_micros: 4000

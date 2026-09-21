@@ -111,8 +111,10 @@ PRODUCT_TABLE_PREFIXES = (
     "kb_",
     "brd_",
     "wiki_",
-    "standup",
-    "incident",
+    "standups",
+    "standup_",
+    "incidents",
+    "incident_",
 )
 PRODUCT_DATABASE_MARKERS = (
     "supabase",

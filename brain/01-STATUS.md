@@ -1,6 +1,6 @@
 # 01 — Status
 
-Living state of the AI service. Rewritten, not appended. Last updated: 2026-09-21 (session 006).
+Living state of the AI service. Rewritten, not appended. Last updated: 2026-09-21 (session 008).
 
 ## Where we are
 
@@ -9,8 +9,10 @@ The constitution, the scaffold, `improve-story` and `generate-children` are on l
 retrieval package (AI-005) and the summaries and translation capabilities (AI-006) are built in
 the working tree: the service's own database with RLS, the `search` capability and its index
 operations, the re-embed and retention jobs, the retrieval eval against a real PostgreSQL;
-`summarize` with the participant-token rule and `translate` with structure kept. The work runs in
-four phases; phase 4 is under way.
+`summarize` with the participant-token rule and `translate` with structure kept; then (AI-007)
+`propose-workflow` and the `standup` and `digest` modes, with the error envelope in the
+document; then (AI-008) `release-notes`, `generate-tests` and `post-mortem` with every entry
+traced to a supplied id. The work runs in four phases; phase 4 is under way.
 
 | Phase | Goal | Done when |
 | --- | --- | --- |
@@ -30,15 +32,20 @@ four phases; phase 4 is under way.
 | AI-006 | Summaries and translation: `summarize` (modes comments, thread) with participant tokens as a schema rule, the length cap and `covered_range`; `translate` (modes field, title) with a required target, structure and kept spans, language detection | summarize, translate, platform/language, evals | ARCH-003, ARCH-009, RULE-004, RULE-008 | `summarize-comments`, `ai-translate-field`, `ai-translate-title`, `ai-improve-story` mode `translate_text` | no participant outside the tokens (refused on output); the cap and the range; the target required; Markdown preserved; sets ≥ 40 per mode with numbers (authored fixtures); `make verify` and `make ci` | review (session 006) |
 | AI-005 | Retrieval: the storage seam over the service's own PostgreSQL with `pgvector` and RLS, the `work_items` corpus (chunking, versioned embeddings), hybrid search with reciprocal rank fusion, the `search` capability (`index.upsert`, `index.delete`, `search.run`), the re-embed and retention jobs, the labelled retrieval set, `generate-children` de-duplication over the index | search, retrieval, platform/storage, providers/gemini (embed), evals | ARCH-006, ARCH-007 §4, ADR-006, RULE-005 | `ai-similar-items`; the semantic half of `ai-search-issues` | RLS proven with the application layer bypassed; versions never mixed; fusion documented; recall@10 and MRR pasted (authored fixtures, real database); index budget and oversized document refused; injection and cross-tenant cases; `make verify` and `make ci` | review (session 005) |
 
-Capabilities after AI-006, in the ledger's order: workflow and digests, release/test/incident,
-knowledge, the assistant, then the retirement pass.
+| AI-007 | Workflow proposals, standups and digests: `propose-workflow` (a described process → a structurally valid scheme the backend validates against its engine; reachability, the single initial, the guard vocabulary, reasons where implied); `summarize` modes `standup` and `digest` (the window cut, tokens only, counts echoed); the `ErrorEnvelope` schema referenced from every operation's error statuses (FIX); `ARCH-003 §1` reworded to one concern per package (`D-023`) | propose-workflow, summarize, platform/httpserver, evals | ARCH-002 §2, ARCH-003, ARCH-004, RULE-003, RULE-008 | `workflow-ai`, `ai-generate-workflow`, `standup-summarize`, `standup-summary`, `ai-digest` | the validator on planted proposals; both sets ≥ 40 per operation and mode with numbers; the document with the envelope and no drift; the record | built (session 007), awaiting the lead's review |
+
+| AI-008 | Release, test and incident capabilities: `release-notes` (notes, summary), `generate-tests` (cases, artefacts), `post-mortem`; every entry traced to a supplied id (`untraceable_entry`), people as tokens, facts apart from analysis; the record rules in `platform/language/records` | release-notes, generate-tests, post-mortem, platform/language, evals | ARCH-002 §2, ARCH-003, RULE-008 | `release-notes-generate`, `summarize-release`, `ai-generate-story-test-cases`, `ai-generate-test-artefacts`, `ai-post-mortem` | the traceability refusal on recorded bad outputs; three sets ≥ 40 per mode with numbers; the document with drift green; the record | built (session 008), awaiting the lead's review |
+
+Capabilities after AI-008, in the ledger's order: knowledge, the assistant, then the
+retirement pass.
 
 ## Blocked
 
 Nothing. Open questions that shape later tickets: `Q-001` (participant labels), `Q-002`
-(quality sampling opt-in), `Q-006` (one operation or one concern per package), `Q-007` (the
-backend's `kind` vocabulary and indexing events).
+(quality sampling opt-in), `Q-007` (the backend's `kind` vocabulary and indexing events),
+`Q-008` (the workflow engine's field list and guard vocabulary), `Q-009` (what the hub
+modules can produce for the three record contracts).
 
 ## Next
 
-The lead reviews AI-005 and AI-006 (`D-013..D-022`, `F-005..F-011`, `Q-006`, `Q-007`); a provider key unlocks the live recording of the five sets (`make record LIVE=1 CAP=search` needs a database too); the workflow and digest card follows.
+The lead reviews AI-007 and AI-008 (`D-023..D-028`, `F-012..F-015`, `Q-008`, `Q-009`); a provider key unlocks the live recording of the nine sets (`make record LIVE=1 CAP=search` needs a database too); the knowledge card follows.

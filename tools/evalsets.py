@@ -7,7 +7,9 @@ from pathlib import Path
 
 from tools import rules
 from tools.corpus_terms import DOMAINS, INJECTIONS, PARAPHRASES, ROLES
+from tools.evalsets_hubs import write_hub
 from tools.evalsets_threads import write_threads
+from tools.evalsets_workflow import write_workflow
 
 ORG_A = "11111111-1111-7111-8111-111111111111"
 ORG_B = "22222222-2222-7222-8222-222222222222"
@@ -251,9 +253,15 @@ def write(name: str) -> int:
 
 def main(name: str) -> int:
     """Write the named set: the retrieval corpus and cases, or a thread set."""
-    if name in ("summarize", "translate"):
-        return write_threads(name)
-    return write(name)
+    writers = {
+        "summarize": write_threads,
+        "translate": write_threads,
+        "propose-workflow": write_workflow,
+        "release-notes": write_hub,
+        "generate-tests": write_hub,
+        "post-mortem": write_hub,
+    }
+    return writers.get(name, write)(name)
 
 
 if __name__ == "__main__":

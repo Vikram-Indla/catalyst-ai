@@ -3,26 +3,19 @@
 import re
 
 from catalyst_ai.capabilities.summarize import descriptor
+from catalyst_ai.capabilities.summarize.modes import digest_groups, lines_of, standup_entries
 from catalyst_ai.capabilities.summarize.schema import ModelOutput
-from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.contract.summarize import CoveredRange, SummarizeRequest, SummarizeResponse
-from catalyst_ai.platform.errors import Error
+from catalyst_ai.platform.language.records import refuse_foreign_tokens, tokens_in
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
 from catalyst_ai.providers.port import GenerateResult
 
-TOKEN = re.compile(r"\bp[0-9]{1,4}\b")
 WORD = re.compile(r"\S+")
 HEADING = re.compile(r"^\s{0,3}#{1,6}\s", re.M)
 FENCE = "```"
 CAP_SHARE = 1.5
 PENALTY_LENGTH = 0.2
 PENALTY_STRUCTURE = 0.2
-PARTICIPANT_LEAK = "participant_not_in_thread"
-
-
-def tokens_in(text: str) -> set[str]:
-    """Every participant token a text names."""
-    return set(TOKEN.findall(text))
 
 
 def check_participants(summary: str, mentioned: list[str], request: SummarizeRequest) -> None:
@@ -30,16 +23,7 @@ def check_participants(summary: str, mentioned: list[str], request: SummarizeReq
     known = {item.participant for item in request.items} | {
         change.participant for change in request.status_changes
     }
-    foreign = (tokens_in(summary) | set(mentioned)) - known
-    if foreign:
-        detail = ErrorDetail(
-            field="summary", code=PARTICIPANT_LEAK, message=f"{len(foreign)} unknown token(s)"
-        )
-        raise Error(
-            ErrorCode.OUTPUT_UNSAFE,
-            "the summary names a participant outside the thread",
-            details=[detail],
-        )
+    refuse_foreign_tokens(summary, mentioned, known, "summary")
 
 
 def word_count(text: str) -> int:
@@ -85,12 +69,15 @@ def to_response(
     output: ModelOutput, result: GenerateResult, request: SummarizeRequest, request_id: str
 ) -> SummarizeResponse:
     """Check the participants, cap the length, strip structure, log the row, build the response."""
-    check_participants(output.summary, output.participants_mentioned, request)
+    entries, groups = standup_entries(output, request), digest_groups(output, request)
+    lines = lines_of(entries, groups)
+    named = output.participants_mentioned + [entry.participant for entry in output.standup]
+    check_participants(output.summary + "\n" + lines, named, request)
     summary = cap_words(
         strip_structure(output.summary).strip(), int(request.target_words * CAP_SHARE)
     )
     log_provider_call(_row(result, request, request_id))
-    empty = not summary.strip() or output.empty_reason is not None
+    empty = not (summary.strip() or lines.strip()) or output.empty_reason is not None
     return SummarizeResponse(
         capability_version=descriptor.version,
         prompt_version=descriptor.prompt_version,
@@ -101,8 +88,10 @@ def to_response(
         summary="" if empty else summary,
         empty_reason="nothing_to_summarize" if empty else None,
         covered_range=covered_range(request),
-        participants_mentioned=sorted(tokens_in(summary)) if not empty else [],
+        participants_mentioned=sorted(tokens_in(summary + "\n" + lines)) if not empty else [],
         confidence=confidence(summary, output, request) if not empty else 1.0,
+        standup=entries if not empty else [],
+        digest=groups if not empty else [],
     )
 
 

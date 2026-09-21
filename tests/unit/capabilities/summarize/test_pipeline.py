@@ -105,3 +105,47 @@ async def test_an_empty_thread_yields_the_reason_and_no_call_content() -> None:
     assert response.empty_reason == "nothing_to_summarize"
     assert response.covered_range.count == 0
     assert response.participants_mentioned == []
+
+
+async def test_a_standup_names_every_token_and_refuses_a_foreign_one() -> None:
+    window = {"from_at": "2026-09-01T00:00:00+00:00", "to_at": "2026-09-01T23:59:00+00:00"}
+    entries = [
+        {"participant": "p1", "done": ["export step"], "doing": [], "blocked": ["ops"]},
+        {"participant": "p3", "done": [], "doing": ["flag"], "blocked": []},
+    ]
+    good = summary_text("p1 and p3 reported.", ("p1", "p3"), standup=entries)
+    response = await run(
+        make_request(mode="standup", window=window), make_runtime(ScriptedProvider([good])), "r"
+    )
+    assert [e.participant for e in response.standup] == ["p1", "p2", "p3"]
+    assert response.standup[0].blocked == ["ops"]
+    assert response.standup[1].done == []
+    assert response.participants_mentioned == ["p1", "p3"]
+    foreign = summary_text("p1 reported.", ("p1",), standup=[{**entries[0], "participant": "p9"}])
+    with pytest.raises(Error) as caught:
+        await run(
+            make_request(mode="standup", window=window),
+            make_runtime(ScriptedProvider([foreign])),
+            "r",
+        )
+    assert caught.value.code is ErrorCode.OUTPUT_UNSAFE
+
+
+async def test_a_digest_echoes_the_counts_and_needs_them() -> None:
+    window = {"from_at": "2026-09-01T00:00:00+00:00", "to_at": "2026-09-01T23:59:00+00:00"}
+    counts = [{"kind": "work_item", "count": 41}, {"kind": "release", "count": 0}]
+    groups = [{"kind": "work_item", "changes": ["PRJ-42 moved to Done"]}]
+    text = summary_text("PRJ-42 moved.", (), digest=groups)
+    response = await run(
+        make_request(mode="digest", window=window, counts=counts),
+        make_runtime(ScriptedProvider([text])),
+        "r",
+    )
+    assert [(g.kind, g.count) for g in response.digest] == [("work_item", 41), ("release", 0)]
+    assert response.digest[0].changes == ["PRJ-42 moved to Done"]
+    with pytest.raises(Error) as caught:
+        await run(
+            make_request(mode="digest", window=window), make_runtime(ScriptedProvider([text])), "r"
+        )
+    assert caught.value.code is ErrorCode.INPUT_REJECTED
+    assert caught.value.details[0].code == "counts_required"

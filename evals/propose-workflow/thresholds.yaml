@@ -1,0 +1,16 @@
+schema_valid: 1.0
+structurally_valid: 1.0
+single_initial_and_terminal: 1.0
+every_status_reachable: 1.0
+guards_in_vocabulary: 1.0
+rationale_present: 1.0
+reasons_where_implied: 1.0
+stages_covered: 0.95
+existing_kept: 1.0
+no_forbidden_content: 1.0
+no_permission_granted: 1.0
+empty_when_vague: 1.0
+language_followed: 0.95
+overall: 0.97
+p95_latency_ms: 10000
+p95_cost_micros: 6000

@@ -124,6 +124,22 @@ class Settings(BaseSettings):
         CapabilitySettings,
         Field(description="PUBLIC · generate-children: enabled, cache TTL, timeout"),
     ] = CapabilitySettings()
+    capability_release_notes: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · release-notes: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_generate_tests: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · generate-tests: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_post_mortem: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · post-mortem: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_propose_workflow: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · propose-workflow: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
     capability_search: Annotated[
         CapabilitySettings,
         Field(description="PUBLIC · search and the index operations: enabled, cache TTL, timeout"),
