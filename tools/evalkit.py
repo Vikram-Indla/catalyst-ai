@@ -14,6 +14,9 @@ from pydantic import SecretStr
 from testcontainers.core.utils import inside_container
 from testcontainers.postgres import PostgresContainer
 
+from catalyst_ai.capabilities.documents import ask as documents_ask
+from catalyst_ai.capabilities.documents import generate as documents_generate
+from catalyst_ai.capabilities.documents import run_ingest
 from catalyst_ai.capabilities.generate_children import run as generate_children
 from catalyst_ai.capabilities.generate_tests import run as generate_tests
 from catalyst_ai.capabilities.improve_story import run as improve_story
@@ -25,6 +28,7 @@ from catalyst_ai.capabilities.search import run_upsert
 from catalyst_ai.capabilities.summarize import run as summarize
 from catalyst_ai.capabilities.translate import run as translate
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
+from catalyst_ai.contract.documents import AskRequest, DraftRequest, IngestRequest
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope
 from catalyst_ai.contract.generate_children import GenerateChildrenRequest
 from catalyst_ai.contract.generate_tests import GenerateTestsRequest
@@ -175,6 +179,17 @@ async def index_corpus(runtime: RuntimeContext, directory: Path) -> None:
             await run_upsert(request, runtime, f"setup-{organization_id[:8]}-{start}")
 
 
+async def ingest_corpus(runtime: RuntimeContext, directory: Path) -> None:
+    """Index `corpus.jsonl` through the ingest operation, one document per line."""
+    lines = [
+        json.loads(line)
+        for line in (directory / CORPUS_FILE).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    for index, line in enumerate(lines):
+        await run_ingest(IngestRequest.model_validate(line), runtime, f"setup-{index}")
+
+
 REGISTRY: dict[str, SetSpec] = {
     "improve-story": SetSpec(ImproveStoryRequest, improve_story),
     "generate-children": SetSpec(GenerateChildrenRequest, generate_children),
@@ -185,6 +200,9 @@ REGISTRY: dict[str, SetSpec] = {
     "release-notes": SetSpec(ReleaseNotesRequest, release_notes),
     "generate-tests": SetSpec(GenerateTestsRequest, generate_tests),
     "post-mortem": SetSpec(PostMortemRequest, post_mortem),
+    "documents": SetSpec(AskRequest, documents_ask, setup=ingest_corpus),
+    "documents-generate": SetSpec(DraftRequest, documents_generate),
+    "documents-ingest": SetSpec(IngestRequest, run_ingest),
 }
 
 

@@ -22,7 +22,8 @@ HASH_PATTERN = r"^[0-9a-f]{64}$"
 KIND_PATTERN = r"^[a-z][a-z0-9_]{0,39}$"
 MAX_SNIPPET = 240
 
-Corpus = Literal["work_items"]
+Corpus = Literal["work_items", "documents"]
+SearchCorpus = Literal["work_items"]
 IndexableClass = Literal["PUBLIC", "INTERNAL", "CONFIDENTIAL"]
 
 
@@ -90,7 +91,8 @@ class IndexUpsertRequest(RequestEnvelope):
     model_config = ConfigDict(extra="forbid")
 
     corpus: Annotated[
-        Corpus, Field(json_schema_extra=classified("PUBLIC", "Which corpus the documents join"))
+        SearchCorpus,
+        Field(json_schema_extra=classified("PUBLIC", "Which corpus the documents join")),
     ]
     documents: Annotated[
         list[IndexDocument],
@@ -129,7 +131,8 @@ class IndexDeleteRequest(RequestEnvelope):
     model_config = ConfigDict(extra="forbid")
 
     corpus: Annotated[
-        Corpus, Field(json_schema_extra=classified("PUBLIC", "Which corpus the keys belong to"))
+        SearchCorpus,
+        Field(json_schema_extra=classified("PUBLIC", "Which corpus the keys belong to")),
     ]
     external_ids: Annotated[
         list[str],
@@ -155,7 +158,7 @@ class SearchRequest(RequestEnvelope):
     model_config = ConfigDict(extra="forbid")
 
     corpus: Annotated[
-        Corpus, Field(json_schema_extra=classified("PUBLIC", "Which corpus to search"))
+        SearchCorpus, Field(json_schema_extra=classified("PUBLIC", "Which corpus to search"))
     ]
     mode: Annotated[
         SearchMode,

@@ -224,6 +224,7 @@ class PostgresStorage:
                 list(scope.kinds),
                 list(scope.exclude),
                 scope.limit,
+                scope.prefix,
             )
         return _hits(rows)
 
@@ -237,6 +238,7 @@ class PostgresStorage:
                 list(scope.kinds),
                 list(scope.exclude),
                 scope.limit,
+                scope.prefix,
             )
         return _hits(rows)
 

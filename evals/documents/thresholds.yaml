@@ -1,0 +1,11 @@
+schema_valid: 1.0
+no_uncited_claims: 1.0
+citations_resolve: 1.0
+not_found_on_traps: 0.95
+answer_grounded: 0.95
+kinds_respected: 1.0
+no_forbidden_content: 1.0
+language_preserved: 0.95
+overall: 0.97
+p95_latency_ms: 15000
+p95_cost_micros: 8000

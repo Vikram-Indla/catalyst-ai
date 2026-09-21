@@ -7,10 +7,10 @@ from catalyst_ai.capabilities.propose_workflow import descriptor
 from catalyst_ai.capabilities.propose_workflow.postprocess import from_cache, to_response
 from catalyst_ai.capabilities.propose_workflow.schema import ModelOutput, output_schema
 from catalyst_ai.contract.propose_workflow import (
+    ExistingStatus,
     ProposeWorkflowRequest,
     ProposeWorkflowResponse,
     Scheme,
-    Status,
     Transition,
 )
 from catalyst_ai.platform.pipeline import Door, Stages, admit, parse_with_repair, run_stages
@@ -35,9 +35,9 @@ class Parsed:
     user_texts: dict[str, str | None]
 
 
-def _status_line(status: Status) -> str:
+def _status_line(status: ExistingStatus) -> str:
     roles = (" initial" if status.initial else "") + (" terminal" if status.terminal else "")
-    return f"status {status.key} [{status.category.value}] label={status.label!r}{roles}"
+    return f"status {status.key} [{status.category.value}] name={status.name!r}{roles}"
 
 
 def _transition_line(transition: Transition) -> str:
@@ -135,7 +135,7 @@ async def call(generate: GenerateRequest, runtime: RuntimeContext) -> GenerateRe
 
 def prose_of(output: ModelOutput) -> str:
     """Every free-text field of a proposal, joined for the leakage scan."""
-    labels = [s.label for s in output.statuses]
+    labels = [s.name for s in output.statuses]
     rationales = [t.rationale for t in output.transitions]
     return "\n".join([*labels, *rationales, output.rationale])
 

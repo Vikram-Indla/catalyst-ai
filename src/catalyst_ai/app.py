@@ -9,6 +9,7 @@ import httpx
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
+from catalyst_ai.capabilities.documents import router as documents_router
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
 from catalyst_ai.capabilities.generate_tests import router as generate_tests_router
 from catalyst_ai.capabilities.improve_story import router as improve_story_router
@@ -161,4 +162,5 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(release_notes_router)
     app.include_router(generate_tests_router)
     app.include_router(post_mortem_router)
+    app.include_router(documents_router)
     return app

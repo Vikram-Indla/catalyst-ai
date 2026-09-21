@@ -20,11 +20,11 @@ def status(
 ) -> dict[str, Any]:
     return {
         "key": key,
-        "label": key.replace("_", " ").title(),
+        "name": key.replace("_", " ").title(),
         "category": category,
         "initial": initial,
         "terminal": terminal,
-        "sort_order": order,
+        "order": order,
     }
 
 
@@ -40,7 +40,6 @@ def transition(
         "to_key": to_key,
         "kind": kind,
         "guards": guards or [],
-        "requires_approval": False,
         "reason_code": reason_code,
         "rationale": f"The description implies moving to {to_key}.",
     }

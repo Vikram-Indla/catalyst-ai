@@ -119,11 +119,11 @@ class SchemeBuilder:
         return [
             {
                 "key": key,
-                "label": label,
+                "name": label,
                 "category": self._category(key),
                 "initial": key == self.initial,
                 "terminal": key in self.terminals,
-                "sort_order": index,
+                "order": index,
             }
             for index, (key, label) in enumerate(self.labels.items())
         ]
@@ -143,7 +143,6 @@ class SchemeBuilder:
                 "to_key": target,
                 "kind": kind,
                 "guards": [guard] if guard in self.vocabulary else [],
-                "requires_approval": guard == "approval_recorded",
                 "reason_code": f"{kind}_to_{target}" if kind in REASON_KINDS else None,
                 "rationale": self._rationale(source, target),
             }

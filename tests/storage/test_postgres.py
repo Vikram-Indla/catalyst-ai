@@ -113,3 +113,49 @@ async def test_rls_holds_with_the_application_layer_bypassed(
 async def test_migrate_is_idempotent(storage: PostgresStorage, database_url: str) -> None:
     assert await storage.ready() is True
     assert await migrate(database_url, migrations_dir()) == []
+
+
+DOCUMENTS_SELECT = "SELECT external_id FROM embeddings_documents"
+
+
+async def _seed_documents(storage: PostgresStorage, a: UUID, b: UUID) -> None:
+    for organization, key, text in (
+        (a, "kb/runbook", "§ Paging\nalerts page the on-call engineer"),
+        (a, "other/secret", "§ Tiers\nthe on-call engineer pages the enterprise tier"),
+        (b, "kb/theirs", "alerts page the on-call engineer"),
+    ):
+        record = document(organization, key, text, corpus="documents", kind="wiki_page")
+        await storage.replace_document(record, wide(text))
+
+
+async def _raw_rows_as(database_url: str, organization: UUID) -> list[str]:
+    connection = await asyncpg.connect(database_url, timeout=5)
+    try:
+        await connection.execute(sql("session_role_app"))
+        async with connection.transaction():
+            await connection.execute(sql("session_organization"), str(organization))
+            rows = await connection.fetch(DOCUMENTS_SELECT)
+        async with connection.transaction():
+            assert await connection.fetch(DOCUMENTS_SELECT) == []
+    finally:
+        await connection.close()
+    return [r["external_id"] for r in rows]
+
+
+async def test_documents_corpus_holds_rls_and_the_space_prefix(
+    storage: PostgresStorage, database_url: str
+) -> None:
+    a, b = uuid4(), uuid4()
+    await _seed_documents(storage, a, b)
+    scoped = SearchScope(a, "documents", (), (), 10, "kb/")
+    vector = tuple(hashed_vector("on-call engineer", DIMENSIONS))
+    hits = await storage.search_vector(scoped, vector, MODEL, VERSION)
+    assert [h.external_id for h in hits] == ["kb/runbook"]
+    lexical = await storage.search_lexical(scoped, LexicalQuery("web", "on-call engineer"))
+    assert [h.external_id for h in lexical] == ["kb/runbook"]
+    unscoped = SearchScope(a, "documents", (), (), 10)
+    everything = await storage.search_vector(unscoped, vector, MODEL, VERSION)
+    assert {h.external_id for h in everything} == {"kb/runbook", "other/secret"}
+    assert await _raw_rows_as(database_url, b) == ["kb/theirs"]
+    await storage.delete_documents(a, "documents", ["kb/runbook", "other/secret"])
+    await storage.delete_documents(b, "documents", ["kb/theirs"])

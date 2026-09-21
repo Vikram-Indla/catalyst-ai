@@ -25,11 +25,11 @@ def test_keys_must_be_snake_case() -> None:
         statuses=[
             {
                 "key": "In Work",
-                "label": "x",
+                "name": "x",
                 "category": "todo",
                 "initial": True,
                 "terminal": False,
-                "sort_order": 0,
+                "order": 0,
             }
         ]
     )

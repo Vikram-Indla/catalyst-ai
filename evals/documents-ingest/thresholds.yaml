@@ -1,0 +1,7 @@
+state_as_expected: 1.0
+chunks_present: 1.0
+headings_seen: 1.0
+versions_named: 1.0
+overall: 1.0
+p95_latency_ms: 15000
+p95_cost_micros: 8000

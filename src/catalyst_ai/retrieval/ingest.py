@@ -1,5 +1,6 @@
 """Indexing: what changed is chunked and embedded, what did not is touched, the budget is a wall."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from catalyst_ai.contract.envelopes import Usage
@@ -18,6 +19,7 @@ from catalyst_ai.retrieval.chunking import chunk, embedding_input
 from catalyst_ai.retrieval.corpora import CorpusSpec
 from catalyst_ai.retrieval.embeddings import NO_USAGE, EmbedContext, Embedded, embed_texts
 
+Chunker = Callable[[str, CorpusSpec], list[str]]
 INDEX_BUDGET = "index_budget"
 DOCUMENT_TOO_LARGE = "document_too_large"
 
@@ -116,7 +118,11 @@ async def _store(
 
 
 async def upsert(
-    job: Job, documents: list[IndexDocument], storage: Storage, provider: Provider
+    job: Job,
+    documents: list[IndexDocument],
+    storage: Storage,
+    provider: Provider,
+    chunker: Chunker = chunk,
 ) -> UpsertOutcome:
     """Index the changed documents in one embedding pass; touch the unchanged ones."""
     refuse_oversized(documents, job.spec)
@@ -128,7 +134,7 @@ async def upsert(
         changed = [
             d for d in documents if not _unchanged(d, states.get(d.external_id), model, job.spec)
         ]
-        windows = {d.external_id: chunk(d.text, job.spec) for d in changed}
+        windows = {d.external_id: chunker(d.text, job.spec) for d in changed}
         current = await storage.count_chunks(job.organization_id, job.spec.name)
         freed = sum(states[d.external_id].chunks for d in changed if d.external_id in states)
         _refuse_over_budget(current, freed, sum(len(w) for w in windows.values()), job)

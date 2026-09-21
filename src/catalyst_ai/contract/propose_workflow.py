@@ -4,6 +4,7 @@ from enum import StrEnum
 from typing import Annotated, Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.config import JsonDict
 
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope, classified
 
@@ -23,6 +24,13 @@ EmptyReason = Literal["description_too_vague"]
 CATEGORIES_MISSING = "allowed_categories must include todo and done"
 CATEGORIES_REPEAT = "allowed_categories repeats a category"
 GUARDS_REPEAT = "guard_vocabulary repeats a guard"
+NAME_REQUIRED = "a status needs a name"
+ORDER_REQUIRED = "a status needs an order"
+
+
+def deprecated() -> JsonDict:
+    """Return the schema extra that marks a mirror field the next minor removes."""
+    return {"deprecated": True, "description": "Read the engine's word instead; removed at 1.2.0"}
 
 
 class StatusCategory(StrEnum):
@@ -45,21 +53,65 @@ class TransitionKind(StrEnum):
     EXCEPTION = "exception"
 
 
-class Status(BaseModel):
-    """One status of the scheme: its key, label, category and role."""
+class StatusBase(BaseModel):
+    """One status of the scheme: its key, name, category, whether it is the initial one, its order.
+
+    `terminal` is informative: the engine treats `done` as the resting class and lets a reopen
+    move out of it.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
     key: str = Field(pattern=KEY_SHAPE, max_length=MAX_KEY)
-    label: str = Field(min_length=1, max_length=MAX_LABEL)
+    name: str = Field(min_length=1, max_length=MAX_LABEL)
     category: StatusCategory
     initial: bool = False
     terminal: bool = False
-    sort_order: int = Field(ge=0, le=MAX_STATUSES)
+    order: int = Field(ge=0, le=MAX_STATUSES)
 
 
-class Transition(BaseModel):
-    """One allowed move; `from_key` null means from any status; guards name engine conditions."""
+class Status(StatusBase):
+    """A proposed status; `label` and `sort_order` repeat `name` and `order` until 1.2.0."""
+
+    label: str = Field(min_length=1, max_length=MAX_LABEL, json_schema_extra=deprecated())
+    sort_order: int = Field(ge=0, le=MAX_STATUSES, json_schema_extra=deprecated())
+
+
+class ExistingStatus(BaseModel):
+    """A status of the scheme to extend, under either spelling; `name` and `order` are read."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    key: str = Field(pattern=KEY_SHAPE, max_length=MAX_KEY)
+    name: str | None = Field(default=None, min_length=1, max_length=MAX_LABEL)
+    label: str | None = Field(
+        default=None, min_length=1, max_length=MAX_LABEL, json_schema_extra=deprecated()
+    )
+    category: StatusCategory
+    initial: bool = False
+    terminal: bool = False
+    order: int | None = Field(default=None, ge=0, le=MAX_STATUSES)
+    sort_order: int | None = Field(
+        default=None, ge=0, le=MAX_STATUSES, json_schema_extra=deprecated()
+    )
+
+    @model_validator(mode="after")
+    def _one_spelling(self) -> Self:
+        if self.name is None and self.label is None:
+            raise ValueError(NAME_REQUIRED)
+        if self.order is None and self.sort_order is None:
+            raise ValueError(ORDER_REQUIRED)
+        self.name = self.name if self.name is not None else self.label
+        self.order = self.order if self.order is not None else self.sort_order
+        return self
+
+
+class TransitionBase(BaseModel):
+    """One allowed move; a null `from_key` means from any status; guards are the engine's.
+
+    The engine expands a null `from_key` into one transition per status; its one guard today is
+    `requires_reason`; a reason code where the kind needs one.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -67,17 +119,22 @@ class Transition(BaseModel):
     to_key: str = Field(pattern=KEY_SHAPE, max_length=MAX_KEY)
     kind: TransitionKind
     guards: list[str] = Field(default_factory=list, max_length=MAX_GUARDS_PER_TRANSITION)
-    requires_approval: bool = False
     reason_code: str | None = Field(default=None, pattern=KEY_SHAPE, max_length=MAX_KEY)
     rationale: str = Field(min_length=1, max_length=MAX_RATIONALE)
 
 
+class Transition(TransitionBase):
+    """A transition as sent and returned; `requires_approval` is always false until 1.2.0."""
+
+    requires_approval: bool = Field(default=False, json_schema_extra=deprecated())
+
+
 class Scheme(BaseModel):
-    """A whole scheme: the statuses and the transitions between them."""
+    """The scheme to extend: its statuses under either spelling and its transitions."""
 
     model_config = ConfigDict(extra="forbid")
 
-    statuses: list[Status] = Field(max_length=MAX_STATUSES)
+    statuses: list[ExistingStatus] = Field(max_length=MAX_STATUSES)
     transitions: list[Transition] = Field(max_length=MAX_TRANSITIONS)
 
 

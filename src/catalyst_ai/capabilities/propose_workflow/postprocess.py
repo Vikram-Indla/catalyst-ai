@@ -1,5 +1,6 @@
 """Stages 6 and 7: the structural check, the confidence, the response."""
 
+from collections.abc import Sequence
 from typing import Final
 
 from catalyst_ai.capabilities.propose_workflow import descriptor
@@ -10,7 +11,9 @@ from catalyst_ai.contract.propose_workflow import (
     ProposeWorkflowRequest,
     ProposeWorkflowResponse,
     Status,
+    StatusBase,
     Transition,
+    TransitionBase,
 )
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
@@ -23,7 +26,7 @@ PENALTY_DEAD_END = 0.1
 PENALTY_NO_PROGRESS = 0.1
 
 
-def dead_ends(statuses: list[Status], transitions: list[Transition]) -> list[str]:
+def dead_ends(statuses: Sequence[StatusBase], transitions: Sequence[TransitionBase]) -> list[str]:
     """Statuses that are not terminal yet have no way out; a smell, not a refusal."""
     leaving = {t.from_key for t in transitions}
     if None in leaving:
@@ -31,7 +34,7 @@ def dead_ends(statuses: list[Status], transitions: list[Transition]) -> list[str
     return sorted(s.key for s in statuses if not s.terminal and s.key not in leaving)
 
 
-def confidence(statuses: list[Status], transitions: list[Transition]) -> float:
+def confidence(statuses: Sequence[StatusBase], transitions: Sequence[TransitionBase]) -> float:
     """Score deterministically: size, dead ends, and whether work can be in progress at all."""
     score = 1.0
     if len(statuses) > LARGE_SCHEME:
@@ -67,11 +70,21 @@ def to_response(
         eval_set_version=descriptor.eval_set_version,
         usage=result.usage,
         request_id=request_id,
-        statuses=[] if empty else output.statuses,
-        transitions=[] if empty else output.transitions,
+        statuses=[] if empty else [as_status(s) for s in output.statuses],
+        transitions=[] if empty else [as_transition(t) for t in output.transitions],
         empty_reason=TOO_VAGUE if empty else None,
         confidence=1.0 if empty else confidence(output.statuses, output.transitions),
     )
+
+
+def as_status(status: StatusBase) -> Status:
+    """Lay the proposed status out with the two mirrors the contract still carries."""
+    return Status(**status.model_dump(), label=status.name, sort_order=status.order)
+
+
+def as_transition(transition: TransitionBase) -> Transition:
+    """Lay the proposed transition out; the engine models no approval, so none is claimed."""
+    return Transition(**transition.model_dump())
 
 
 def _row(

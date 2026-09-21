@@ -30,6 +30,10 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `CAPABILITY_RELEASE_NOTES__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_RELEASE_NOTES__CACHE_TTL_SECONDS` | int | no | the descriptor's 900 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
 | `CAPABILITY_RELEASE_NOTES__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_DOCUMENTS` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `documents` (ingest, ask, generate) |
+| `CAPABILITY_DOCUMENTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch for all three operations |
+| `CAPABILITY_DOCUMENTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 600 | ≥ 0 | PUBLIC | Cache and idempotency TTL of `ask` and `generate` |
+| `CAPABILITY_DOCUMENTS__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline and the parser child's deadline |
 | `CAPABILITY_GENERATE_TESTS` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `generate-tests` |
 | `CAPABILITY_GENERATE_TESTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_GENERATE_TESTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |

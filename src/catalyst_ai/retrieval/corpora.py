@@ -37,7 +37,18 @@ WORK_ITEMS = CorpusSpec(
     embed_batch=100,
 )
 
-CORPORA = MappingProxyType({WORK_ITEMS.name: WORK_ITEMS})
+DOCUMENTS = CorpusSpec(
+    name="documents",
+    alias=ModelAlias.EMBED_DEFAULT,
+    dimensions=768,
+    revision=1,
+    chunk_chars=1_000,
+    overlap_chars=120,
+    max_document_chars=200_000,
+    embed_batch=100,
+)
+
+CORPORA = MappingProxyType({WORK_ITEMS.name: WORK_ITEMS, DOCUMENTS.name: DOCUMENTS})
 
 
 def spec_of(corpus: Corpus) -> CorpusSpec:

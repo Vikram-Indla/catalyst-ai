@@ -13,6 +13,7 @@ fails on drift. Three are written by hand.
 | `eval-sets.md` | `evals/*/README.md` + `eval_runs` | Per capability: set version, prompt version, model alias, scores per grader, p95 latency, p95 cost, date, session record |
 | `invariants.md` | **By hand**, checked | `INV-NNN` — the registry: invariant, owner, enforcement, criticality, source; every enforcement must name an existing check (`tools/checks/invariants`) |
 | `contracts-changelog.md` | **By hand** | Every contract change, with what the backend must do now |
+| `parsers.md` | **By hand**, with the descriptor of `documents` | Per format: the library, why it beats the standard library, the limits and their reason classes, what is not parsed |
 | `retirement.md` | **By hand** | Per previous function: `live` / `shadow` / `retired`, date, the capability, the eval run that justified it — created with the first `built` capability |
 
 Until `make ledgers` exists, the generated files are written by hand from their sources in the

@@ -38,8 +38,8 @@ async def test_run_returns_the_scheme_with_versions_and_caches_it() -> None:
 def test_scheme_text_is_one_line_per_status_and_transition() -> None:
     scheme = Scheme.model_validate({"statuses": STATUSES, "transitions": TRANSITIONS})
     lines = scheme_text(scheme).splitlines()
-    assert lines[0] == "status reported [todo] label='Reported' initial"
-    assert lines[4] == "status closed [done] label='Closed' terminal"
+    assert lines[0] == "status reported [todo] name='Reported' initial"
+    assert lines[4] == "status closed [done] name='Closed' terminal"
     assert lines[7] == "transition triaged -> in_work (forward) guards=assignee_set"
     assert lines[8] == "transition in_work -> triaged (backward) reason=needs_triage"
     assert lines[-1] == "transition * -> cancelled (cancel)"
@@ -85,7 +85,7 @@ async def test_the_door_refuses_switch_scanner_and_version() -> None:
 
 
 async def test_a_label_carrying_a_foreign_link_is_unsafe() -> None:
-    statuses = [{**STATUSES[0], "label": "See https://evil.example/steps"}, *STATUSES[1:]]
+    statuses = [{**STATUSES[0], "name": "See https://evil.example/steps"}, *STATUSES[1:]]
     provider = ScriptedProvider([proposal_text(statuses)])
     with pytest.raises(Error) as caught:
         await run(make_request(), make_runtime(provider), "r")

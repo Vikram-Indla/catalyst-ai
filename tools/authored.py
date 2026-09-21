@@ -5,6 +5,7 @@ import json
 import re
 from typing import Any
 
+from tools.authored_documents import answer_documents
 from tools.authored_envelope import envelope
 from tools.authored_hubs import answer_incident, answer_release, answer_tests
 from tools.authored_threads import answer_summary, answer_translation
@@ -271,5 +272,6 @@ DISPATCH = (
     ("<<<changes>>>", answer_release),
     ("<<<criteria>>>", answer_tests),
     ("<<<timeline>>>", answer_incident),
+    ("<<<passages>>>", answer_documents),
     ("Target language:", answer_translation),
 )

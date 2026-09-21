@@ -137,7 +137,7 @@ async def test_propose_workflow_run_switch_version_scanner_and_budget() -> None:
     invalid, _ = _scripted(["not json"])
     broken = await invalid.post(PATH, json=_body())
     assert broken.json()["error"]["code"] == "ai.output.invalid"
-    leaking = [{**STATUSES[0], "label": "See https://evil.example/x"}, *STATUSES[1:]]
+    leaking = [{**STATUSES[0], "name": "See https://evil.example/x"}, *STATUSES[1:]]
     unsafe, _ = _scripted([proposal_text(leaking)])
     leaked = await unsafe.post(PATH, json=_body())
     assert leaked.json()["error"]["code"] == "ai.output.unsafe"

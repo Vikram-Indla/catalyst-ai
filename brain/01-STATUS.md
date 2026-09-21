@@ -1,6 +1,6 @@
 # 01 — Status
 
-Living state of the AI service. Rewritten, not appended. Last updated: 2026-09-21 (session 008).
+Living state of the AI service. Rewritten, not appended. Last updated: 2026-09-22 (session 009).
 
 ## Where we are
 
@@ -12,7 +12,9 @@ operations, the re-embed and retention jobs, the retrieval eval against a real P
 `summarize` with the participant-token rule and `translate` with structure kept; then (AI-007)
 `propose-workflow` and the `standup` and `digest` modes, with the error envelope in the
 document; then (AI-008) `release-notes`, `generate-tests` and `post-mortem` with every entry
-traced to a supplied id. The work runs in four phases; phase 4 is under way.
+traced to a supplied id; then (AI-009) `documents` — hostile files parsed in a bounded child,
+indexed per space in the second corpus, asked and drafted with a citation behind every sentence.
+The work runs in four phases; phase 4 is under way.
 
 | Phase | Goal | Done when |
 | --- | --- | --- |
@@ -36,16 +38,18 @@ traced to a supplied id. The work runs in four phases; phase 4 is under way.
 
 | AI-008 | Release, test and incident capabilities: `release-notes` (notes, summary), `generate-tests` (cases, artefacts), `post-mortem`; every entry traced to a supplied id (`untraceable_entry`), people as tokens, facts apart from analysis; the record rules in `platform/language/records` | release-notes, generate-tests, post-mortem, platform/language, evals | ARCH-002 §2, ARCH-003, RULE-008 | `release-notes-generate`, `summarize-release`, `ai-generate-story-test-cases`, `ai-generate-test-artefacts`, `ai-post-mortem` | the traceability refusal on recorded bad outputs; three sets ≥ 40 per mode with numbers; the document with drift green; the record | built (session 008), awaiting the lead's review |
 
-Capabilities after AI-008, in the ledger's order: knowledge, the assistant, then the
-retirement pass.
+| AI-009 | Knowledge base and document intelligence: `documents.ingest` (docx, pptx, pdf, markdown, text in a killed-on-budget child behind the bomb, macro, entity, script and size guards; the hostile corpus), `documents.ask` (the space's passages only, every sentence cited, `not_found` without a call on an empty space), `documents.generate` (every section cites its sources); the `documents` corpus of the retrieval index under the same RLS with a space prefix; `propose-workflow` 1.1.0 (the engine's words added beside the old ones, the old ones removed at 1.2.0) | documents, propose_workflow, retrieval/parsers, retrieval/runner, retrieval/grounding, platform/storage, evals | ARCH-006, ARCH-009, RULE-004 §2, RULE-008 | `docintel-ingest`, `docintel-sync`, `docintel-analyze`, `docintel-ask`, `docintel-generate`, `kb-train`, `folio-ai-search` | the hostile corpus test; the groundedness refusal; RLS and the prefix against PostgreSQL; three sets with numbers; the record | built (session 009), awaiting the lead's review |
+
+Capabilities after AI-009, in the ledger's order: the assistant, then the retirement pass.
 
 ## Blocked
 
 Nothing. Open questions that shape later tickets: `Q-001` (participant labels), `Q-002`
 (quality sampling opt-in), `Q-007` (the backend's `kind` vocabulary and indexing events),
-`Q-008` (the workflow engine's field list and guard vocabulary), `Q-009` (what the hub
-modules can produce for the three record contracts).
+`Q-009` (what the hub modules can produce for the three record contracts), `Q-010` (the
+document kinds and the shape of a space); `Q-008` is answered — the proposal's fields now
+carry the engine's names.
 
 ## Next
 
-The lead reviews AI-007 and AI-008 (`D-023..D-028`, `F-012..F-015`, `Q-008`, `Q-009`); a provider key unlocks the live recording of the nine sets (`make record LIVE=1 CAP=search` needs a database too); the knowledge card follows.
+The lead reviews AI-009 (`D-029..D-031`, `F-016..F-018`, `Q-010`); a provider key unlocks the live recording of the twelve sets (`make record LIVE=1 CAP=search` needs a database too); the assistant card follows.

@@ -1,0 +1,10 @@
+schema_valid: 1.0
+every_section_cites: 1.0
+sources_used: 0.95
+length_bounds: 0.95
+empty_when_thin: 1.0
+no_forbidden_content: 1.0
+language_preserved: 0.95
+overall: 0.97
+p95_latency_ms: 15000
+p95_cost_micros: 8000

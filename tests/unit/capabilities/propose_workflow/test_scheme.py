@@ -14,7 +14,7 @@ from catalyst_ai.capabilities.propose_workflow.scheme import (
     check_scheme,
     reachable_from,
 )
-from catalyst_ai.contract.propose_workflow import Status, Transition
+from catalyst_ai.contract.propose_workflow import StatusBase, TransitionBase
 from tests.unit.capabilities.propose_workflow.conftest import (
     STATUSES,
     TRANSITIONS,
@@ -26,8 +26,8 @@ from tests.unit.capabilities.propose_workflow.conftest import (
 
 def _codes(statuses: list[dict[str, object]], transitions: list[dict[str, object]]) -> list[str]:
     details = check_scheme(
-        [Status.model_validate(s) for s in statuses],
-        [Transition.model_validate(t) for t in transitions],
+        [StatusBase.model_validate(s) for s in statuses],
+        [TransitionBase.model_validate(t) for t in transitions],
         make_request(),
     )
     return [d.code for d in details]
@@ -60,7 +60,7 @@ def test_unreachable_status_is_named() -> None:
     reached = reachable_from(
         "reported",
         {s["key"] for s in statuses},
-        [Transition.model_validate(t) for t in TRANSITIONS],
+        [TransitionBase.model_validate(t) for t in TRANSITIONS],
     )
     assert "parked" not in reached
     assert "cancelled" in reached
@@ -92,8 +92,8 @@ def test_duplicate_keys_and_disallowed_categories() -> None:
     assert DUPLICATE_STATUS in _codes(statuses, TRANSITIONS)
     request = make_request(allowed_categories=["todo", "done"])
     details = check_scheme(
-        [Status.model_validate(s) for s in STATUSES],
-        [Transition.model_validate(t) for t in TRANSITIONS],
+        [StatusBase.model_validate(s) for s in STATUSES],
+        [TransitionBase.model_validate(t) for t in TRANSITIONS],
         request,
     )
     assert [d.message for d in details if d.code == CATEGORY_NOT_ALLOWED] == ["in_work", "fixed"]
@@ -102,8 +102,8 @@ def test_duplicate_keys_and_disallowed_categories() -> None:
 def test_an_existing_status_may_not_be_dropped() -> None:
     existing = {"statuses": [*STATUSES, status("on_hold", "todo", order=7)], "transitions": []}
     details = check_scheme(
-        [Status.model_validate(s) for s in STATUSES],
-        [Transition.model_validate(t) for t in TRANSITIONS],
+        [StatusBase.model_validate(s) for s in STATUSES],
+        [TransitionBase.model_validate(t) for t in TRANSITIONS],
         make_request(existing=existing),
     )
     assert [(d.code, d.message) for d in details] == [(EXISTING_DROPPED, "on_hold")]

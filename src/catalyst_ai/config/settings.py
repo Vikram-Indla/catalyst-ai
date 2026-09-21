@@ -128,6 +128,10 @@ class Settings(BaseSettings):
         CapabilitySettings,
         Field(description="PUBLIC · release-notes: enabled, cache TTL, timeout"),
     ] = CapabilitySettings()
+    capability_documents: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · documents: enabled, cache TTL, the parse and call timeout"),
+    ] = CapabilitySettings()
     capability_generate_tests: Annotated[
         CapabilitySettings,
         Field(description="PUBLIC · generate-tests: enabled, cache TTL, timeout"),

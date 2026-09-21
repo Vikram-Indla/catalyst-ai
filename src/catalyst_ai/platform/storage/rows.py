@@ -62,13 +62,17 @@ class StoredHit:
 
 @dataclass(frozen=True)
 class SearchScope:
-    """The tenant, the corpus and the filters every search leg applies before ranking."""
+    """The tenant, the corpus and the filters every search leg applies before ranking.
+
+    `prefix` narrows to keys that start with it — a space inside an organisation.
+    """
 
     organization_id: UUID
     corpus: Corpus
     kinds: tuple[str, ...]
     exclude: tuple[str, ...]
     limit: int
+    prefix: str = ""
 
 
 @dataclass(frozen=True)

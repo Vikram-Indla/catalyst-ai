@@ -5,5 +5,6 @@ WHERE organization_id = $1
   AND lexical @@ to_tsquery('simple', $2)
   AND (cardinality($3::text[]) = 0 OR kind = ANY($3::text[]))
   AND NOT (external_id = ANY($4::text[]))
+  AND starts_with(external_id, $6)
 ORDER BY score DESC, external_id, chunk_index
 LIMIT $5;

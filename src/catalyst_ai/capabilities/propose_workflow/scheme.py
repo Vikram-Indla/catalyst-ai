@@ -1,13 +1,14 @@
 """The structural rules a proposed scheme must satisfy before the backend ever sees it."""
 
 from collections import deque
+from collections.abc import Sequence
 
 from catalyst_ai.contract.errors import ErrorDetail
 from catalyst_ai.contract.propose_workflow import (
     ProposeWorkflowRequest,
-    Status,
+    StatusBase,
     StatusCategory,
-    Transition,
+    TransitionBase,
     TransitionKind,
 )
 
@@ -28,7 +29,7 @@ def _detail(field: str, code: str, message: str) -> ErrorDetail:
     return ErrorDetail(field=field, code=code, message=message)
 
 
-def initial_of(statuses: list[Status]) -> Status | None:
+def initial_of(statuses: Sequence[StatusBase]) -> StatusBase | None:
     """Return the one initial status, or None when there is not exactly one in `todo`."""
     initials = [s for s in statuses if s.initial]
     if len(initials) != 1 or initials[0].category is not StatusCategory.TODO:
@@ -36,7 +37,7 @@ def initial_of(statuses: list[Status]) -> Status | None:
     return initials[0]
 
 
-def reachable_from(start: str, keys: set[str], transitions: list[Transition]) -> set[str]:
+def reachable_from(start: str, keys: set[str], transitions: Sequence[TransitionBase]) -> set[str]:
     """Return every status a walk from `start` reaches; a null `from_key` leaves every status."""
     seen = {start}
     queue = deque([start])
@@ -50,7 +51,9 @@ def reachable_from(start: str, keys: set[str], transitions: list[Transition]) ->
     return seen
 
 
-def status_details(statuses: list[Status], request: ProposeWorkflowRequest) -> list[ErrorDetail]:
+def status_details(
+    statuses: Sequence[StatusBase], request: ProposeWorkflowRequest
+) -> list[ErrorDetail]:
     """Duplicates, the single initial, at least one terminal in `done`, allowed categories."""
     details: list[ErrorDetail] = []
     keys = [s.key for s in statuses]
@@ -71,7 +74,9 @@ def status_details(statuses: list[Status], request: ProposeWorkflowRequest) -> l
 
 
 def transition_details(
-    statuses: list[Status], transitions: list[Transition], request: ProposeWorkflowRequest
+    statuses: Sequence[StatusBase],
+    transitions: Sequence[TransitionBase],
+    request: ProposeWorkflowRequest,
 ) -> list[ErrorDetail]:
     """Endpoints exist, no self-loop, guards from the vocabulary, reasons where kinds need them."""
     details: list[ErrorDetail] = []
@@ -93,7 +98,7 @@ def transition_details(
 
 
 def reachability_details(
-    statuses: list[Status], transitions: list[Transition]
+    statuses: Sequence[StatusBase], transitions: Sequence[TransitionBase]
 ) -> list[ErrorDetail]:
     """Every status is reached from the initial one; nothing to say without a single initial."""
     initial = initial_of(statuses)
@@ -105,7 +110,9 @@ def reachability_details(
 
 
 def check_scheme(
-    statuses: list[Status], transitions: list[Transition], request: ProposeWorkflowRequest
+    statuses: Sequence[StatusBase],
+    transitions: Sequence[TransitionBase],
+    request: ProposeWorkflowRequest,
 ) -> list[ErrorDetail]:
     """Return every structural problem of a proposal; empty means the backend may read it."""
     return (

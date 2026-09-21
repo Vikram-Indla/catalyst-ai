@@ -5,8 +5,8 @@ from pydantic import BaseModel, ConfigDict, Field
 from catalyst_ai.contract.propose_workflow import (
     MAX_STATUSES,
     MAX_TRANSITIONS,
-    Status,
-    Transition,
+    StatusBase,
+    TransitionBase,
 )
 
 MAX_RATIONALE_CHARS = 500
@@ -17,8 +17,8 @@ class ModelOutput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    statuses: list[Status] = Field(max_length=MAX_STATUSES)
-    transitions: list[Transition] = Field(max_length=MAX_TRANSITIONS)
+    statuses: list[StatusBase] = Field(max_length=MAX_STATUSES)
+    transitions: list[TransitionBase] = Field(max_length=MAX_TRANSITIONS)
     empty_reason: str | None = None
     rationale: str = Field(min_length=1, max_length=MAX_RATIONALE_CHARS)
 

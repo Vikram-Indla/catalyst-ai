@@ -143,7 +143,7 @@ Two proposals:
    Proposed: `feat(workflows): propose-workflow, standup and digest modes, the error envelope`
 2. Files: `api/openapi.yaml`, `evals/{propose-workflow,summarize}/set.jsonl`, `tests/fixtures/providers/gemini/{propose-workflow,summarize}/**`
    Proposed: `gen: contract document, sets and authored fixtures for propose-workflow, summarize`
-Green light: pending the lead
+Green light: given by the lead on 2026-09-21 — committed on local `main` in the proposed order (no remote yet)
 
 ## Next
 The backend's answer to `Q-008` (a rename is a `CHANGE` before it consumes the operation); the live recording of the six sets when the key arrives; the release, test and incident card.

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tools import rules
 from tools.corpus_terms import DOMAINS, INJECTIONS, PARAPHRASES, ROLES
+from tools.evalsets_documents import write_documents
 from tools.evalsets_hubs import write_hub
 from tools.evalsets_threads import write_threads
 from tools.evalsets_workflow import write_workflow
@@ -260,6 +261,9 @@ def main(name: str) -> int:
         "release-notes": write_hub,
         "generate-tests": write_hub,
         "post-mortem": write_hub,
+        "documents": write_documents,
+        "documents-generate": write_documents,
+        "documents-ingest": write_documents,
     }
     return writers.get(name, write)(name)
 

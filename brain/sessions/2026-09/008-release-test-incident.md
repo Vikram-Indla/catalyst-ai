@@ -41,8 +41,9 @@ Safety:          the door's scanner over every text; fences; the data rules (no 
                  validation
 Contract:        release_notes.run, generate_tests.run, post_mortem.run ADD; the ErrorEnvelope referenced from each; not breaking
 Invariants:      INV-007..009, INV-011, INV-018, INV-030..033, INV-035, INV-037, INV-039, INV-042, INV-043; new INV-047
-Blast radius:    PLATFORM — platform/language/records (the participant rule moved there from summarize, behaviour unchanged) and
-                 the branch's earlier document change; CAPABILITY for the three packages; CONTRACT for the backend
+Blast radius:    SYSTEM on the branch that carries this record (a later ticket's migration and tool configuration ride with
+                 it); this ticket's own paths derive PLATFORM — platform/language/records (the participant rule moved there
+                 from summarize, behaviour unchanged); CAPABILITY for the three packages; CONTRACT for the backend
 Decision level:  2
 ADR:             none new
 ```
@@ -131,7 +132,7 @@ Two proposals (after AI-007's two):
    Proposed: `feat(records): release notes, test generation and post-mortems, every entry traced`
 2. Files: `api/openapi.yaml`, `evals/{release-notes,generate-tests,post-mortem}/set.jsonl`, `tests/fixtures/providers/gemini/{release-notes,generate-tests,post-mortem}/**`
    Proposed: `gen: contract document, sets and authored fixtures for the three record capabilities`
-Green light: pending the lead
+Green light: given by the lead on 2026-09-21 — committed on local `main` in the proposed order (no remote yet)
 
 ## Next
 The backend's answers to `Q-008` and `Q-009`; the live recording of the nine sets when the key arrives; the knowledge card.

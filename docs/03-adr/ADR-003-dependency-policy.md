@@ -42,7 +42,7 @@ fails a licence outside the allowlist (MIT, BSD, Apache-2.0, PSF, ISC, MPL-2.0).
 | `pgvector` (Python) | the vector type codec for `asyncpg` (brings `numpy`); no `py.typed` → the contained `ignore_missing_imports` under `platform/storage`, the database adapter | hand-rolled encoding |
 | `opentelemetry-api`, `-sdk`, `-instrumentation-fastapi`, `-instrumentation-httpx` | traces and metrics, the standard | vendor SDKs |
 | `tiktoken` or the provider's tokeniser (adapter-local) | token counting for budgets before a call | estimating by characters |
-| `python-docx`, `python-pptx`, `pypdf` (adapter-local under `retrieval/parsers`) | document parsing for ingest; no `py.typed` → the contained `ignore_missing_imports` | shelling out to converters (unbounded), cloud parsers (content leaves) |
+| `pypdf`, `defusedxml` (adapter-local under `retrieval/parsers`) | document parsing for ingest: `pypdf` reads the PDF text layer (no scripts run, no OCR), `defusedxml` reads Word and PowerPoint XML with entity expansion and DTDs forbidden; the containers are read by the standard `zipfile` behind the bomb and macro guards; `pypdf` ships `py.typed`, `defusedxml` does not → the contained `ignore_missing_imports` | `python-docx`, `python-pptx` (convenience over the same XML, no safety of their own, two more packages to audit), shelling out to converters (unbounded), cloud parsers (the document leaves the tenant's boundary) |
 | `ruff` (dev) | format and lint | `black` + `flake8` + `isort` (three tools for one job) |
 | `mypy` (dev) | strict types | `pyright` (fine; one checker only) |
 | `import-linter` (dev) | layer contracts as configuration | hand-written import tests only |

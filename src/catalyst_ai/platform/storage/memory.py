@@ -131,6 +131,8 @@ class MemoryStorage:
                 continue
             if document.external_id in scope.exclude:
                 continue
+            if not document.external_id.startswith(scope.prefix):
+                continue
             pairs.extend((document, chunk) for chunk in self._chunks[key])
         return pairs
 

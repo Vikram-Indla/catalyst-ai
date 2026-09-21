@@ -27,7 +27,7 @@ def _score(ok: bool) -> float:
 
 
 def _prose(response: ProposeWorkflowResponse) -> str:
-    labels = [s.label for s in response.statuses]
+    labels = [s.name for s in response.statuses]
     rationales = [t.rationale for t in response.transitions]
     return "\n".join(labels + rationales)
 
@@ -174,7 +174,7 @@ def language_followed(
     wanted = str(expected.get("script", dominant_script(request.description)))
     if request.language is not None:
         wanted = "ARABIC" if request.language.startswith("ar") else "LATIN"
-    labels = " ".join(s.label for s in response.statuses)
+    labels = " ".join(s.name for s in response.statuses)
     return _score(dominant_script(labels) == wanted)
 
 

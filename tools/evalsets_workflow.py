@@ -92,11 +92,11 @@ def _existing(stages: list[Stage], moves: list[Move]) -> dict[str, object]:
         "statuses": [
             {
                 "key": key,
-                "label": label,
+                "name": label,
                 "category": "todo",
                 "initial": index == 0,
                 "terminal": False,
-                "sort_order": index,
+                "order": index,
             }
             for index, (key, label, _) in enumerate(kept)
         ],
@@ -106,7 +106,6 @@ def _existing(stages: list[Stage], moves: list[Move]) -> dict[str, object]:
                 "to_key": target,
                 "kind": kind,
                 "guards": [],
-                "requires_approval": False,
                 "reason_code": None,
                 "rationale": "Already in the scheme.",
             }

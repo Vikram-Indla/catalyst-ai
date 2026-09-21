@@ -11,7 +11,7 @@ from catalyst_ai.capabilities.propose_workflow.postprocess import (
 from catalyst_ai.capabilities.propose_workflow.schema import ModelOutput
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.contract.errors import ErrorCode
-from catalyst_ai.contract.propose_workflow import Status, Transition
+from catalyst_ai.contract.propose_workflow import StatusBase, TransitionBase
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.providers.port import GenerateResult
 from tests.unit.capabilities.propose_workflow.conftest import (
@@ -30,12 +30,12 @@ RESULT = GenerateResult(
 )
 
 
-def _statuses(raw: list[dict[str, object]]) -> list[Status]:
-    return [Status.model_validate(s) for s in raw]
+def _statuses(raw: list[dict[str, object]]) -> list[StatusBase]:
+    return [StatusBase.model_validate(s) for s in raw]
 
 
-def _transitions(raw: list[dict[str, object]]) -> list[Transition]:
-    return [Transition.model_validate(t) for t in raw]
+def _transitions(raw: list[dict[str, object]]) -> list[TransitionBase]:
+    return [TransitionBase.model_validate(t) for t in raw]
 
 
 def test_to_response_carries_the_scheme_and_full_confidence() -> None:

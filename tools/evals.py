@@ -40,6 +40,17 @@ async def run_set(directory: Path) -> dict[str, object]:
         return await _grade_set(directory, runtime)
 
 
+def _expected_refusal(case: evalkit.Case, error: Exception) -> bool:
+    """Whether the case asked for exactly this refusal: the code and, when named, the detail."""
+    wanted = case.expected.get("refused")
+    if not isinstance(wanted, dict) or not isinstance(error, Error):
+        return False
+    details = {detail.code for detail in error.details}
+    code_ok = error.code.value == wanted.get("code")
+    detail = wanted.get("detail")
+    return code_ok and (detail is None or detail in details)
+
+
 async def _grade_set(directory: Path, runtime: RuntimeContext) -> dict[str, object]:
     name = directory.name
     cases = evalkit.load_cases(directory / "set.jsonl")
@@ -52,9 +63,16 @@ async def _grade_set(directory: Path, runtime: RuntimeContext) -> dict[str, obje
         try:
             response, elapsed = await _run_case(case, runtime, name)
         except (Error, MissingFixtureError) as error:
-            failures.append(
-                f"{case.id}: raised {type(error).__name__} {getattr(error, 'code', '')}"
-            )
+            expected = _expected_refusal(case, error)
+            if not expected:
+                failures.append(
+                    f"{case.id}: raised {type(error).__name__} {getattr(error, 'code', '')}"
+                )
+            for grader_name in graders:
+                per_grader[grader_name].append(1.0 if expected else 0.0)
+            continue
+        if case.expected.get("refused"):
+            failures.append(f"{case.id}: answered where a refusal was expected")
             for grader_name in graders:
                 per_grader[grader_name].append(0.0)
             continue
