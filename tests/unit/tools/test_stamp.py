@@ -50,6 +50,19 @@ def test_the_tree_hash_sees_edits_untracked_files_and_deletions_but_not_ignored_
     assert stamp.tree_hash() not in {clean, with_untracked}
 
 
+def test_the_tree_hash_does_not_move_when_a_change_is_committed(repo: Path) -> None:
+    identity = ("-c", "user.name=t", "-c", "user.email=t@example.invalid")
+    (repo / ".gitattributes").write_bytes(b"* text=auto eol=lf" + bytes([10]))
+    (repo / "crlf.txt").write_bytes(b"one" + bytes([13, 10]) + b"two" + bytes([13, 10]))
+    (repo / "a.py").unlink()
+    before = stamp.tree_hash()
+    assert git_output(repo, "add", "-u") is not None
+    assert git_output(repo, "add", "crlf.txt", ".gitattributes") is not None
+    assert git_output(repo, *identity, "commit", "-q", "-m", "chore: move") is not None
+    assert git_output(repo, "status", "--porcelain") == ""
+    assert stamp.tree_hash() == before
+
+
 def test_a_green_run_is_honoured_until_the_tree_the_image_or_the_day_moves(repo: Path) -> None:
     assert stamp.reason_to_run(IMAGE) is not None
     written = stamp.write(IMAGE)

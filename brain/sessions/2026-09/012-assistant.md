@@ -122,5 +122,13 @@ Two proposals:
    Proposed: `gen: contract document, sets and fixtures for the assistant, unfurl and chat`
 Green light: awaited
 
+## Addendum — the stamp after the push
+The push of the two commits ran the pipeline in the main checkout although `make ci` had stamped the tree
+minutes before: the stamp's hash was not a pure function of the files on disk (F-023 — a deleted-but-uncommitted
+file hashed as "missing", then vanished from the listing after the commit; and files hashed through git's
+filters). `tree_hash` now takes only the files that exist and their raw bytes; `test_the_tree_hash_does_not_move_when_a_change_is_committed`
+commits a deletion and a CRLF file and sees the hash hold. Proposal: `build(stamp): hash the files on disk, so a commit never moves it`;
+the push of this fix is the proof — it should skip.
+
 ## Next
 The retirement pass (AI-011); Q-011; the live recording of the fourteen sets when the key arrives.

@@ -17,7 +17,6 @@ from pathlib import Path
 
 STAMP_NAME = "ci-green"
 MAX_AGE_S = 24 * 60 * 60
-MISSING = "missing"
 
 
 def _git(*args: str) -> str:
@@ -28,21 +27,24 @@ def _git(*args: str) -> str:
 
 
 def tree_hash() -> str:
-    """Return a hash of the working tree: every tracked or unignored file's content, by path."""
+    """Return a hash of the working tree: every tracked or unignored file's bytes, by path.
+
+    A pure function of the files on disk: the bytes as they are (never their normalised form)
+    and only the files that exist — a tracked file deleted but not yet committed counts as
+    absent, exactly as it will after its commit, so committing never moves the hash.
+    """
     listed = _git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
-    paths = sorted({p for p in listed.split("\0") if p})
-    present = [p for p in paths if Path(p).is_file()]
+    present = sorted({p for p in listed.split("\0") if p and Path(p).is_file()})
     hashed = subprocess.run(
-        ["git", "hash-object", "--stdin-paths"],
+        ["git", "hash-object", "--no-filters", "--stdin-paths"],
         input="\n".join(present) + "\n",
         capture_output=True,
         check=True,
         encoding="utf-8",
     ).stdout.split()
-    blobs = dict(zip(present, hashed, strict=True))
     digest = hashlib.sha256()
-    for path in paths:
-        digest.update(f"{path}\0{blobs.get(path, MISSING)}\n".encode())
+    for path, blob in zip(present, hashed, strict=True):
+        digest.update(f"{path}\0{blob}\n".encode())
     return digest.hexdigest()
 
 
