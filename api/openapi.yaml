@@ -42,6 +42,30 @@ components:
       - confidence
       title: Candidate
       type: object
+    CoveredRange:
+      additionalProperties: false
+      description: 'Which items the summary rests on: the first and last ids and how many.'
+      properties:
+        count:
+          minimum: 0.0
+          title: Count
+          type: integer
+        first_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: First Id
+        last_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Last Id
+      required:
+      - first_id
+      - last_id
+      - count
+      title: CoveredRange
+      type: object
     GenerateChildrenRequest:
       additionalProperties: false
       description: The parent, its context, the hierarchy as data, the siblings, and the bounds.
@@ -180,6 +204,10 @@ components:
         eval_set_version:
           title: Eval Set Version
           type: string
+        index_consulted:
+          default: false
+          title: Index Consulted
+          type: boolean
         model:
           title: Model
           type: string
@@ -218,6 +246,41 @@ components:
           title: Detail
           type: array
       title: HTTPValidationError
+      type: object
+    Hit:
+      additionalProperties: false
+      description: One document the search found, with the score of the documented fusion.
+      properties:
+        external_id:
+          title: External Id
+          type: string
+        kind:
+          title: Kind
+          type: string
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        score:
+          maximum: 1.0
+          minimum: 0.0
+          title: Score
+          type: number
+        snippet:
+          maxLength: 240
+          title: Snippet
+          type: string
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+      required:
+      - external_id
+      - kind
+      - title
+      - score
+      - snippet
+      - provenance
+      title: Hit
       type: object
     ImproveStoryMode:
       description: The editorial operations; each maps to one instruction block of the prompt.
@@ -374,6 +437,240 @@ components:
       - changed
       title: ImproveStoryResponse
       type: object
+    IndexDeleteRequest:
+      additionalProperties: false
+      description: Documents to forget, by key.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        corpus:
+          const: work_items
+          data_class: PUBLIC
+          description: Which corpus the keys belong to
+          title: Corpus
+          type: string
+        external_ids:
+          data_class: INTERNAL
+          description: The backend's keys
+          items:
+            type: string
+          maxItems: 500
+          minItems: 1
+          title: External Ids
+          type: array
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - corpus
+      - external_ids
+      title: IndexDeleteRequest
+      type: object
+    IndexDeleteResponse:
+      additionalProperties: false
+      description: How many chunks were removed.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        deleted_chunks:
+          minimum: 0.0
+          title: Deleted Chunks
+          type: integer
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - deleted_chunks
+      title: IndexDeleteResponse
+      type: object
+    IndexDocument:
+      additionalProperties: false
+      description: 'One document the backend wants findable: its text, its key, its class, its hash.'
+      properties:
+        content_hash:
+          data_class: INTERNAL
+          description: sha256 of title and text; an unchanged hash is not re-embedded
+          pattern: ^[0-9a-f]{64}$
+          title: Content Hash
+          type: string
+        data_class:
+          data_class: PUBLIC
+          description: The document's class; never RESTRICTED
+          enum:
+          - PUBLIC
+          - INTERNAL
+          - CONFIDENTIAL
+          title: Data Class
+          type: string
+        external_id:
+          data_class: INTERNAL
+          description: The backend's key for the document
+          maxLength: 200
+          minLength: 1
+          title: External Id
+          type: string
+        kind:
+          data_class: PUBLIC
+          description: The item level or type, a filter for search
+          pattern: ^[a-z][a-z0-9_]{0,39}$
+          title: Kind
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The text to index; over the corpus limit is refused
+          minLength: 1
+          title: Text
+          type: string
+        title:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The title, returned with every hit
+          title: Title
+      required:
+      - external_id
+      - kind
+      - text
+      - data_class
+      - content_hash
+      title: IndexDocument
+      type: object
+    IndexUpsertRequest:
+      additionalProperties: false
+      description: Documents to index or re-index in one corpus of the caller's organisation.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        corpus:
+          const: work_items
+          data_class: PUBLIC
+          description: Which corpus the documents join
+          title: Corpus
+          type: string
+        documents:
+          data_class: CONFIDENTIAL
+          description: The documents
+          items:
+            $ref: '#/components/schemas/IndexDocument'
+          maxItems: 100
+          minItems: 1
+          title: Documents
+          type: array
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - corpus
+      - documents
+      title: IndexUpsertRequest
+      type: object
+    IndexUpsertResponse:
+      additionalProperties: false
+      description: One line per document and the corpus size afterwards.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        index_chunks:
+          minimum: 0.0
+          title: Index Chunks
+          type: integer
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/IndexedDocument'
+          title: Results
+          type: array
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - results
+      - index_chunks
+      title: IndexUpsertResponse
+      type: object
+    IndexedDocument:
+      additionalProperties: false
+      description: What happened to one document.
+      properties:
+        chunks:
+          minimum: 0.0
+          title: Chunks
+          type: integer
+        embedding_model:
+          title: Embedding Model
+          type: string
+        embedding_version:
+          title: Embedding Version
+          type: string
+        external_id:
+          title: External Id
+          type: string
+        unchanged:
+          title: Unchanged
+          type: boolean
+      required:
+      - external_id
+      - chunks
+      - embedding_model
+      - embedding_version
+      - unchanged
+      title: IndexedDocument
+      type: object
     LiveResponse:
       additionalProperties: false
       description: Return the process is up.
@@ -385,6 +682,45 @@ components:
       required:
       - status
       title: LiveResponse
+      type: object
+    Provenance:
+      additionalProperties: false
+      description: Where a hit comes from and how each leg of the ranking placed it.
+      properties:
+        chunk_index:
+          minimum: 0.0
+          title: Chunk Index
+          type: integer
+        embedding_model:
+          title: Embedding Model
+          type: string
+        embedding_version:
+          title: Embedding Version
+          type: string
+        lexical_rank:
+          anyOf:
+          - minimum: 1.0
+            type: integer
+          - type: 'null'
+          title: Lexical Rank
+        vector_rank:
+          anyOf:
+          - minimum: 1.0
+            type: integer
+          - type: 'null'
+          title: Vector Rank
+        vector_similarity:
+          anyOf:
+          - maximum: 1.0
+            minimum: -1.0
+            type: number
+          - type: 'null'
+          title: Vector Similarity
+      required:
+      - chunk_index
+      - embedding_model
+      - embedding_version
+      title: Provenance
       type: object
     ReadyResponse:
       additionalProperties: false
@@ -405,6 +741,122 @@ components:
       - status
       - checks
       title: ReadyResponse
+      type: object
+    SearchMode:
+      description: '`similar` ranks against an item''s own text; `query` ranks against a member''s words.'
+      enum:
+      - similar
+      - query
+      title: SearchMode
+      type: string
+    SearchRequest:
+      additionalProperties: false
+      description: 'A search over one corpus: by an item''s text or by a member''s query.'
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        corpus:
+          const: work_items
+          data_class: PUBLIC
+          description: Which corpus to search
+          title: Corpus
+          type: string
+        exclude_external_ids:
+          data_class: INTERNAL
+          description: 'Keys never returned: the item itself, what is already linked'
+          items:
+            type: string
+          maxItems: 100
+          title: Exclude External Ids
+          type: array
+        k:
+          data_class: PUBLIC
+          default: 10
+          description: How many hits at most
+          maximum: 50.0
+          minimum: 1.0
+          title: K
+          type: integer
+        kinds:
+          data_class: PUBLIC
+          description: Only hits of these kinds; empty means all
+          items:
+            type: string
+          maxItems: 20
+          title: Kinds
+          type: array
+        mode:
+          $ref: '#/components/schemas/SearchMode'
+          data_class: PUBLIC
+          description: similar (an item's text) or query
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The item's text or the member's query
+          maxLength: 4000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - corpus
+      - mode
+      - text
+      title: SearchRequest
+      type: object
+    SearchResponse:
+      additionalProperties: false
+      description: The hits in rank order, and the fusion and embedding version that ranked them.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        embedding_version:
+          title: Embedding Version
+          type: string
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        fusion:
+          title: Fusion
+          type: string
+        hits:
+          items:
+            $ref: '#/components/schemas/Hit'
+          title: Hits
+          type: array
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - hits
+      - fusion
+      - embedding_version
+      title: SearchResponse
       type: object
     Sibling:
       additionalProperties: false
@@ -428,6 +880,340 @@ components:
       required:
       - title
       title: Sibling
+      type: object
+    StatusChange:
+      additionalProperties: false
+      description: A recorded status move, authoritative over anything the thread says about it.
+      properties:
+        at:
+          data_class: INTERNAL
+          description: When
+          format: date-time
+          title: At
+          type: string
+        from_status:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: The old status
+          title: From Status
+        participant:
+          data_class: INTERNAL
+          description: The token of who moved it
+          pattern: ^p[0-9]{1,4}$
+          title: Participant
+          type: string
+        to_status:
+          data_class: INTERNAL
+          description: The new status
+          maxLength: 64
+          minLength: 1
+          title: To Status
+          type: string
+      required:
+      - participant
+      - to_status
+      - at
+      title: StatusChange
+      type: object
+    SummarizeMode:
+      description: '`comments` is a work item''s thread (decisions, blockers, questions); `thread` a talk.'
+      enum:
+      - comments
+      - thread
+      title: SummarizeMode
+      type: string
+    SummarizeRequest:
+      additionalProperties: false
+      description: The thread, its item, the recorded status changes, the length wanted.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        item_title:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The work item's title, when there is one
+          title: Item Title
+        item_type:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: The work item's type; sets the focus
+          title: Item Type
+        items:
+          data_class: CONFIDENTIAL
+          description: The thread, oldest first
+          items:
+            $ref: '#/components/schemas/ThreadItem'
+          maxItems: 200
+          title: Items
+          type: array
+        language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag of the summary; absent preserves the thread's
+          title: Language
+        mode:
+          $ref: '#/components/schemas/SummarizeMode'
+          data_class: PUBLIC
+          description: Which prompt section and shape apply
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        status_changes:
+          data_class: INTERNAL
+          description: Recorded status moves, oldest first
+          items:
+            $ref: '#/components/schemas/StatusChange'
+          maxItems: 100
+          title: Status Changes
+          type: array
+        target_words:
+          data_class: PUBLIC
+          default: 150
+          description: The length wanted, in words
+          maximum: 400.0
+          minimum: 40.0
+          title: Target Words
+          type: integer
+      required:
+      - organization_id
+      - capability_version
+      - mode
+      - items
+      title: SummarizeRequest
+      type: object
+    SummarizeResponse:
+      additionalProperties: false
+      description: The summary, or an empty one with its reason; the tokens it mentions; what it covered.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        covered_range:
+          $ref: '#/components/schemas/CoveredRange'
+        empty_reason:
+          anyOf:
+          - const: nothing_to_summarize
+            type: string
+          - type: 'null'
+          title: Empty Reason
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        participants_mentioned:
+          items:
+            type: string
+          title: Participants Mentioned
+          type: array
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        summary:
+          maxLength: 8000
+          title: Summary
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - summary
+      - empty_reason
+      - covered_range
+      - participants_mentioned
+      - confidence
+      title: SummarizeResponse
+      type: object
+    ThreadItem:
+      additionalProperties: false
+      description: 'One comment or message: who (a token the backend chose), when, what.'
+      properties:
+        at:
+          data_class: INTERNAL
+          description: When it was written
+          format: date-time
+          title: At
+          type: string
+        id:
+          data_class: INTERNAL
+          description: The backend's id; returned in covered_range
+          maxLength: 64
+          minLength: 1
+          title: Id
+          type: string
+        participant:
+          data_class: INTERNAL
+          description: An opaque token (p1, p2, …) the backend maps back to a person
+          pattern: ^p[0-9]{1,4}$
+          title: Participant
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The text as written
+          maxLength: 4000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - id
+      - participant
+      - at
+      - text
+      title: ThreadItem
+      type: object
+    TranslateMode:
+      description: '`field` keeps paragraphs and Markdown; `title` returns one line.'
+      enum:
+      - field
+      - title
+      title: TranslateMode
+      type: string
+    TranslateRequest:
+      additionalProperties: false
+      description: The text, its optional context, the target — required, refused at the door when absent.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        context:
+          anyOf:
+          - maxLength: 800
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: Surrounding text that resolves pronouns and tone; not translated
+          title: Context
+        mode:
+          $ref: '#/components/schemas/TranslateMode'
+          data_class: PUBLIC
+          description: field (paragraphs, Markdown) or title
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        source_language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag; absent means detect
+          title: Source Language
+        target_language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag; absent is refused (translation always has a target)
+          title: Target Language
+        text:
+          data_class: CONFIDENTIAL
+          description: The text to translate
+          maxLength: 20000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - mode
+      - text
+      title: TranslateRequest
+      type: object
+    TranslateResponse:
+      additionalProperties: false
+      description: The translation, the languages, whether the structure survived, the confidence.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        detected_language:
+          title: Detected Language
+          type: string
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        structure_preserved:
+          title: Structure Preserved
+          type: boolean
+        target_language:
+          title: Target Language
+          type: string
+        translated_text:
+          maxLength: 40000
+          title: Translated Text
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - translated_text
+      - detected_language
+      - target_language
+      - structure_preserved
+      - confidence
+      title: TranslateResponse
       type: object
     Usage:
       additionalProperties: false
@@ -615,6 +1401,223 @@ paths:
       tags:
       - capabilities
       x-capability: improve-story
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
+  /v1/index/delete:
+    post:
+      description: Forget documents by key.
+      operationId: index.delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndexDeleteRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexDeleteResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Index Delete
+      tags:
+      - capabilities
+      x-capability: search
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.index.unavailable
+  /v1/index/upsert:
+    post:
+      description: Index or re-index documents of the caller's organisation; unchanged hashes cost nothing.
+      operationId: index.upsert
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IndexUpsertRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndexUpsertResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Index Upsert
+      tags:
+      - capabilities
+      x-capability: search
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.index.unavailable
+      - ai.index.document_too_large
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+  /v1/search:
+    post:
+      description: Find similar or matching documents in one corpus of the caller's organisation.
+      operationId: search.run
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Search Run
+      tags:
+      - capabilities
+      x-capability: search
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.index.unavailable
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+  /v1/summarize:
+    post:
+      description: Summarise a thread; people appear only by the tokens the backend sent.
+      operationId: summarize.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SummarizeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummarizeResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Summarize
+      tags:
+      - capabilities
+      x-capability: summarize
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
+  /v1/translate:
+    post:
+      description: Translate a field or a title into the named target; structure and identifiers kept.
+      operationId: translate.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TranslateRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TranslateResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+      summary: Translate
+      tags:
+      - capabilities
+      x-capability: translate
       x-capability-version: 1.0.0
       x-error-codes:
       - ai.contract.version_mismatch
