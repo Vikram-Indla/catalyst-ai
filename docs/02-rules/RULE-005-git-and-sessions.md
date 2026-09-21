@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -23,14 +23,19 @@ created: 2026-09-18
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,
   `gen` (rendered document, lockfile, fixtures only). `commit-msg` enforces it.
-- **A push is preceded by the pipeline itself, run locally.** `make ci` runs the CI job verbatim
-  inside the CI image; it is green before any push. The workflow file holds only checkout,
-  setup, `make tools`, `make hooks`, `make verify` (`tools/checks/ci`).
+- **A push is preceded by a green pipeline run of that tree; the stamp proves the tree.** `make ci`
+  runs the CI job verbatim inside the CI image and, green, writes a stamp keyed by the hash of
+  the working tree and the image digest (`tools/stamp`, in the common git directory). `pre-push`
+  skips the run when the stamp matches the tree being pushed, the image, and is younger than a
+  day, printing it; otherwise it runs. The workflow file holds only checkout, setup, `make tools`,
+  `make hooks`, `make verify` (`tools/checks/ci`).
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast` (format, lint,
-  the ⚡ checks, gitleaks on the staged tree); `commit-msg` runs the message check; `pre-push`
-  runs `make ci` where Docker is available and otherwise the full `make verify`, printing that
-  parity with the CI image is not proven. A red hook blocks.
+  the ⚡ checks, the eval sets a change can move, gitleaks on the staged tree — iteration, never
+  evidence); `commit-msg` runs the message check; `pre-push` consults the stamp, then runs
+  `make ci` where Docker is available and otherwise the full `make verify`, printing that parity
+  with the CI image is not proven. A red hook blocks. `make test-fast` (the unit tree, last
+  failures first, no coverage) and `make evals-affected` exist for iteration; neither is evidence.
 
 ## §2 Sessions and git — the hybrid rule
 

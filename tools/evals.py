@@ -11,7 +11,9 @@ from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.providers.recorded import MissingFixtureError, RecordedTransport
 from tools import evalkit, rules
+from tools.affected import affected_sets
 from tools.checks.evals import thresholds
+from tools.checks.gitinfo import changed_since_main
 
 RUNS = Path(".evals")
 P95 = 0.95
@@ -114,14 +116,29 @@ def judge(result: dict[str, object], floors: dict[str, float]) -> list[str]:
     return reds
 
 
+def selected(argv: list[str]) -> list[Path]:
+    """Every set, the one named after `--set`, or with `--affected` the sets a change touches."""
+    directories = sorted(p for p in Path(rules.EVALS).iterdir() if p.is_dir())
+    if "--set" in argv:
+        only = argv[argv.index("--set") + 1]
+        return [d for d in directories if d.name == only]
+    if "--affected" in argv:
+        root = Path.cwd()
+        names = affected_sets(changed_since_main(root), [d.name for d in directories], root)
+        return [d for d in directories if d.name in names]
+    return directories
+
+
 def main(argv: list[str]) -> int:
-    """Run every set (or the one named after `--set`) and write `.evals/<name>.json`."""
-    only = argv[argv.index("--set") + 1] if "--set" in argv else None
+    """Run the selected sets and write `.evals/<name>.json`; `--affected` is iteration only."""
     RUNS.mkdir(exist_ok=True)
     status = 0
-    for directory in sorted(p for p in Path(rules.EVALS).iterdir() if p.is_dir()):
-        if only and directory.name != only:
-            continue
+    directories = selected(argv)
+    if "--affected" in argv:
+        print(
+            f"evals: affected sets {[d.name for d in directories]} (iteration only, not evidence)"
+        )
+    for directory in directories:
         result = asyncio.run(run_set(directory))
         floors = thresholds((directory / "thresholds.yaml").read_text(encoding="utf-8"))
         reds = judge(result, floors)

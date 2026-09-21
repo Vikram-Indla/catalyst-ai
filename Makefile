@@ -7,11 +7,14 @@ RUN := $(UV) run --frozen
 TOOLS_BIN := $(shell $(RUN) python -c "from tools.install import target_dir; print(target_dir())" 2>/dev/null || echo .tools/bin/unknown)
 export PATH := $(CURDIR)/$(TOOLS_BIN):$(PATH)
 CI_IMAGE := python:3.12.14-slim
+CI_VOLUMES := -v catalyst-ai-ci-uv:/tmp/uv-cache -v catalyst-ai-ci-venv:/tmp/venv -v catalyst-ai-ci-cache:/tmp/.cache
+CI_CACHES := -e RUFF_CACHE_DIR=/tmp/.cache/ruff -e MYPY_CACHE_DIR=/tmp/.cache/mypy -e HYPOTHESIS_STORAGE_DIRECTORY=/tmp/.cache/hypothesis
+PYTEST_ITERATE := --import-mode=importlib --disable-socket --allow-hosts=127.0.0.1,::1 --strict-markers -q
 WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
 
-.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test storage evals security selftest verify verify-fast ci serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage evals evals-affected security selftest verify verify-fast ci ci-cold stamp-check serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -52,11 +55,17 @@ test:
 	$(RUN) pytest tests/architecture -q
 	$(RUN) pytest --cov --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=90
 
+test-fast:
+	$(RUN) pytest tests/unit -o addopts="$(PYTEST_ITERATE)" --lf --ff -x
+
 storage:
 	$(RUN) pytest tests/storage -q
 
 evals:
 	@if ls evals/*/set.jsonl >/dev/null 2>&1; then $(RUN) python -m tools.evals; else echo "evals: no eval set yet, nothing to run"; fi
+
+evals-affected:
+	@if ls evals/*/set.jsonl >/dev/null 2>&1; then $(RUN) python -m tools.evals --affected; else echo "evals: no eval set yet, nothing to run"; fi
 
 security:
 	$(UV) export --frozen --no-emit-project --quiet -o .tools/requirements.txt
@@ -73,17 +82,25 @@ coverage-check:
 verify: lint api-check ledgers-check test coverage-check storage evals budgets-check security selftest
 	@echo "VERIFY GREEN"
 
-verify-fast: lint-fast
+verify-fast: lint-fast evals-affected
 	gitleaks protect --staged --no-banner --redact
-	@echo "VERIFY-FAST GREEN"
+	@echo "VERIFY-FAST GREEN (iteration, not evidence: make ci is the evidence)"
 
 ci:
 	MSYS_NO_PATHCONV=1 docker run --rm -t \
-		-v "$(WORKDIR_HOST)":/work -w /work \
+		-v "$(WORKDIR_HOST)":/work -w /work $(CI_VOLUMES) $(CI_CACHES) \
 		-v /var/run/docker.sock:/var/run/docker.sock -e TESTCONTAINERS_RYUK_DISABLED=true \
 		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
 		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
 		$(CI_IMAGE) bash -c "$$($(RUN) python -m tools.ci_steps)"
+	$(RUN) python -m tools.stamp write --image $(CI_IMAGE)
+
+ci-cold:
+	-docker volume rm catalyst-ai-ci-uv catalyst-ai-ci-venv catalyst-ai-ci-cache
+	$(MAKE) --no-print-directory ci
+
+stamp-check:
+	@$(RUN) python -m tools.stamp check --image $(CI_IMAGE)
 
 serve:
 	$(RUN) catalyst-ai serve

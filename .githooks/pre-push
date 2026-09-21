@@ -7,6 +7,10 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
     exit 1
   fi
 done
+if make --no-print-directory stamp-check; then
+  echo "pre-push: this tree already has a green pipeline run (the stamp above); no second run"
+  exit 0
+fi
 if docker info >/dev/null 2>&1; then
   make ci
 else

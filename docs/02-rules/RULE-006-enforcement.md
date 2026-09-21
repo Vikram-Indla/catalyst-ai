@@ -2,7 +2,7 @@
 id: RULE-006
 title: Enforcement — every rule is a check
 status: Binding
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -79,7 +79,7 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Python version agrees across `.tool-versions`, `pyproject.toml`, the image (RULE-002 §1) | equal | `catalyst-ai check` | AI-002 |
 | Commit message format (RULE-005 §1) ⚡ | Conventional Commit, ≤ 80 chars | `.githooks/commit-msg` | AI-002 |
 | CI job equals the gate: the workflow holds only checkout, setup, `make tools`, `make hooks`, `make verify` (RULE-005 §1) | zero other steps | `tools/checks/ci` | AI-002 |
-| Push preceded by the pipeline run locally (RULE-005 §1) | `make ci` green | `.githooks/pre-push` | AI-002 |
+| Push preceded by a green pipeline run of that tree; the stamp proves the tree (RULE-005 §1) | a stamp for this tree and image, younger than a day, else `make ci` green | `.githooks/pre-push` · `tools/stamp` | AI-002, AI-012 |
 | Generated artefacts committed separately (RULE-005 §2) | no commit mixes `uv.lock`, `api/`, fixtures with hand-written files | `tools/checks/commits` (CI, on the PR) | AI-002 |
 | Session record carries the impact matrix, the gate output and the eval numbers (RULE-007) | present for every session that changed code | `tools/checks/sessions` (CI, on the PR) | AI-002 |
 | PR risk class not understated (RULE-005 §6) | claimed ≥ derived | `tools/checks/prclass` | AI-002 |
@@ -99,13 +99,17 @@ make lint-fast    the ⚡ subset of the above
 make api          render api/openapi.yaml from the app
 make api-check    the rendered document equals the committed one
 make test         tests/architecture first, then pytest with coverage and the socket guard
+make test-fast    the unit tree, last failures first, stop at the first, no coverage — iteration, never evidence
 make storage      tests/storage against testcontainers once db/migrations has a file
 make evals        every eval set against recorded fixtures once evals/ has a set
+make evals-affected   the sets a change since main can move (tools/affected) — iteration, never evidence
 make security     pip-audit on the exported lock · gitleaks · licences
 make selftest     every check red on its plant, one line per check
 make verify       lint · api-check · ledgers-check · test · coverage-check · storage · evals · security · selftest   (= CI)
-make ci           the workflow's run steps verbatim, inside the CI image                              (= pre-push)
-make verify-fast  lint-fast · gitleaks on the staged tree                                          (= pre-commit)
+make ci           the workflow's run steps verbatim, inside the CI image; green, it stamps the tree   (= pre-push)
+make ci-cold      the same with the image's cache volumes dropped first (the cold number of the record)
+make stamp-check  whether this tree, in this image, has a green run younger than a day (what pre-push asks)
+make verify-fast  lint-fast · evals-affected · gitleaks on the staged tree                          (= pre-commit)
 make image        build the runtime image · make image-scan: trivy on it (release candidate)
 make check        catalyst-ai check: toolchain agreement and settings
 make record · make new-capability   built with the first adapter and the golden capability
@@ -113,3 +117,6 @@ make serve · make worker · make migrate
 ```
 
 Toolchain versions are pinned in `.tool-versions` and `uv.lock`; upgrading one is its own change.
+`make ci` keeps uv's cache, the project environment and the ruff, mypy and hypothesis caches in
+named volumes (`catalyst-ai-ci-*`), apart from the host's own caches so the two never share a
+file; pytest's cache stays off in the gate (`pytest.ini`) and on only in `make test-fast`.
