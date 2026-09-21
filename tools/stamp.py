@@ -27,16 +27,17 @@ def _git(*args: str) -> str:
 
 
 def tree_hash() -> str:
-    """Return a hash of the working tree: every tracked or unignored file's bytes, by path.
+    """Return a hash of the working tree: every tracked or unignored file's content, by path.
 
-    A pure function of the files on disk: the bytes as they are (never their normalised form)
-    and only the files that exist — a tracked file deleted but not yet committed counts as
-    absent, exactly as it will after its commit, so committing never moves the hash.
+    Only the files that exist (a tracked file deleted but not yet committed counts as absent,
+    exactly as it will after its commit, so committing never moves the hash), each as git would
+    store it — line endings normalised — so a worktree and the main checkout of the same tree
+    hash alike whatever their endings on disk.
     """
     listed = _git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
     present = sorted({p for p in listed.split("\0") if p and Path(p).is_file()})
     hashed = subprocess.run(
-        ["git", "hash-object", "--no-filters", "--stdin-paths"],
+        ["git", "hash-object", "--stdin-paths"],
         input="\n".join(present) + "\n",
         capture_output=True,
         check=True,
