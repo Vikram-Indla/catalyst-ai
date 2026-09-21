@@ -1,0 +1,11 @@
+schema_valid: 1.0
+target_script: 1.0
+detected_language_correct: 0.95
+structure_kept: 1.0
+spans_kept: 1.0
+no_name_like_introduced: 0.95
+length_bounds: 0.95
+no_forbidden_content: 1.0
+overall: 0.97
+p95_latency_ms: 6000
+p95_cost_micros: 2000

@@ -1,0 +1,13 @@
+schema_valid: 1.0
+tokens_only: 1.0
+length_bounds: 0.95
+covered_range_correct: 1.0
+structure_clean: 1.0
+language_preserved: 0.95
+identifiers_kept: 1.0
+no_forbidden_content: 1.0
+empty_when_nothing: 1.0
+status_changes_reflected: 0.95
+overall: 0.97
+p95_latency_ms: 8000
+p95_cost_micros: 4000
