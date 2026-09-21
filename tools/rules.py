@@ -205,7 +205,7 @@ GENERATED_LEDGERS = ("capabilities.md", "errors.md", "config.md", "providers.md"
 CI_ALLOWED_USES = ("actions/checkout@v4",)
 CI_SETUP = (
     "apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates"
-    " && pip install uv==0.12.16"
+    " && pip install uv==0.12.16 && git config --global --add safe.directory '*'"
 )
 CI_ALLOWED_RUNS = (
     CI_SETUP,

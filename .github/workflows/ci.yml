@@ -23,7 +23,7 @@ jobs:
     env:
       CATALYST_AI_EVAL_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@postgres:5432/catalyst_ai
     steps:
-      - run: apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates && pip install uv==0.12.16
+      - run: apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates && pip install uv==0.12.16 && git config --global --add safe.directory '*'
       - uses: actions/checkout@v4
       - run: make tools
       - run: make hooks

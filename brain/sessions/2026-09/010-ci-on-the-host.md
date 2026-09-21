@@ -65,5 +65,30 @@ The named-database path, proven on the host with a service-shaped container (`do
    Proposed: `ci: git before checkout, a named pgvector service for the hosted run`
 Green light: given by the lead on 2026-09-22 (the failed hosted run)
 
+## Addendum — `ci #2`
+`ci #2` (`0e1ea50`) was a real clone and failed at `make hooks` again: `fatal: detected dubious
+ownership in repository at '/__w/catalyst-ai/catalyst-ai'` — the container runs as root, the
+checked-out tree belongs to the runner's user, and git refuses a repository owned by someone
+else. The pinned setup line (`tools/rules.py` `CI_SETUP` and the workflow, together, as
+`tools/checks/ci` demands) gains `git config --global --add safe.directory '*'`: it runs before
+the checkout, in a throwaway container, so the exception is in place when git first reads the
+tree; `make ci` runs the same line locally with `HOME=/tmp`, where it is inert. Still the four
+steps, still the image. Gate re-run below.
+```
+$ make verify
+All checks passed! · GATE GREEN (43 checks) · oasdiff: no breaking change against main · 633 passed in 115.86s · Total coverage: 99.45%
+GATE GREEN (1 checks) · 4 passed · EVALS GREEN · GATE GREEN (1 checks) · no leaks found · GATE GREEN (1 checks) · selftest: 45/45 red on their plant
+VERIFY GREEN
+```
+```
+$ make ci
+$ make ci     (python:3.12.14-slim, the workflow's steps verbatim — the safe.directory clause included)
+All checks passed! · GATE GREEN (43 checks) · oasdiff: no breaking change against main · 633 passed in 146.63s · Total coverage: 99.45%
+GATE GREEN (1 checks) · pytest tests/storage: 4 passed · EVALS GREEN · GATE GREEN (1 checks) · no leaks found · GATE GREEN (1 checks)
+selftest: 45/45 checks red on their plant
+VERIFY GREEN
+```
+Commit: `.github/workflows/ci.yml`, `tools/rules.py`, this record — `ci: the container may read the runner's checkout`.
+
 ## Next
-Watch `ci #2` on `main`; the assistant card.
+Watch `ci #3` on `main`; the assistant card.
