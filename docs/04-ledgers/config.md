@@ -70,3 +70,7 @@ Rows that arrive with later packages, declared here so the design is visible: `T
 (the budgets package), `QUALITY_SAMPLING_ORGANIZATIONS` (the opt-in of `ARCH-010 §4`; a row without a
 `D-NNN` reference fails `check`), `RECORD_PROVIDER_KEY` (read only by `make record`). The job line
 (20 s, `ADR-007`) is a constant in `platform/jobs`, not a variable.
+
+Tooling only, never read by the service: `CATALYST_AI_EVAL_DATABASE_URL` names a PostgreSQL with pgvector
+for `make storage` and the retrieval eval; absent, a throwaway container is started (the CI workflow
+names its service container this way, since a container job has no Docker of its own).
