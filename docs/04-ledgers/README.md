@@ -7,6 +7,7 @@ fails on drift. Three are written by hand.
 | File | Source | Content |
 | --- | --- | --- |
 | `capabilities.md` | Descriptors (`capabilities/*/descriptor.py`) | Capability, version, state, the previous system's functions it retires, inputs with data class, output, eval set, budget, model alias, kill-switch key |
+| `legacy-ai-tables.md` | By hand (the previous system's migrations) | Every `ai_*` table of the previous system with its destination — this service, the backend, or dropped with the reason — and the `kb_*` / `tm_ai_*` note |
 | `errors.md` | `contract/errors.py` + descriptors | Error code, HTTP status, degradation, operations that can return it |
 | `config.md` | `config/settings.py` | Variable, type, required, default, validation, data class, description |
 | `providers.md` | `providers/*/models.py` + configuration | Alias → provider, concrete model id, context limit, price row, retention setting, date measured |

@@ -6,8 +6,11 @@ until then written by hand and kept true by review. The **Retires** column is th
 contract: a previous function is retired only when the capability that replaces it is `built`
 with its eval set green and the backend calls it.
 
-States: `planned` (this ledger only) · `built` (descriptor, eval set, contract test, backend
-client) · `retired-source` (the previous function is switched off). Inputs are the request
+States: `built` (descriptor, eval set, contract test) with its evidence `authored` (fixtures
+from the stand-ins, DD-025) or `recorded` (a live recording); the previous functions carry a
+final state each in the last section — `retired` (replaced, by which capability), `retired-changed`
+(replaced with a deliberate change of behaviour, by which decision) or `dropped` (with the reason).
+No row waits to be built. Inputs are the request
 fields the backend sends, with their data class (`ARCH-002 §3`); `people` means an opaque
 participant label chosen by the backend — never a name (`Q-001`).
 
@@ -16,7 +19,7 @@ participant label chosen by the backend — never a name (`Q-001`).
 | Capability | State | Retires (previous system) | Inputs · class | Output | Eval set | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `improve-story` | **built** v1.0.0 — the golden capability; prompt v1; eval set v1, 52 cases; authored fixtures until a key exists | `ai-improve-story` (modes `improve_clarify`, `expand_detail`, `add_acceptance_criteria`, `convert_user_story`, `shorten_focus`, `add_edge_cases`, `improve_description_v2` incl. its streaming variant) | `title`, `description`, `acceptance_criteria?`, `focus_hint?`, `parent_title?`, `parent_description?` · CONFIDENTIAL; `item_type` · INTERNAL; `mode` (`clarify` | `expand` | `acceptance_criteria` | `user_story` | `shorten` | `edge_cases`), `language?` (BCP 47; absent = preserve) · PUBLIC | `improved_description` (markdown), `acceptance_criteria?`, `rationale`, `changed`, `confidence` (deterministic), the envelope (`capability_version`, `prompt_version`, `model`, `eval_set_version`, `usage`, `request_id`) | `improve-story` v1 | `POST /v1/improve-story` (`improve_story.run`); the previous function also multiplexed `predict_subtask_titles`, `suggest_child_issues`, `translate_text` — those retire under `suggest-children` and `translate-field`; attachments are not sent (`Q-003`); no product persona or hard-coded language in the prompt — the language is a request field (`Q-004`) |
-| `improve-comment` | planned | `ai-improve-comment` | `comment`, `parent_comment`, `item_title`, `item_description` · CONFIDENTIAL; `item_type` · INTERNAL; `mode`, `language` · PUBLIC | `improved_text`, `confidence` | `improve-comment` | `parent_author` is RESTRICTED and not sent |
+| `improve-comment` | dropped — not carried (`Q-015`) | `ai-improve-comment` | — | — | — | the previous function rewrote a comment and suggested a reply from the parent comment and the item; no card built it and `improve-story`'s modes are editorial operations on a story, not on a thread; if the product wants it, it is a mode of `improve-story` (`reply`, `polish_comment`) with the participant-token rule — a later card |
 | `translate` | **built** v1.0.0 — one operation, two modes (`field`, `title`); prompt v1; eval set v1, 94 cases (43 field / 51 title); authored fixtures until a key exists | `ai-translate-field`, `ai-translate-title`, `ai-improve-story` mode `translate_text` | `text`, `context?` (≤ 800, reference only) · CONFIDENTIAL; `mode`, `source_language?`, `target_language` (BCP 47; absent → `ai.input.rejected` with `target_language_required`) · PUBLIC | `translated_text`, `detected_language`, `target_language`, `structure_preserved`, `confidence` (deterministic: script, structure, kept spans, length), the envelope | `translate` v1 | `POST /v1/translate` (`translate.run`); `text-fast`; item keys, links, code, placeholders and brand names stay exactly; the Markdown skeleton is compared line for line in `field` mode; a title is one line; the previous functions' Arabic transliteration rule lives in the prompt, the script rule in `capabilities/translate/quality.py` |
 
 ## Structured generation
@@ -40,7 +43,7 @@ participant label chosen by the backend — never a name (`Q-001`).
 | Capability | State | Retires | Inputs · class | Output | Eval set | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `search` | **built** v1.0.0 — three operations, one corpus (`work_items`); no prompt; eval set v1, 146 cases; authored fixtures until a key exists | `ai-similar-items`; the semantic part of `ai-search-issues` (its natural-language-to-filter translation is `interpret-query` below) | `index.upsert`: `documents[] {external_id · INTERNAL, kind · PUBLIC, title? · CONFIDENTIAL, text · CONFIDENTIAL, data_class · PUBLIC (never RESTRICTED), content_hash · INTERNAL}` (≤ 100 per call, ≤ 20 000 chars each), `corpus` · PUBLIC; `index.delete`: `external_ids[]` · INTERNAL; `search.run`: `text` · CONFIDENTIAL, `mode` (`similar` \| `query`), `kinds[]`, `k` (1–50, default 10) · PUBLIC, `exclude_external_ids[]` · INTERNAL | `results[] {external_id, chunks, embedding_model, embedding_version, unchanged}` + `index_chunks`; `deleted_chunks`; `hits[] {external_id, kind, title, score, snippet, provenance {chunk_index, embedding_model, embedding_version, vector_rank?, lexical_rank?, vector_similarity?}}` + `fusion` + `embedding_version`, the envelope | `search` v1 (recall@10, MRR, isolation, provenance, filters, inertness) | `POST /v1/index/upsert`, `POST /v1/index/delete`, `POST /v1/search`; the backend owns what is indexed (`content_hash` decides re-embedding; delete on archive); an unchanged hash costs nothing; hybrid ranking = reciprocal rank fusion of the HNSW cosine leg and the `tsvector` leg (`retrieval/fusion.py`); embeddings carry `embedding_model` + `embedding_version` and a search never mixes versions — a model change is `catalyst-ai reembed`; the index budget per organisation is `RETRIEVAL_INDEX_MAX_CHUNKS_PER_ORGANIZATION` (`ai.budget.exceeded`, detail `index_budget`); an oversized document is `ai.index.document_too_large`; a database that does not answer is `ai.index.unavailable`; the retention job forgets documents unseen for `RETRIEVAL_DOCUMENT_TTL_DAYS`; `generate-children` reads this index in its retrieve stage (`index_consulted`) |
-| `interpret-query` | planned | the filter-translation part of `ai-search-issues` (natural language → the structured filter the client applies) | `query` · CONFIDENTIAL; `filter_schema` · PUBLIC | `filters` (validated against the schema the backend sends), `reason` | `interpret-query` | `text-fast`; the previous function passed `current_user` — RESTRICTED, not sent; the semantic search itself is `search.run` above |
+| `interpret-query` | dropped — not carried (`Q-016`) | the filter-translation part of `ai-search-issues` | — | — | — | natural language → the structured filter the client applies; the semantic half is `search.run`; the translation half was never built — if the product wants "my open defects from last week" typed as a sentence, it is a small sync capability over a filter schema the backend sends (`text-fast`) — a later card |
 | `documents` | **built** v1.0.0 — three operations, one concern (`documents.ingest`, `documents.ask`, `documents.generate`); prompt v1; eval sets v1: `documents` (ask) 92 cases, `documents-generate` 42, `documents-ingest` 19 (the parse matrix); authored fixtures until a key exists | `docintel-ingest`, `docintel-sync`, `docintel-analyze`, `docintel-ask`, `docintel-generate`, `kb-train`, `folio-ai-search` (`kb-query` and `kb-sync` are the same operations seen from the previous wiki; the retirement card closes them) | `ingest`: `space_id`, `document_id`, `filename?` · INTERNAL; `kind`, `format` (`docx` | `pptx` | `pdf` | `markdown` | `text`), `data_class` (never RESTRICTED), `content_hash` (sha256) · PUBLIC/INTERNAL; `content_base64` (≤ 10 MB) or `text` (≤ 200 000), `title?` · CONFIDENTIAL — `ask`: `space_id` · INTERNAL; `question` · CONFIDENTIAL; `kinds[]`, `k` (1–20), `language?` · PUBLIC — `generate`: `brief`, `sources[] {id, title?, text}` (≤ 40) · CONFIDENTIAL; `target_words`, `language?` · PUBLIC | `ingest` → `{document_id, state: indexed | unchanged, chunks, headings[], embedding_model, embedding_version, index_chunks}`; `ask` → `{answer (every sentence ends with `[n]` markers), citations[] {chunk_id, document_id, position, heading_path[], quote ≤ 300}, not_found, confidence}`; `generate` → `{title, sections[] {heading, text, sources[]}, empty_reason? (sources_insufficient), confidence}`, the envelope | `documents` v1 (ask, groundedness) · `documents-generate` v1 · `documents-ingest` v1 | `POST /v1/documents/ingest`, `POST /v1/documents/ask`, `POST /v1/documents/generate`; bytes parse in a killed-on-budget child (`retrieval/runner`) behind the bomb, macro, entity, script and size guards (`docs/04-ledgers/parsers.md`); a refused document is `ai.input.rejected` with `document_too_large`, `document_unsupported`, `document_malformed`, `document_timeout` or `document_restricted` — never a crash, never the bytes; chunks are the `documents` corpus of the retrieval index (the second corpus, same storage, same RLS), keyed `<space>/<document>` so a space is a prefix; `ask` reads only the space, answers only from retrieved passages, refuses an answer sentence without a citation (`ai.output.invalid`, `uncited_claim`) or citing a passage it did not read (`untraceable_entry`), and says `not_found` — at no model cost when the space holds nothing; `generate` drafts only from the supplied sources, every section citing; the previous functions trusted the file (mammoth, unpdf, SheetJS with no limits), wrote `ai_document_*` and `kb_*` tables in the product database, cached per user and fetched from the web — none of it carried; no OCR of scanned images (a register row and a later card: it needs a vision model row and an image budget) |
 
 ## Assistant
@@ -66,7 +69,52 @@ participant label chosen by the backend — never a name (`Q-001`).
 | `_shared/llm.ts`, `_shared/lovable-ai.ts` | provider gateways | redesigned as the port and adapters (`ADR-004`); nothing ported |
 | `_shared/ai-cache.ts` | a cache table without tenancy | redesigned as `cache_entries` with the tenant key (`ARCH-008 §3`) |
 | `_shared/embed_stage.ts`, `_shared/prompts.ts` | embedding glue; prompt strings in code | `retrieval/embeddings.py` + `retrieval/chunking.py` (built with `search`); prompt files (`RULE-008`) |
-| `ai_usage_log`, `tm_ai_usage_log`, `*_generation_cache`, `ai_digest_cache`, `ai_theme_cache`, `ai_document_*`, `kb_*` tables | product-database tables of the previous system | not migrated: usage becomes `provider_calls`; caches become `cache_entries`; documents and knowledge are re-ingested through `knowledge-ingest` from what the backend can resend |
+| `_shared/docx.ts`, `_shared/pptx.ts`, `_shared/docintel.ts` | office parsers and the document pipeline's glue, trusting the file | the parsers register (`docs/04-ledgers/parsers.md`: `zipfile` + `defusedxml` behind the guards, `D-029`) and `retrieval/runner` (the bounded child, `INV-049`) |
+| the `ai_*`, `kb_*` and `tm_ai_*` tables | product-database tables of the previous system | each with its destination in `docs/04-ledgers/legacy-ai-tables.md`: usage becomes `provider_calls`; caches become `cache_entries`; documents and knowledge are re-ingested through `knowledge-ingest` from what the backend can resend |
+
+## Final states of the previous functions
+
+Every assisted function of the previous system, with one final state. `retired` names the
+capability, its version and its eval set; `retired-changed` also names the decision that changed
+the behaviour; `dropped` gives the reason and, where the product might want the behaviour back,
+the open question. Evidence is `authored` for every row today (DD-025): the fixtures are the
+stand-ins' until a provider key exists; the mapping is final, the evidence is not.
+
+| Previous function | State | Replaced by · decision · reason | Evidence |
+| --- | --- | --- | --- |
+| `ai-improve-story` | retired | `improve-story` v1.0.0 · set `improve-story` v1 | authored |
+| `ai-generate-stories`, `ai-generate-epics`, `ai-suggest-children` | retired | `generate-children` v1.0.0 · set v1 | authored |
+| `ai-similar-items` | retired | `search` v1.0.0 (`search.similar`) · set v1 | authored |
+| `ai-search-issues` | retired-changed | the semantic half is `search` v1.0.0; the filter-translation half is not carried (`interpret-query` dropped, `Q-016`) | authored |
+| `summarize-comments` | retired | `summarize` v1.1.0 modes `comments`, `thread` · set v2 | authored |
+| `standup-summarize`, `standup-summary` | retired | `summarize` v1.1.0 mode `standup` · set v2 | authored |
+| `ai-digest` | retired-changed | `summarize` v1.1.0 mode `digest` · set v2 — the service counts nothing and ranks nothing; the backend sends the counts it shows (`D-026`) | authored |
+| `chat-summarize` | retired | `summarize` v1.1.0 mode `chat` · set v2 | authored |
+| `ai-translate-field`, `ai-translate-title` | retired | `translate` v1.0.0 · set v1 | authored |
+| `workflow-ai`, `ai-generate-workflow` | retired-changed | `propose-workflow` v1.1.0 · set v1 — one description at a time in the engine's words; the conversational proposal (questions, deltas) stays with the backend (`D-025`) | authored |
+| `release-notes-generate`, `summarize-release` | retired | `release-notes` v1.0.0 modes `notes`, `summary` · set v1 | authored |
+| `ai-generate-story-test-cases`, `ai-generate-test-artefacts` | retired | `generate-tests` v1.0.0 modes `cases`, `artefacts` · set v1 | authored |
+| `ai-post-mortem` | retired-changed | `post-mortem` v1.0.0 · set v1 — an incident post-mortem from a timeline; the previous function was a business-request retrospective, not carried (`F-014`, `D-028`) | authored |
+| `docintel-ingest`, `docintel-sync` | retired-changed | `documents` v1.0.0 (`documents.ingest`) · set `documents-ingest` v1 — bounded parsing in a child, no page images, no OCR (`D-029`) | authored |
+| `docintel-analyze` | retired-changed | `documents` v1.0.0 — the analysis was page images to a vision model and extracted "facts"; a reply cites passages instead (`D-031`) | authored |
+| `docintel-ask`, `kb-query`, `folio-ai-search` | retired | `documents` v1.0.0 (`documents.ask`) · set `documents` v1 | authored |
+| `docintel-generate` | retired | `documents` v1.0.0 (`documents.generate`) · set `documents-generate` v1 | authored |
+| `kb-train`, `kb-sync` | retired | `documents` v1.0.0 (`documents.ingest`) and `search` (`index.upsert`) — the index is fed by the backend on change, not trained on a schedule | authored |
+| `caty-chat` | retired-changed | `assistant` v1.0.0 · set `assistant` v1 — one grounded assistant over supplied context; the seven personas were prompt flavour over no data (`F-021`) | authored |
+| `ai-admin-assistant` | retired-changed | `assistant` v1.0.0 — an admin asks over administration pages the backend supplies; the natural-language commands that executed writes are not carried (`Q-011`) | authored |
+| `ai-tm-assist` | retired-changed | `assistant` v1.0.0 over a supplied case, `generate-tests` for authoring — the previous function was a test-case refiner, not a chat (`F-021`) | authored |
+| `chat-unfurl` | retired-changed | `unfurl` v1.0.0 · set v1 — nothing is fetched; the backend sends the content (`INV-050`) | authored |
+| `ai-improve-comment` | dropped | not carried; a later mode of `improve-story` if wanted (`Q-015`) | — |
+| `alignment-story` | dropped | an executive briefing over a strategy chain (themes → goals → key results → initiatives → epics) written for a ministry audience; no card cut it and no hub carries the chain yet (`Q-012`) | — |
+| `voice-transcribe` | dropped | audio (Arabic, Urdu, Hindi) transcribed and translated to English through a second provider's speech model with a fallback; a new modality and a new provider that no card cut (`Q-013`) | — |
+| `ai-theme-prewarm` | dropped | a nightly cache warmup of the digest's themes; the digest is on demand (`F-022`) | — |
+| `kb-feedback` | dropped | no model call — the backend stores the thumbs; a future eval source | — |
+| `kb-cleanup` | dropped | no model call — the service's retention job covers its own tables (`RULE-009 §4`) | — |
+| `catyflow-clean`, `catyflow-token` | dropped | no model call — token issuance for a flow feature (`F-001`) | — |
+
+Forty-one functions: 20 retired, 11 retired-changed, 10 dropped. The card that cut this pass
+counted thirty-nine; `alignment-story` and `voice-transcribe` were the two the ledger had never
+named. The `_shared/*` helpers are retired ideas, not functions, and sit in the section above.
 
 ## Model aliases in use (target)
 
