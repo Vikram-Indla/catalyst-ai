@@ -14,6 +14,7 @@ from pydantic import SecretStr
 from testcontainers.core.utils import inside_container
 from testcontainers.postgres import PostgresContainer
 
+from catalyst_ai.capabilities.assistant.pipeline import stream as assistant_stream
 from catalyst_ai.capabilities.documents import ask as documents_ask
 from catalyst_ai.capabilities.documents import generate as documents_generate
 from catalyst_ai.capabilities.documents import run_ingest
@@ -27,7 +28,9 @@ from catalyst_ai.capabilities.search import run as search_run
 from catalyst_ai.capabilities.search import run_upsert
 from catalyst_ai.capabilities.summarize import run as summarize
 from catalyst_ai.capabilities.translate import run as translate
+from catalyst_ai.capabilities.unfurl.pipeline import run as unfurl_run
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
+from catalyst_ai.contract.assistant import TurnRequest, TurnResponse
 from catalyst_ai.contract.documents import AskRequest, DraftRequest, IngestRequest
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope
 from catalyst_ai.contract.generate_children import GenerateChildrenRequest
@@ -39,6 +42,7 @@ from catalyst_ai.contract.release_notes import ReleaseNotesRequest
 from catalyst_ai.contract.search import IndexUpsertRequest, SearchRequest
 from catalyst_ai.contract.summarize import SummarizeRequest
 from catalyst_ai.contract.translate import TranslateRequest
+from catalyst_ai.contract.unfurl import UnfurlRequest
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.clock import SystemClock
@@ -55,6 +59,7 @@ DATABASE_VARIABLE = "CATALYST_AI_EVAL_DATABASE_URL"
 DATABASE_IMAGE = "pgvector/pgvector:pg17"
 MIGRATIONS = Path("db/migrations")
 CORPUS_FILE = "corpus.jsonl"
+UNTERMINATED = "the stream ended without done"
 UPSERT_BATCH = 100
 COMMAND_TIMEOUT_S = 30.0
 
@@ -179,6 +184,19 @@ async def index_corpus(runtime: RuntimeContext, directory: Path) -> None:
             await run_upsert(request, runtime, f"setup-{organization_id[:8]}-{start}")
 
 
+async def assistant_turn(
+    request: TurnRequest, runtime: RuntimeContext, request_id: str
+) -> TurnResponse:
+    """Run a turn through the streaming path and return the response its `done` carries."""
+    result: TurnResponse | None = None
+    async for event in assistant_stream(request, runtime, request_id):
+        if event.kind == "done":
+            result = event.result
+    if result is None:
+        raise RuntimeError(UNTERMINATED)
+    return result
+
+
 async def ingest_corpus(runtime: RuntimeContext, directory: Path) -> None:
     """Index `corpus.jsonl` through the ingest operation, one document per line."""
     lines = [
@@ -203,6 +221,8 @@ REGISTRY: dict[str, SetSpec] = {
     "documents": SetSpec(AskRequest, documents_ask, setup=ingest_corpus),
     "documents-generate": SetSpec(DraftRequest, documents_generate),
     "documents-ingest": SetSpec(IngestRequest, run_ingest),
+    "assistant": SetSpec(TurnRequest, assistant_turn, setup=ingest_corpus),
+    "unfurl": SetSpec(UnfurlRequest, unfurl_run),
 }
 
 

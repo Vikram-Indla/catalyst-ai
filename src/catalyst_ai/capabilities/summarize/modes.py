@@ -3,9 +3,11 @@
 from catalyst_ai.capabilities.summarize.schema import ModelOutput
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.contract.summarize import (
+    CHAT_HEADINGS,
     MAX_LINE_CHARS,
     MAX_LINES,
     WINDOW_MODES,
+    ChatSection,
     DigestGroup,
     StandupEntry,
     SummarizeRequest,
@@ -108,8 +110,25 @@ def digest_groups(output: ModelOutput, request: SummarizeRequest) -> list[Digest
     ]
 
 
-def lines_of(entries: list[StandupEntry], groups: list[DigestGroup]) -> str:
-    """Every line of both shapes, joined — what the participant rule and the scanner read."""
+def chat_sections(output: ModelOutput, request: SummarizeRequest) -> list[ChatSection]:
+    """Lay out the fixed headings in their order, the model's lines under each, cleaned."""
+    if request.mode.value != "chat":
+        return []
+    by_heading = {section.heading.strip().lower(): section for section in output.chat}
+    return [
+        ChatSection(
+            heading=heading,
+            lines=clean_lines(by_heading[heading].lines) if heading in by_heading else [],
+        )
+        for heading in CHAT_HEADINGS
+    ]
+
+
+def lines_of(
+    entries: list[StandupEntry], groups: list[DigestGroup], sections: list[ChatSection]
+) -> str:
+    """Every line of the three shapes, joined — what the participant rule and the scanner read."""
     standup = [line for e in entries for line in [*e.done, *e.doing, *e.blocked]]
     digest = [line for g in groups for line in g.changes]
-    return "\n".join(standup + digest)
+    chat = [line for s in sections for line in s.lines]
+    return "\n".join(standup + digest + chat)

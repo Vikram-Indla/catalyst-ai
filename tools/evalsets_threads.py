@@ -121,9 +121,9 @@ def summarize_cases() -> list[dict[str, object]]:
     """Comment and discussion threads: lengths, scripts, status changes, empties, injection."""
     cases: list[dict[str, object]] = []
     seed = 0
-    for mode in ("comments", "thread"):
+    for mode in ("comments", "thread", "chat"):
         for topic_index, topic in enumerate(TOPICS):
-            for length in LENGTHS[: 4 if mode == "thread" else 5]:
+            for length in LENGTHS[: 4 if mode != "comments" else 5]:
                 seed += 1
                 cases.append(_thread_case(mode, topic, length, seed))
             if topic_index % 3 == 0:

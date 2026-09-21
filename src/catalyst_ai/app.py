@@ -9,6 +9,7 @@ import httpx
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
+from catalyst_ai.capabilities.assistant import router as assistant_router
 from catalyst_ai.capabilities.documents import router as documents_router
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
 from catalyst_ai.capabilities.generate_tests import router as generate_tests_router
@@ -19,6 +20,7 @@ from catalyst_ai.capabilities.release_notes import router as release_notes_route
 from catalyst_ai.capabilities.search import router as search_router
 from catalyst_ai.capabilities.summarize import router as summarize_router
 from catalyst_ai.capabilities.translate import router as translate_router
+from catalyst_ai.capabilities.unfurl import router as unfurl_router
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.health import LiveResponse, ReadyResponse
@@ -163,4 +165,6 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(generate_tests_router)
     app.include_router(post_mortem_router)
     app.include_router(documents_router)
+    app.include_router(assistant_router)
+    app.include_router(unfurl_router)
     return app

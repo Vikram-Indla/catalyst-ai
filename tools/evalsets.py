@@ -7,6 +7,7 @@ from pathlib import Path
 
 from tools import rules
 from tools.corpus_terms import DOMAINS, INJECTIONS, PARAPHRASES, ROLES
+from tools.evalsets_assistant import write_assistant
 from tools.evalsets_documents import write_documents
 from tools.evalsets_hubs import write_hub
 from tools.evalsets_threads import write_threads
@@ -264,6 +265,8 @@ def main(name: str) -> int:
         "documents": write_documents,
         "documents-generate": write_documents,
         "documents-ingest": write_documents,
+        "assistant": write_assistant,
+        "unfurl": write_assistant,
     }
     return writers.get(name, write)(name)
 

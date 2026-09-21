@@ -12,4 +12,4 @@ has no `Reviewed` threat model is a finding.
 | THREAT-003 | structured generation | Draft — `THREAT-003-structured-generation.md`, with `generate-children` v1 |
 | THREAT-004 | summaries and translation | Draft — `THREAT-004-summaries.md`, with `summarize` and `translate` v1 |
 | THREAT-005 | retrieval and knowledge | Draft — `THREAT-005-retrieval.md`, with `search` v1 |
-| THREAT-006 | assistant | with `assistant-chat` |
+| THREAT-006 | the assistant and the unfurl card | Draft — `THREAT-006-assistant.md`, with `assistant` v1 |

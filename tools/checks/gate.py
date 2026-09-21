@@ -22,6 +22,7 @@ CHECKS = (
     "dupl",
     "globals",
     "boundary",
+    "readonly",
     "classification",
     "routes",
     "contract",

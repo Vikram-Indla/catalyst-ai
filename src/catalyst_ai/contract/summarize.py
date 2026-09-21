@@ -31,15 +31,17 @@ LANGUAGE_PATTERN = r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
 
 EmptyReason = Literal["nothing_to_summarize"]
 WINDOW_MODES = frozenset({"standup", "digest"})
+CHAT_HEADINGS = ("activity", "decisions", "actions", "questions")
 
 
 class SummarizeMode(StrEnum):
-    """`comments` is a work item's thread (decisions, blockers, questions); `thread` a talk."""
+    """`comments`: an item's thread; `thread`: a talk; `chat`: a channel laid out in sections."""
 
     COMMENTS = "comments"
     THREAD = "thread"
     STANDUP = "standup"
     DIGEST = "digest"
+    CHAT = "chat"
 
 
 class ThreadItem(BaseModel):
@@ -233,6 +235,15 @@ class DigestGroup(BaseModel):
     changes: list[str] = Field(max_length=MAX_LINES)
 
 
+class ChatSection(BaseModel):
+    """One section of a channel summary: a fixed heading and the lines under it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    heading: str
+    lines: list[str] = Field(max_length=MAX_LINES)
+
+
 class CoveredRange(BaseModel):
     """Which items the summary rests on: the first and last ids and how many."""
 
@@ -255,3 +266,4 @@ class SummarizeResponse(ResponseEnvelope):
     confidence: float = Field(ge=0.0, le=1.0)
     standup: list[StandupEntry] = Field(default_factory=list)
     digest: list[DigestGroup] = Field(default_factory=list)
+    chat: list[ChatSection] = Field(default_factory=list)

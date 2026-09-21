@@ -11,7 +11,7 @@ from catalyst_ai.config import Settings
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.platform.clock import Clock
 from catalyst_ai.platform.resilience import Breaker, BreakerOpenError, RetryPolicy, retry_async
-from catalyst_ai.providers.gemini import aliases, errors
+from catalyst_ai.providers.gemini import aliases, errors, streaming
 from catalyst_ai.providers.gemini.models import ModelSpec
 from catalyst_ai.providers.port import (
     EmbedRequest,
@@ -34,6 +34,7 @@ SHAPE_WRONG_SIZE = "an embedding of the wrong size"
 BREAKER_FAILURES = 5
 BREAKER_OPEN_SECONDS = 30
 MS_PER_SECOND = 1000
+HTTP_ERROR_FLOOR = 400
 SCHEMA_KEYS = ("type", "properties", "required", "items", "enum", "description", "nullable")
 
 
@@ -168,11 +169,42 @@ class GeminiProvider:
         latency_ms = int((self._clock.now() - started).total_seconds() * MS_PER_SECOND)
         return _parse_generate(response.json(), spec, latency_ms, request.request_id)
 
-    def stream(self, request: GenerateRequest) -> AsyncIterator[StreamFrame]:
-        """Streaming arrives with the assistant capability; until then the port refuses it."""
-        del request
-        message = "streaming is not implemented by this adapter yet"
-        raise NotImplementedError(message)
+    async def stream(self, request: GenerateRequest) -> AsyncIterator[StreamFrame]:
+        """Stream one generation: `delta` frames, one `usage`, one `done`; a failure raises.
+
+        The breaker and the status mapping guard the connection; a stream is never retried,
+        since a retry would repeat deltas the caller already passed on.
+        """
+        spec = aliases.resolve(request.alias, self._settings)
+        url = f"{self._url(spec, streaming.STREAM_METHOD)}?{streaming.STREAM_QUERY}"
+        breaker = self._breaker(spec.model_id)
+        started = self._clock.now()
+        try:
+            breaker.before_call()
+            async with self._client.stream(
+                "POST",
+                url,
+                json=build_body(request),
+                headers=self._headers(),
+                timeout=request.timeout_ms / MS_PER_SECOND,
+            ) as response:
+                if response.status_code >= HTTP_ERROR_FLOOR:
+                    excerpt = len(await response.aread())
+                    raise errors.from_status(response.status_code, excerpt, request.request_id)
+
+                def latency_of() -> float:
+                    return (self._clock.now() - started).total_seconds() * MS_PER_SECOND
+
+                async for frame in streaming.frames_of(
+                    response.aiter_lines(), spec, request.request_id, latency_of
+                ):
+                    yield frame
+        except BreakerOpenError as error:
+            raise errors.from_transport(error, request.request_id) from error
+        except httpx.HTTPError as error:
+            breaker.record_failure()
+            raise errors.from_transport(error, request.request_id) from error
+        breaker.record_success()
 
     async def embed(self, request: EmbedRequest) -> EmbedResult:
         """Embed the texts in one batch call; tokens are estimated, the API reports none."""

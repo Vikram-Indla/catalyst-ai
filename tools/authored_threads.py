@@ -4,6 +4,7 @@ import json
 import re
 from typing import Any
 
+from tools.authored_assistant import chat_sections
 from tools.authored_envelope import envelope
 from tools.authored_windows import answer_window
 
@@ -174,6 +175,8 @@ def answer_summary(body: dict[str, Any]) -> dict[str, Any]:
         "empty_reason": None,
         "rationale": "Kept the latest position, the cued bullets and the recorded moves.",
     }
+    if mode and mode.group("mode") == "chat":
+        output["chat"] = chat_sections(items)
     return envelope(body, json.dumps(output, ensure_ascii=False))
 
 

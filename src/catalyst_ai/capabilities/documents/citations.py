@@ -4,14 +4,14 @@ from typing import Final
 
 from catalyst_ai.capabilities.documents import descriptor
 from catalyst_ai.capabilities.documents.schema import AskOutput, ModelClaim
-from catalyst_ai.contract.documents import MAX_QUOTE, AskRequest, AskResponse, Citation
+from catalyst_ai.contract.documents import AskRequest, AskResponse, Citation
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.language.records import refuse_untraceable
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
 from catalyst_ai.providers.port import GenerateResult
-from catalyst_ai.retrieval import Passage, Retrieved
+from catalyst_ai.retrieval import Passage, Retrieved, quote_for
 
 UNCITED: Final = "uncited_claim"
 NOT_FOUND_TEXT: Final = ""
@@ -31,17 +31,6 @@ def check_claims(output: AskOutput, passages: list[Passage]) -> None:
         raise Error(ErrorCode.OUTPUT_INVALID, "an answer sentence cites nothing", details=uncited)
     cited = [(f"claims.{i}", c) for i, claim in enumerate(output.claims) for c in claim.chunk_ids]
     refuse_untraceable(cited, {p.chunk_id for p in passages})
-
-
-def quote_for(passage: Passage, claim: str) -> str:
-    """Return the passage's opening words; the part the claim rests on is not guessed at."""
-    words = passage.text.split()
-    quote = ""
-    for word in words:
-        if len(quote) + len(word) + 1 > MAX_QUOTE:
-            break
-        quote = f"{quote} {word}".strip()
-    return quote or passage.text[:MAX_QUOTE]
 
 
 def citations_of(output: AskOutput, passages: list[Passage]) -> list[Citation]:

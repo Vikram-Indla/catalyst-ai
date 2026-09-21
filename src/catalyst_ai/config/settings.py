@@ -132,6 +132,14 @@ class Settings(BaseSettings):
         CapabilitySettings,
         Field(description="PUBLIC · documents: enabled, cache TTL, the parse and call timeout"),
     ] = CapabilitySettings()
+    capability_assistant: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · assistant: enabled, cache TTL of the whole form, timeout"),
+    ] = CapabilitySettings()
+    capability_unfurl: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · unfurl: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
     capability_generate_tests: Annotated[
         CapabilitySettings,
         Field(description="PUBLIC · generate-tests: enabled, cache TTL, timeout"),

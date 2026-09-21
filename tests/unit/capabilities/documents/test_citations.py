@@ -8,7 +8,6 @@ from catalyst_ai.capabilities.documents.citations import (
     confidence,
     from_cache,
     not_found_response,
-    quote_for,
     render_answer,
     to_response,
 )
@@ -17,7 +16,7 @@ from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.providers.port import GenerateResult
-from catalyst_ai.retrieval import Passage, Retrieved
+from catalyst_ai.retrieval import Passage, Retrieved, quote_for
 from tests.unit.capabilities.documents.conftest import answer_text, ask_request
 
 USAGE = Usage(input_tokens=10, output_tokens=5, cost_micros=7, latency_ms=3, cache_hit=False)

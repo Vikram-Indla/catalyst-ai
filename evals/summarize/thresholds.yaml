@@ -10,6 +10,7 @@ empty_when_nothing: 1.0
 status_changes_reflected: 0.95
 standup_shape: 1.0
 digest_shape_and_count_echo: 1.0
+chat_shape: 1.0
 window_respected: 1.0
 no_counts_invented: 1.0
 overall: 0.97

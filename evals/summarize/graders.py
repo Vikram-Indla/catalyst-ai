@@ -5,7 +5,7 @@ from collections.abc import Callable
 
 from catalyst_ai.capabilities.summarize.modes import lines_of, within_window
 from catalyst_ai.capabilities.summarize.postprocess import HEADING, word_count
-from catalyst_ai.contract.summarize import SummarizeRequest, SummarizeResponse
+from catalyst_ai.contract.summarize import CHAT_HEADINGS, SummarizeRequest, SummarizeResponse
 from catalyst_ai.platform.language.records import tokens_in
 from catalyst_ai.platform.language.signals import (
     ITEM_KEY,
@@ -30,7 +30,7 @@ def _score(ok: bool) -> float:
 
 
 def _text(response: SummarizeResponse) -> str:
-    return response.summary + "\n" + lines_of(response.standup, response.digest)
+    return response.summary + "\n" + lines_of(response.standup, response.digest, response.chat)
 
 
 def _strings(expected: dict[str, object], name: str) -> list[str]:
@@ -209,6 +209,19 @@ def no_counts_invented(
     return _score(set(NUMBER.findall(_text(response))) <= source)
 
 
+def chat_shape(
+    request: SummarizeRequest, response: SummarizeResponse, expected: dict[str, object]
+) -> float:
+    """Score a chat summary as the four fixed headings in order, its lines by token, else none."""
+    del expected
+    if request.mode.value != "chat" or response.empty_reason is not None:
+        return _score(not response.chat)
+    headings = [s.heading for s in response.chat]
+    tokens = {i.participant for i in request.items}
+    named = all(line.split(":")[0] in tokens for s in response.chat for line in s.lines)
+    return _score(headings == list(CHAT_HEADINGS) and named and not response.standup)
+
+
 GRADERS: dict[str, Grader] = {
     "schema_valid": schema_valid,
     "tokens_only": tokens_only,
@@ -224,4 +237,5 @@ GRADERS: dict[str, Grader] = {
     "digest_shape_and_count_echo": digest_shape_and_count_echo,
     "window_respected": window_respected,
     "no_counts_invented": no_counts_invented,
+    "chat_shape": chat_shape,
 }

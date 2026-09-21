@@ -29,6 +29,15 @@ class ModelDigest(BaseModel):
     changes: list[str] = Field(max_length=MAX_LINES)
 
 
+class ModelChatSection(BaseModel):
+    """One section of a channel summary as the model wrote it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    heading: str
+    lines: list[str] = Field(max_length=MAX_LINES)
+
+
 class ModelOutput(BaseModel):
     """What a valid completion carries; anything else is `ai.output.invalid`."""
 
@@ -40,6 +49,7 @@ class ModelOutput(BaseModel):
     rationale: str = Field(min_length=1, max_length=MAX_RATIONALE_CHARS)
     standup: list[ModelStandup] = Field(default_factory=list, max_length=MAX_ENTRIES)
     digest: list[ModelDigest] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    chat: list[ModelChatSection] = Field(default_factory=list, max_length=MAX_ENTRIES)
 
 
 def prose_of(output: ModelOutput) -> str:

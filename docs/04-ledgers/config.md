@@ -34,6 +34,14 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `CAPABILITY_DOCUMENTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch for all three operations |
 | `CAPABILITY_DOCUMENTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 600 | ≥ 0 | PUBLIC | Cache and idempotency TTL of `ask` and `generate` |
 | `CAPABILITY_DOCUMENTS__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline and the parser child's deadline |
+| `CAPABILITY_ASSISTANT` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `assistant` (both operations) |
+| `CAPABILITY_ASSISTANT__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch for the stream and the whole form |
+| `CAPABILITY_ASSISTANT__CACHE_TTL_SECONDS` | int | no | the descriptor's 300 | ≥ 0 | PUBLIC | Cache and idempotency TTL of the whole form; the stream is never cached |
+| `CAPABILITY_ASSISTANT__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's deadline for the stream's connection and the retrieval calls |
+| `CAPABILITY_UNFURL` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `unfurl` |
+| `CAPABILITY_UNFURL__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_UNFURL__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_UNFURL__TIMEOUT_MS` | int | no | the descriptor's 10000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
 | `CAPABILITY_GENERATE_TESTS` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `generate-tests` |
 | `CAPABILITY_GENERATE_TESTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_GENERATE_TESTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |

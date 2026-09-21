@@ -14,6 +14,7 @@ class Fault:
     status: int = 200
     body: dict[str, object] | None = None
     raises: type[Exception] | None = None
+    raw: str | None = None
 
 
 INJECTED = "injected fault"
@@ -36,5 +37,7 @@ class FaultTransport(httpx.AsyncBaseTransport):
         fault = self._script.popleft() if len(self._script) > 1 else self._script[0]
         if fault.raises is not None:
             raise fault.raises(INJECTED)
-        content = json.dumps(fault.body or {}).encode()
+        content = (
+            fault.raw.encode() if fault.raw is not None else json.dumps(fault.body or {}).encode()
+        )
         return httpx.Response(status_code=fault.status, content=content, request=request)

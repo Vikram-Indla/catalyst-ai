@@ -11,12 +11,20 @@ import httpx
 from pydantic import SecretStr
 
 from catalyst_ai.platform.errors import Error
-from catalyst_ai.providers.recorded import FIXTURE_SUFFIX, fixture_hash, write_fixture
+from catalyst_ai.providers.recorded import (
+    EVENT_STREAM,
+    FIXTURE_SUFFIX,
+    fixture_hash,
+    write_fixture,
+    write_raw_fixture,
+)
 from tools import authored, evalkit, rules
+from tools.authored_envelope import sse_of
 
 KEY_VARIABLE = "CATALYST_AI_RECORD_PROVIDER_KEY"
 MANIFEST = "_manifest.json"
 EMBED_SUFFIX = ":batchEmbedContents"
+STREAM_MARKER = ":streamGenerateContent"
 
 
 class RecordingTransport(httpx.AsyncBaseTransport):
@@ -32,6 +40,8 @@ class RecordingTransport(httpx.AsyncBaseTransport):
         """Produce the answer, persist it, return it."""
         body = request.read()
         key = fixture_hash(request.method, str(request.url), body)
+        if STREAM_MARKER in str(request.url):
+            return await self._stream(request, key, body)
         if self._live is not None:
             upstream = await self._live.handle_async_request(request)
             status, payload = upstream.status_code, json.loads(await upstream.aread())
@@ -43,6 +53,22 @@ class RecordingTransport(httpx.AsyncBaseTransport):
         self.written.append(key)
         return httpx.Response(
             status_code=status, content=json.dumps(payload).encode(), request=request
+        )
+
+    async def _stream(self, request: httpx.Request, key: str, body: bytes) -> httpx.Response:
+        """Record a streamed call as the event-stream text, verbatim or authored."""
+        if self._live is not None:
+            upstream = await self._live.handle_async_request(request)
+            status, raw = upstream.status_code, (await upstream.aread()).decode()
+        else:
+            status, raw = 200, sse_of(authored.answer(json.loads(body)))
+        write_raw_fixture(self._directory, key, status, raw)
+        self.written.append(key)
+        return httpx.Response(
+            status_code=status,
+            headers={"content-type": EVENT_STREAM},
+            content=raw.encode(),
+            request=request,
         )
 
 

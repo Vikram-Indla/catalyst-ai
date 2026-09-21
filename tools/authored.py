@@ -5,6 +5,7 @@ import json
 import re
 from typing import Any
 
+from tools.authored_assistant import answer_turn, answer_unfurl
 from tools.authored_documents import answer_documents
 from tools.authored_envelope import envelope
 from tools.authored_hubs import answer_incident, answer_release, answer_tests
@@ -266,6 +267,8 @@ def answer_embed(body: dict[str, Any]) -> dict[str, Any]:
 
 
 DISPATCH = (
+    ("<<<sources>>>", answer_turn),
+    ("<<<title>>>", answer_unfurl),
     ("<<<child_level>>>", answer_children),
     ("<<<thread>>>", answer_summary),
     ("<<<description>>>", answer_workflow),

@@ -243,3 +243,4 @@ PLATFORM_PATHS = (
 )
 CONTRACT_PATHS = ("src/catalyst_ai/contract/", "api/openapi.yaml")
 CAPABILITY_PATHS = ("src/catalyst_ai/capabilities/", "evals/")
+READ_ONLY_CAPABILITIES = ("assistant",)

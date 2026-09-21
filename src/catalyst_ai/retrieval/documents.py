@@ -3,6 +3,7 @@
 import re
 from dataclasses import dataclass
 
+from catalyst_ai.contract.documents import MAX_QUOTE
 from catalyst_ai.retrieval.chunking import chunk
 from catalyst_ai.retrieval.corpora import CorpusSpec
 from catalyst_ai.retrieval.parsers import Block, Parsed
@@ -74,3 +75,15 @@ def passage_of(key: str, position: int, window: str, score: float) -> Passage:
     heading_path, text = split_window(window)
     document_id = key.split(KEY_JOIN, 1)[1] if KEY_JOIN in key else key
     return Passage(chunk_id(key, position), document_id, position, heading_path, text, score)
+
+
+def quote_for(passage: Passage, claim: str) -> str:
+    """Return the passage's opening words; the part the claim rests on is not guessed at."""
+    del claim
+    words = passage.text.split()
+    quote = ""
+    for word in words:
+        if len(quote) + len(word) + 1 > MAX_QUOTE:
+            break
+        quote = f"{quote} {word}".strip()
+    return quote or passage.text[:MAX_QUOTE]

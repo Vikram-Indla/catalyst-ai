@@ -1,6 +1,8 @@
 """The adapter over a scripted transport: body shape, retries, breaker, cost, every error mapping."""
 
+import json
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import uuid4
 
 import httpx
@@ -21,7 +23,13 @@ from catalyst_ai.providers.gemini.adapter import (
     normalise,
 )
 from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH
-from catalyst_ai.providers.port import EmbedRequest, GenerateRequest, ModelAlias, Segment
+from catalyst_ai.providers.port import (
+    EmbedRequest,
+    GenerateRequest,
+    ModelAlias,
+    Segment,
+    StreamFrame,
+)
 
 OK_BODY: dict[str, object] = {
     "candidates": [{"content": {"parts": [{"text": '{"a": 1}'}]}, "finishReason": "STOP"}],
@@ -157,10 +165,51 @@ def _embed_body(count: int) -> dict[str, object]:
     return {"embeddings": [{"values": [1.0] + [0.0] * (EMBED_DIMENSIONS - 1)}] * count}
 
 
-async def test_stream_is_not_implemented_yet() -> None:
-    adapter, _, _ = _adapter([Fault()])
-    with pytest.raises(NotImplementedError):
-        adapter.stream(_request())
+def _sse(*texts: str, finish: str = "STOP") -> str:
+    chunks: list[dict[str, Any]] = [
+        {"candidates": [{"content": {"parts": [{"text": t}]}}]} for t in texts
+    ]
+    chunks[-1]["candidates"][0]["finishReason"] = finish
+    chunks[-1]["usageMetadata"] = {"promptTokenCount": 30, "candidatesTokenCount": 12}
+    chunks[-1]["modelVersion"] = "double-stream-model"
+    return "".join(f"data: {json.dumps(chunk)}" + chr(10) * 2 for chunk in chunks)
+
+
+async def _frames(adapter: GeminiProvider) -> list[StreamFrame]:
+    return [frame async for frame in adapter.stream(_request())]
+
+
+async def test_stream_yields_deltas_then_usage_then_done() -> None:
+    adapter, transport, _ = _adapter([Fault(raw=_sse("Hel", "lo ", "there."))])
+    frames = await _frames(adapter)
+    assert [f.kind for f in frames] == ["delta", "delta", "delta", "usage", "done"]
+    assert "".join(f.text for f in frames if f.kind == "delta") == "Hello there."
+    usage = frames[3].usage
+    assert usage is not None
+    assert (usage.input_tokens, usage.output_tokens) == (30, 12)
+    assert usage.cost_micros == FLASH.cost_micros(30, 12)
+    assert frames[4].model_id == "double-stream-model"
+    assert transport.calls == 1
+
+
+@pytest.mark.parametrize(
+    ("fault", "code"),
+    [
+        (Fault(status=503), ErrorCode.PROVIDER_UNAVAILABLE),
+        (Fault(raises=httpx.ReadTimeout), ErrorCode.PROVIDER_TIMEOUT),
+        (Fault(raw=_sse("x", finish="SAFETY")), ErrorCode.PROVIDER_REJECTED),
+        (Fault(raw=": keep-alive" + chr(10) * 2), ErrorCode.PROVIDER_UNAVAILABLE),
+    ],
+    ids=["unavailable", "timeout", "blocked", "empty"],
+)
+async def test_stream_failures_map_to_the_catalog_and_never_retry(
+    fault: Fault, code: ErrorCode
+) -> None:
+    adapter, transport, _ = _adapter([fault])
+    with pytest.raises(Error) as caught:
+        await _frames(adapter)
+    assert caught.value.code is code
+    assert transport.calls == 1
 
 
 def test_embed_body_carries_the_task_type_and_the_dimensions() -> None:

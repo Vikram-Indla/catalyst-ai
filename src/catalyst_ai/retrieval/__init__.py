@@ -5,6 +5,7 @@ from catalyst_ai.retrieval.documents import (
     Passage,
     chunk_id,
     document_key,
+    quote_for,
     space_prefix,
     windows_of,
 )
@@ -29,6 +30,7 @@ __all__ = [
     "chunk_id",
     "delete",
     "document_key",
+    "quote_for",
     "reembed",
     "retention",
     "retrieve",

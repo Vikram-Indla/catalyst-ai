@@ -45,6 +45,7 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Layers and independence of capabilities (ARCH-012 §1–2) | contracts kept | `import-linter` + `test_capabilities_are_independent` | AI-002 |
 | Boundary: no product schema import, no product database config, no call to the backend (ARCH-002 §1–2) | zero violations | `test_no_product_schema_import`, `test_no_product_database_config`, `test_service_never_calls_backend` | AI-002 |
 | Every request field classified; no `RESTRICTED` field in the contract (ARCH-002 §3) | zero violations | `tools/checks/classification` | AI-002 |
+| A read-only capability imports no client, socket, writer or ingest path (ARCH-002 §1; the assistant's rule, INV-050) | zero violations in the packages `rules.READ_ONLY_CAPABILITIES` names | `tools/checks/readonly` | AI-010 |
 | Routes thin: ≤ 6 statements, no branch on content (RULE-001 §2) | zero violations | `tools/checks/routes` | AI-002 |
 | Typed boundary: no `dict[str, Any]`, `Any` or raw JSON in routes, pipeline surfaces or the port (RULE-003 §1, §3) | zero violations | `tools/checks/contract` + `tools/checks/ports` | AI-002 |
 | Rendered document equals the committed one; every operation carries `x-capability`, versions, `x-error-codes`, an example (RULE-003 §1) | zero drift; zero missing | `tools/checks/openapi` (`make api && git diff --exit-code api/`) | AI-002 |

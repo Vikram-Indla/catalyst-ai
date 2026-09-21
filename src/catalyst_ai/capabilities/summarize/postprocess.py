@@ -3,7 +3,12 @@
 import re
 
 from catalyst_ai.capabilities.summarize import descriptor
-from catalyst_ai.capabilities.summarize.modes import digest_groups, lines_of, standup_entries
+from catalyst_ai.capabilities.summarize.modes import (
+    chat_sections,
+    digest_groups,
+    lines_of,
+    standup_entries,
+)
 from catalyst_ai.capabilities.summarize.schema import ModelOutput
 from catalyst_ai.contract.summarize import CoveredRange, SummarizeRequest, SummarizeResponse
 from catalyst_ai.platform.language.records import refuse_foreign_tokens, tokens_in
@@ -70,7 +75,8 @@ def to_response(
 ) -> SummarizeResponse:
     """Check the participants, cap the length, strip structure, log the row, build the response."""
     entries, groups = standup_entries(output, request), digest_groups(output, request)
-    lines = lines_of(entries, groups)
+    sections = chat_sections(output, request)
+    lines = lines_of(entries, groups, sections)
     named = output.participants_mentioned + [entry.participant for entry in output.standup]
     check_participants(output.summary + "\n" + lines, named, request)
     summary = cap_words(
@@ -92,6 +98,7 @@ def to_response(
         confidence=confidence(summary, output, request) if not empty else 1.0,
         standup=entries if not empty else [],
         digest=groups if not empty else [],
+        chat=sections if not empty else [],
     )
 
 

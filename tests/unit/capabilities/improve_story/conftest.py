@@ -11,9 +11,11 @@ from pydantic import SecretStr
 
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.envelopes import Usage
+from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.improve_story import ImproveStoryMode, ImproveStoryRequest
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
+from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import MemoryStorage, Storage
 from catalyst_ai.providers.port import (
@@ -51,6 +53,10 @@ class FrozenClock:
         return self.at
 
 
+STREAM_PIECE = 7
+STREAM_FAULT = "<<stream fault>>"
+
+
 class ScriptedProvider:
     """Answers with the next scripted text; the last repeats; every call is counted."""
 
@@ -67,8 +73,19 @@ class ScriptedProvider:
         )
         return GenerateResult(text=text, model_id="double", usage=usage)
 
-    def stream(self, request: GenerateRequest) -> AsyncIterator[StreamFrame]:
-        raise NotImplementedError
+    async def stream(self, request: GenerateRequest) -> AsyncIterator[StreamFrame]:
+        """Stream the next scripted text in pieces of `STREAM_PIECE` characters, then finish."""
+        self.calls.append(request)
+        text = self.texts.pop(0) if len(self.texts) > 1 else self.texts[0]
+        if text == STREAM_FAULT:
+            raise Error(ErrorCode.PROVIDER_UNAVAILABLE, "the double broke the stream")
+        for start in range(0, len(text), STREAM_PIECE):
+            yield StreamFrame(kind="delta", text=text[start : start + STREAM_PIECE])
+        usage = Usage(
+            input_tokens=100, output_tokens=50, cost_micros=155, latency_ms=20, cache_hit=False
+        )
+        yield StreamFrame(kind="usage", usage=usage, model_id="double")
+        yield StreamFrame(kind="done", model_id="double")
 
     async def embed(self, request: EmbedRequest) -> EmbedResult:
         self.embed_calls.append(request)

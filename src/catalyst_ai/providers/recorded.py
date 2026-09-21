@@ -7,6 +7,8 @@ from pathlib import Path
 import httpx
 
 FIXTURE_SUFFIX = ".json"
+RAW_KEY = "raw"
+EVENT_STREAM = "text/event-stream"
 HASH_LENGTH = 16
 
 
@@ -45,10 +47,12 @@ class RecordedTransport(httpx.AsyncBaseTransport):
         if not path.is_file():
             raise MissingFixtureError(key, request.method, str(request.url))
         recorded = json.loads(path.read_text(encoding="utf-8"))
+        raw = recorded.get(RAW_KEY)
+        content = str(raw).encode() if raw is not None else json.dumps(recorded["body"]).encode()
         return httpx.Response(
             status_code=int(recorded["status"]),
             headers=dict(recorded.get("headers", {})),
-            content=json.dumps(recorded["body"]).encode(),
+            content=content,
             request=request,
         )
 
@@ -58,4 +62,13 @@ def write_fixture(directory: Path, key: str, status: int, body: object) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     path = directory / f"{key}{FIXTURE_SUFFIX}"
     path.write_text(json.dumps({"status": status, "body": body}, indent=2), encoding="utf-8")
+    return path
+
+
+def write_raw_fixture(directory: Path, key: str, status: int, raw: str) -> Path:
+    """Persist a streamed response verbatim — the event-stream text — under its hash."""
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{key}{FIXTURE_SUFFIX}"
+    recorded = {"status": status, "headers": {"content-type": EVENT_STREAM}, RAW_KEY: raw}
+    path.write_text(json.dumps(recorded, indent=2), encoding="utf-8")
     return path

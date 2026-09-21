@@ -3,6 +3,7 @@
 import pytest
 
 from catalyst_ai.capabilities.summarize.modes import (
+    chat_sections,
     clean_lines,
     counts_text,
     digest_groups,
@@ -93,7 +94,7 @@ def test_digest_groups_echo_the_request_counts_in_order() -> None:
     assert [(g.kind, g.count) for g in groups] == [("work_item", 17), ("release", 0)]
     assert groups[0].changes == ["PRJ-1 merged", "p1 blocked"]
     assert groups[1].changes == ["2.4 tagged"]
-    assert lines_of([], groups) == "PRJ-1 merged\np1 blocked\n2.4 tagged"
+    assert lines_of([], groups, []) == "PRJ-1 merged\np1 blocked\n2.4 tagged"
 
 
 def test_clean_lines_caps_count_and_length() -> None:
@@ -101,3 +102,27 @@ def test_clean_lines_caps_count_and_length() -> None:
     assert len(lines) == MAX_LINES
     assert len(lines[0]) == MAX_LINE_CHARS
     assert lines[0].endswith("…")
+
+
+def test_chat_sections_follow_the_fixed_headings_and_only_the_chat_mode() -> None:
+    output = ModelOutput.model_validate(
+        {
+            "summary": "s",
+            "participants_mentioned": [],
+            "rationale": "r",
+            "chat": [
+                {"heading": "Decisions", "lines": ["- p1 agreed to ship on Friday"]},
+                {"heading": "questions", "lines": [" who owns the rollout? "]},
+                {"heading": "unknown", "lines": ["dropped"]},
+            ],
+        }
+    )
+    sections = chat_sections(output, make_request(mode="chat"))
+    assert [(s.heading, s.lines) for s in sections] == [
+        ("activity", []),
+        ("decisions", ["p1 agreed to ship on Friday"]),
+        ("actions", []),
+        ("questions", ["who owns the rollout?"]),
+    ]
+    assert lines_of([], [], sections) == "p1 agreed to ship on Friday\nwho owns the rollout?"
+    assert chat_sections(output, make_request(mode="thread")) == []
