@@ -180,6 +180,7 @@ async def test_generate_children_run_provider_failures(
         cache=base.cache,
         budgets=base.budgets,
         clock=base.clock,
+        storage=base.storage,
     )
     client = await _client(runtime, settings)
     response = await client.post(PATH, json=_body(), headers=auth)

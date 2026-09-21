@@ -1,13 +1,19 @@
-"""The composition root: settings, middleware, routers, the rendered contract."""
+"""The composition root: settings, middleware, routers, the storage lifecycle, the contract."""
 
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Any
 
 import httpx
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
 from catalyst_ai.capabilities.improve_story import router as improve_story_router
+from catalyst_ai.capabilities.search import router as search_router
+from catalyst_ai.capabilities.summarize import router as summarize_router
+from catalyst_ai.capabilities.translate import router as translate_router
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.health import LiveResponse, ReadyResponse
@@ -17,6 +23,7 @@ from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.clock import SystemClock
 from catalyst_ai.platform.httpserver import RequestIdMiddleware, install_error_handlers
 from catalyst_ai.platform.runtime import RuntimeContext
+from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
 
 CONTRACT_VERSION = "0.1.0"
@@ -28,6 +35,8 @@ PLATFORM_ERROR_CODES = (
     ErrorCode.INTERNAL_ERROR.value,
 )
 
+STORAGE_COMMAND_TIMEOUT_S = 15.0
+log = logging.getLogger(__name__)
 health = APIRouter(tags=["health"])
 
 
@@ -56,9 +65,10 @@ async def live() -> LiveResponse:
         "x-error-codes": [],
     },
 )
-async def ready() -> ReadyResponse:
+async def ready(request: Request) -> ReadyResponse:
     """Report whether the process can serve; every dependency it has answers."""
-    checks = {"settings": True}
+    runtime: RuntimeContext = request.app.state.runtime
+    checks = {"settings": True, "storage": await runtime.storage.ready()}
     return ReadyResponse(status="ready" if all(checks.values()) else "not_ready", checks=checks)
 
 
@@ -102,12 +112,33 @@ def default_runtime(
             clock, settings.tenant_budget_default_micros_per_day, settings.tenant_concurrency_max
         ),
         clock=clock,
+        storage=PostgresStorage(
+            settings.database_url.get_secret_value(),
+            clock,
+            settings.database_pool_max,
+            STORAGE_COMMAND_TIMEOUT_S,
+        ),
     )
+
+
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
+    storage = app.state.runtime.storage
+    if isinstance(storage, PostgresStorage):
+        try:
+            await storage.connect()
+        except StorageUnavailableError as error:
+            log.warning("storage unavailable at startup", extra={"kind": str(error)})
+    yield
+    if isinstance(storage, PostgresStorage):
+        await storage.close()
 
 
 def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> FastAPI:
     """Assemble the app: request ids, the service token, the handlers, the routers, the runtime."""
-    app = FastAPI(title=TITLE, version=CONTRACT_VERSION, docs_url=None, redoc_url=None)
+    app = FastAPI(
+        title=TITLE, version=CONTRACT_VERSION, docs_url=None, redoc_url=None, lifespan=_lifespan
+    )
     app.state.runtime = runtime or default_runtime(settings)
     app.add_middleware(ServiceTokenMiddleware, tokens=settings.service_tokens)
     app.add_middleware(RequestIdMiddleware)
@@ -115,4 +146,7 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(health)
     app.include_router(improve_story_router)
     app.include_router(generate_children_router)
+    app.include_router(search_router)
+    app.include_router(summarize_router)
+    app.include_router(translate_router)
     return app

@@ -1,6 +1,8 @@
 """GeminiProvider: the port over Gemini's REST API with deadline, retries, breaker and cost."""
 
+import math
 from collections.abc import AsyncIterator
+from types import MappingProxyType
 from typing import Any
 
 import httpx
@@ -23,6 +25,12 @@ from catalyst_ai.providers.port import (
 API_VERSION = "v1beta"
 KEY_HEADER = "x-goog-api-key"
 CHARS_PER_TOKEN = 4
+EMBED_METHOD = "batchEmbedContents"
+GENERATE_METHOD = "generateContent"
+EMBED_TASKS = MappingProxyType({"document": "RETRIEVAL_DOCUMENT", "query": "RETRIEVAL_QUERY"})
+EMBED_DIMENSIONS = 768
+SHAPE_NO_EMBEDDINGS = "no embeddings in the response"
+SHAPE_WRONG_SIZE = "an embedding of the wrong size"
 BREAKER_FAILURES = 5
 BREAKER_OPEN_SECONDS = 30
 MS_PER_SECOND = 1000
@@ -43,6 +51,27 @@ def _schema_for_provider(schema: dict[str, object]) -> dict[str, object]:
         else:
             cleaned[key] = value
     return cleaned
+
+
+def build_embed_body(request: EmbedRequest, model_id: str) -> dict[str, Any]:
+    """Build the batch body: one embed request per text, the task type and the dimensions."""
+    return {
+        "requests": [
+            {
+                "model": f"models/{model_id}",
+                "content": {"parts": [{"text": text}]},
+                "taskType": EMBED_TASKS[request.purpose],
+                "outputDimensionality": EMBED_DIMENSIONS,
+            }
+            for text in request.texts
+        ]
+    }
+
+
+def normalise(vector: list[float]) -> list[float]:
+    """Scale to unit length; the provider's reduced-dimension vectors are not normalised."""
+    norm = math.sqrt(sum(value * value for value in vector))
+    return [value / norm for value in vector] if norm else vector
 
 
 def build_body(request: GenerateRequest) -> dict[str, Any]:
@@ -88,9 +117,9 @@ class GeminiProvider:
             model_id, Breaker(self._clock, BREAKER_FAILURES, BREAKER_OPEN_SECONDS)
         )
 
-    def _url(self, spec: ModelSpec) -> str:
+    def _url(self, spec: ModelSpec, method: str = GENERATE_METHOD) -> str:
         base = self._settings.provider_gemini_base_url.rstrip("/")
-        return f"{base}/{API_VERSION}/models/{spec.model_id}:generateContent"
+        return f"{base}/{API_VERSION}/models/{spec.model_id}:{method}"
 
     def _headers(self) -> dict[str, str]:
         key = self._settings.provider_gemini_api_key
@@ -103,14 +132,14 @@ class GeminiProvider:
         response.raise_for_status()
         return response
 
-    async def _call_with_guards(self, spec: ModelSpec, request: GenerateRequest) -> httpx.Response:
+    async def _call_with_guards(
+        self, spec: ModelSpec, url: str, body: dict[str, Any], timeout_ms: int, request_id: str
+    ) -> httpx.Response:
         breaker = self._breaker(spec.model_id)
         breaker.before_call()
         try:
             response = await retry_async(
-                lambda: self._post(
-                    self._url(spec), build_body(request), request.timeout_ms / MS_PER_SECOND
-                ),
+                lambda: self._post(url, body, timeout_ms / MS_PER_SECOND),
                 self._policy,
                 errors.is_retryable,
                 self._rng,
@@ -118,11 +147,11 @@ class GeminiProvider:
         except httpx.HTTPStatusError as error:
             breaker.record_failure()
             raise errors.from_status(
-                error.response.status_code, len(error.response.content), request.request_id
+                error.response.status_code, len(error.response.content), request_id
             ) from error
         except httpx.HTTPError as error:
             breaker.record_failure()
-            raise errors.from_transport(error, request.request_id) from error
+            raise errors.from_transport(error, request_id) from error
         breaker.record_success()
         return response
 
@@ -131,7 +160,9 @@ class GeminiProvider:
         spec = aliases.resolve(request.alias, self._settings)
         started = self._clock.now()
         try:
-            response = await self._call_with_guards(spec, request)
+            response = await self._call_with_guards(
+                spec, self._url(spec), build_body(request), request.timeout_ms, request.request_id
+            )
         except BreakerOpenError as error:
             raise errors.from_transport(error, request.request_id) from error
         latency_ms = int((self._clock.now() - started).total_seconds() * MS_PER_SECOND)
@@ -144,15 +175,32 @@ class GeminiProvider:
         raise NotImplementedError(message)
 
     async def embed(self, request: EmbedRequest) -> EmbedResult:
-        """Embeddings arrive with the retrieval package; until then the port refuses it."""
-        del request
-        message = "embeddings are not implemented by this adapter yet"
-        raise NotImplementedError(message)
+        """Embed the texts in one batch call; tokens are estimated, the API reports none."""
+        spec = aliases.resolve(request.alias, self._settings)
+        request_id = f"embed-{request.capability}"
+        started = self._clock.now()
+        try:
+            response = await self._call_with_guards(
+                spec,
+                self._url(spec, EMBED_METHOD),
+                build_embed_body(request, spec.model_id),
+                request.timeout_ms,
+                request_id,
+            )
+        except BreakerOpenError as error:
+            raise errors.from_transport(error, request_id) from error
+        latency_ms = int((self._clock.now() - started).total_seconds() * MS_PER_SECOND)
+        tokens = sum(self.count_tokens(request.alias, text) for text in request.texts)
+        return _parse_embed(response.json(), spec, tokens, latency_ms, request_id)
 
     def count_tokens(self, alias: ModelAlias, text: str) -> int:
         """Estimate tokens by characters; the provider's tokeniser earns a register row later."""
         del alias
         return max(1, len(text) // CHARS_PER_TOKEN)
+
+    def model_id(self, alias: ModelAlias) -> str:
+        """Return the register's concrete id for the alias under the current settings."""
+        return aliases.resolve(alias, self._settings).model_id
 
 
 def _parse_generate(
@@ -181,3 +229,25 @@ def _parse_generate(
     return GenerateResult(
         text=text, model_id=str(payload.get("modelVersion") or spec.model_id), usage=usage
     )
+
+
+def _parse_embed(
+    payload: dict[str, Any], spec: ModelSpec, tokens: int, latency_ms: int, request_id: str
+) -> EmbedResult:
+    embeddings = payload.get("embeddings")
+    if not isinstance(embeddings, list) or not embeddings:
+        raise errors.from_shape(SHAPE_NO_EMBEDDINGS, request_id)
+    vectors = []
+    for entry in embeddings:
+        values = entry.get("values") if isinstance(entry, dict) else None
+        if not isinstance(values, list) or len(values) != EMBED_DIMENSIONS:
+            raise errors.from_shape(SHAPE_WRONG_SIZE, request_id)
+        vectors.append(normalise([float(v) for v in values]))
+    usage = Usage(
+        input_tokens=tokens,
+        output_tokens=0,
+        cost_micros=spec.cost_micros(tokens, 0),
+        latency_ms=latency_ms,
+        cache_hit=False,
+    )
+    return EmbedResult(vectors=vectors, model_id=spec.model_id, usage=usage)

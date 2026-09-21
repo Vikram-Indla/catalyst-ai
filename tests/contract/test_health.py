@@ -18,7 +18,7 @@ async def test_health_ready_returns_ready_with_checks(client: httpx.AsyncClient)
     assert response.status_code == 200
     ready = ReadyResponse.model_validate(response.json())
     assert ready.status == "ready"
-    assert ready.checks == {"settings": True}
+    assert ready.checks == {"settings": True, "storage": True}
 
 
 async def test_health_live_echoes_a_supplied_request_id(client: httpx.AsyncClient) -> None:

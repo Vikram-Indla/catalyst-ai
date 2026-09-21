@@ -10,3 +10,4 @@ coverage.json
 .env
 .evals/
 dist/
+.hypothesis/

@@ -11,7 +11,7 @@ WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
 
-.PHONY: coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test storage evals security selftest verify verify-fast ci serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test storage evals security selftest verify verify-fast ci serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -30,7 +30,7 @@ lint:
 	$(RUN) mypy src tools tests
 	@for set in evals/*/graders.py; do $(RUN) mypy "$$set" || exit 1; done
 	$(RUN) lint-imports
-	$(RUN) python -m tools.checks.gate --skip coverage
+	$(RUN) python -m tools.checks.gate --skip coverage,budgets
 
 lint-fast:
 	$(RUN) ruff format --check src tests tools
@@ -53,7 +53,7 @@ test:
 	$(RUN) pytest --cov --cov-report=term-missing --cov-report=json:coverage.json --cov-fail-under=90
 
 storage:
-	@if ls db/migrations/*.sql >/dev/null 2>&1; then $(RUN) pytest tests/storage -q; else echo "storage: no migrations yet, nothing to test"; fi
+	$(RUN) pytest tests/storage -q
 
 evals:
 	@if ls evals/*/set.jsonl >/dev/null 2>&1; then $(RUN) python -m tools.evals; else echo "evals: no eval set yet, nothing to run"; fi
@@ -70,7 +70,7 @@ selftest:
 coverage-check:
 	$(RUN) python -m tools.checks.gate --only coverage
 
-verify: lint api-check ledgers-check test coverage-check storage evals security selftest
+verify: lint api-check ledgers-check test coverage-check storage evals budgets-check security selftest
 	@echo "VERIFY GREEN"
 
 verify-fast: lint-fast
@@ -80,7 +80,7 @@ verify-fast: lint-fast
 ci:
 	MSYS_NO_PATHCONV=1 docker run --rm -t \
 		-v "$(WORKDIR_HOST)":/work -w /work \
-		-v /var/run/docker.sock:/var/run/docker.sock \
+		-v /var/run/docker.sock:/var/run/docker.sock -e TESTCONTAINERS_RYUK_DISABLED=true \
 		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
 		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
 		$(CI_IMAGE) bash -c "$$($(RUN) python -m tools.ci_steps)"
@@ -111,3 +111,6 @@ image:
 
 image-scan: image
 	trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress --skip-version-check catalyst-ai:local
+
+budgets-check:
+	$(RUN) python -m tools.checks.gate --only budgets

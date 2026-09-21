@@ -29,12 +29,15 @@ def _calls_port(node: ast.AST) -> bool:
 
 
 def order_violations(stages_seen: list[str], where: str) -> list[Violation]:
-    """Report stages out of order or a required stage missing from a run function."""
-    expected = [
-        s
-        for s in rules.PIPELINE_STAGES
-        if s in stages_seen or s not in rules.PIPELINE_OPTIONAL_STAGES
-    ]
+    """Report stages out of order or a required stage missing from a run function.
+
+    A retrieval-only pipeline has no generation trio; a pipeline with any of the trio needs all.
+    """
+    generation = any(s in rules.PIPELINE_GENERATION_STAGES for s in stages_seen)
+    optional = rules.PIPELINE_OPTIONAL_STAGES | (
+        frozenset() if generation else rules.PIPELINE_GENERATION_STAGES
+    )
+    expected = [s for s in rules.PIPELINE_STAGES if s in stages_seen or s not in optional]
     if stages_seen != expected:
         return [Violation(where, 1, f"stages {stages_seen} must be {expected}")]
     return []

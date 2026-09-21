@@ -1,8 +1,12 @@
 """The authored stand-in: a rule-based, provider-shaped answer for fixtures while no key exists."""
 
+import hashlib
 import json
 import re
 from typing import Any
+
+from tools.authored_envelope import envelope
+from tools.authored_threads import answer_summary, answer_translation
 
 CHARS_PER_TOKEN = 4
 FENCE = re.compile(r"<<<(?P<name>[a-z_]+)>>>\n(?P<body>.*?)\n<<<end (?P=name)>>>", re.S)
@@ -86,8 +90,15 @@ def _shorten(text: str) -> str:
 
 def answer(body: dict[str, Any]) -> dict[str, Any]:
     """Build a provider-shaped response for the request body, deterministic and well-behaved."""
-    if CHILD_LEVEL.search("".join(p.get("text", "") for p in body["contents"][0]["parts"])):
-        return answer_children(body)
+    turn = "".join(p.get("text", "") for p in body["contents"][0]["parts"])
+    for marker, builder in DISPATCH:
+        if marker in turn:
+            return builder(body)
+    return answer_rewrite(body)
+
+
+def answer_rewrite(body: dict[str, Any]) -> dict[str, Any]:
+    """Build the improve-story answer: the editorial operation the prompt names."""
     fields, mode = _segments(body)
     description = fields.get("description", "")
     title = fields.get("title", "")
@@ -135,15 +146,7 @@ def answer(body: dict[str, Any]) -> dict[str, Any]:
 
 
 def _envelope(body: dict[str, Any], text: str) -> dict[str, Any]:
-    prompt_chars = sum(len(p.get("text", "")) for c in body["contents"] for p in c["parts"])
-    return {
-        "candidates": [{"content": {"parts": [{"text": text}]}, "finishReason": "STOP"}],
-        "usageMetadata": {
-            "promptTokenCount": prompt_chars // CHARS_PER_TOKEN,
-            "candidatesTokenCount": len(text) // CHARS_PER_TOKEN,
-        },
-        "modelVersion": "authored-stand-in",
-    }
+    return envelope(body, text)
 
 
 CHILD_LEVEL = re.compile(
@@ -224,3 +227,43 @@ def answer_children(body: dict[str, Any]) -> dict[str, Any]:
         elif all(c["duplicate_of"] for c in output["candidates"]):
             output["empty_reason"] = "siblings_cover_it"
     return _envelope(body, json.dumps(output, ensure_ascii=False))
+
+
+EMBED_DIMENSIONS = 768
+EMBED_STEM = 4
+EMBED_ROUND = 5
+
+
+def _bucket(token: str) -> tuple[int, float]:
+    digest = hashlib.sha256(token.encode()).digest()
+    return int.from_bytes(digest[:2], "big") % EMBED_DIMENSIONS, 1.0 if digest[2] % 2 else -1.0
+
+
+def authored_vector(text: str) -> list[float]:
+    """Hash stems and character trigrams into a unit vector: lexical closeness, no semantics."""
+    values = [0.0] * EMBED_DIMENSIONS
+    words = [w for w in re.findall(r"[^\W_]+", text.lower()) if len(w) > 1]
+    for word in words:
+        index, sign = _bucket("w:" + word[:EMBED_STEM])
+        values[index] += sign
+        for start in range(max(1, len(word) - 2)):
+            index, sign = _bucket("t:" + word[start : start + 3])
+            values[index] += sign * 0.5
+    norm = sum(v * v for v in values) ** 0.5
+    return [round(v / norm, EMBED_ROUND) if norm else 0.0 for v in values]
+
+
+def answer_embed(body: dict[str, Any]) -> dict[str, Any]:
+    """Build a provider-shaped batch embedding response: one vector per request, in order."""
+    texts = [
+        "".join(part.get("text", "") for part in entry.get("content", {}).get("parts", []))
+        for entry in body.get("requests", [])
+    ]
+    return {"embeddings": [{"values": authored_vector(text)} for text in texts]}
+
+
+DISPATCH = (
+    ("<<<child_level>>>", answer_children),
+    ("<<<thread>>>", answer_summary),
+    ("Target language:", answer_translation),
+)

@@ -36,9 +36,7 @@ def _test_violations(root: Path) -> list[Violation]:
     tests = root / rules.TESTS
     if not tests.exists():
         return violations
-    for path in sorted(tests.rglob("*")):
-        if not path.is_file() or any(part in rules.SKIP_DIRS for part in path.parts):
-            continue
+    for path in walk(root, rules.TESTS, suffix=""):
         parts = path.relative_to(tests).parts
         if len(parts) == 1 and parts[0] not in TEST_ROOT_FILES:
             violations.append(

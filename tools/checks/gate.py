@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import importlib
 import io
+import os
 import sys
 import tokenize
 from dataclasses import dataclass
@@ -95,16 +96,16 @@ def relative(path: Path, root: Path) -> str:
 
 
 def walk(root: Path, *subdirs: Path, suffix: str = ".py") -> list[Path]:
-    """Every file with the suffix under the subdirs, skipping the skip list, sorted."""
+    """Every file with the suffix under the subdirs, sorted; skip directories are never entered."""
     found: list[Path] = []
     for sub in subdirs:
         base = root / sub
         if not base.exists():
             continue
-        for path in sorted(base.rglob(f"*{suffix}")):
-            if not any(part in rules.SKIP_DIRS for part in path.relative_to(root).parts):
-                found.append(path)
-    return found
+        for directory, names, files in os.walk(base):
+            names[:] = sorted(n for n in names if n not in rules.SKIP_DIRS)
+            found.extend(Path(directory) / f for f in sorted(files) if f.endswith(suffix))
+    return sorted(found)
 
 
 def python_files(root: Path) -> list[Path]:
@@ -146,11 +147,11 @@ def main(argv: list[str]) -> int:
     root = Path.cwd()
     fast = "--fast" in argv
     only = argv[argv.index("--only") + 1] if "--only" in argv else None
-    skip = argv[argv.index("--skip") + 1] if "--skip" in argv else None
+    skip = argv[argv.index("--skip") + 1].split(",") if "--skip" in argv else []
     names = [
         name
         for name in CHECKS
-        if (not fast or name in FAST) and (only is None or name == only) and name != skip
+        if (not fast or name in FAST) and (only is None or name == only) and name not in skip
     ]
     for name in names:
         violations = run_check(name, root)

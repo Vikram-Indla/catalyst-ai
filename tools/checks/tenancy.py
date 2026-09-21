@@ -14,6 +14,7 @@ CREATE_POLICY = "CREATE POLICY"
 ORG_COLUMN = "organization_id"
 ORG_INDEX = re.compile(r"CREATE (?:UNIQUE )?INDEX .* ON (?P<table>\w+)\s*\((?P<cols>[^)]*)\)", re.I)
 CACHE_KEY_MARKER = "def cache_key("
+PLACEHOLDER = re.compile(r"\{(?P<name>\w+)\}")
 
 
 def tenant_tables(sql: str) -> dict[str, str]:
@@ -47,6 +48,7 @@ def query_violations(sql: str, tables: set[str], where: str) -> list[Violation]:
     violations = []
     for number, statement in enumerate(filter(None, (s.strip() for s in sql.split(";"))), start=1):
         touched = [t for t in tables if re.search(rf"\b{t}\b", statement)]
+        touched += [f"{{{m.group('name')}}}" for m in PLACEHOLDER.finditer(statement)]
         if touched and ORG_COLUMN not in statement:
             violations.append(
                 Violation(where, number, f"statement on {touched[0]} without {ORG_COLUMN}")

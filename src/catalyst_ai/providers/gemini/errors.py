@@ -78,3 +78,9 @@ def is_retryable(error: Exception) -> bool:
     return (
         isinstance(error, httpx.HTTPStatusError) and error.response.status_code >= HTTP_SERVER_ERROR
     )
+
+
+def from_shape(reason: str, request_id: str) -> Error:
+    """Map a response the adapter cannot read to the catalog; the reason is a fixed phrase."""
+    log.warning("provider response shape", extra={"request_id": request_id, "reason": reason})
+    return Error(ErrorCode.PROVIDER_UNAVAILABLE, "the provider answered with an unreadable body")

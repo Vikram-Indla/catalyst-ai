@@ -1,5 +1,7 @@
 """Doubles for the pipeline: a scripted provider behind the port and a runtime around it."""
 
+import hashlib
+import re
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime
 from uuid import UUID
@@ -13,6 +15,7 @@ from catalyst_ai.contract.improve_story import ImproveStoryMode, ImproveStoryReq
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.runtime import RuntimeContext
+from catalyst_ai.platform.storage import MemoryStorage, Storage
 from catalyst_ai.providers.port import (
     EmbedRequest,
     EmbedResult,
@@ -25,6 +28,19 @@ from catalyst_ai.providers.port import (
 ORG = UUID("11111111-1111-7111-8111-111111111111")
 OTHER_ORG = UUID("22222222-2222-7222-8222-222222222222")
 GOOD_TEXT = '{"description": "Improved text.", "acceptance_criteria": null, "rationale": "Tightened the phrasing.", "changed": true}'
+DOUBLE_MODEL = "double"
+EMBED_DIMENSIONS = 64
+TOKEN = re.compile(r"[^\W_]+")
+
+
+def hashed_vector(text: str, dimensions: int = EMBED_DIMENSIONS) -> list[float]:
+    """A bag-of-words vector: tokens hashed into buckets; similar texts land close together."""
+    values = [0.0] * dimensions
+    for token in TOKEN.findall(text.lower()):
+        digest = hashlib.sha256(token[:4].encode()).digest()
+        values[digest[0] % dimensions] += 1.0 if digest[1] % 2 else -1.0
+    norm = sum(v * v for v in values) ** 0.5
+    return [v / norm for v in values] if norm else values
 
 
 class FrozenClock:
@@ -41,6 +57,7 @@ class ScriptedProvider:
     def __init__(self, texts: list[str]) -> None:
         self.texts = list(texts)
         self.calls: list[GenerateRequest] = []
+        self.embed_calls: list[EmbedRequest] = []
 
     async def generate(self, request: GenerateRequest) -> GenerateResult:
         self.calls.append(request)
@@ -54,10 +71,20 @@ class ScriptedProvider:
         raise NotImplementedError
 
     async def embed(self, request: EmbedRequest) -> EmbedResult:
-        raise NotImplementedError
+        self.embed_calls.append(request)
+        tokens = sum(max(1, len(t) // 4) for t in request.texts)
+        usage = Usage(
+            input_tokens=tokens, output_tokens=0, cost_micros=tokens, latency_ms=3, cache_hit=False
+        )
+        return EmbedResult(
+            vectors=[hashed_vector(t) for t in request.texts], model_id=DOUBLE_MODEL, usage=usage
+        )
 
     def count_tokens(self, alias: ModelAlias, text: str) -> int:
         return max(1, len(text) // 4)
+
+    def model_id(self, alias: ModelAlias) -> str:
+        return DOUBLE_MODEL
 
 
 def make_settings(**overrides: object) -> Settings:
@@ -71,7 +98,9 @@ def make_settings(**overrides: object) -> Settings:
     return Settings.model_validate(values)
 
 
-def make_runtime(provider: ScriptedProvider, settings: Settings | None = None) -> RuntimeContext:
+def make_runtime(
+    provider: ScriptedProvider, settings: Settings | None = None, storage: Storage | None = None
+) -> RuntimeContext:
     resolved = settings or make_settings()
     clock = FrozenClock()
     return RuntimeContext(
@@ -82,6 +111,7 @@ def make_runtime(provider: ScriptedProvider, settings: Settings | None = None) -
             clock, resolved.tenant_budget_default_micros_per_day, resolved.tenant_concurrency_max
         ),
         clock=clock,
+        storage=storage or MemoryStorage(clock),
     )
 
 

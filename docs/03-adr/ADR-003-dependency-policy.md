@@ -38,8 +38,8 @@ fails a licence outside the allowlist (MIT, BSD, Apache-2.0, PSF, ISC, MPL-2.0).
 | `pydantic` (v2) | every boundary model, validation, JSON schema | `msgspec` (faster, no OpenAPI integration), dataclasses (no validation) |
 | `pydantic-settings` | the typed settings object from the environment | hand-rolled `os.environ` parsing |
 | `httpx` | every outbound HTTP call; async; a pluggable transport that makes recording possible | `aiohttp` (no transport seam for replay), provider SDKs alone (hide the wire) |
-| `asyncpg` | the PostgreSQL driver; async; typed parameters | `psycopg` (fine; one driver only), any ORM (banned) |
-| `pgvector` (Python) | the vector type codec for `asyncpg` | hand-rolled encoding |
+| `asyncpg`, `asyncpg-stubs` (dev) | the PostgreSQL driver; async; typed parameters; the stubs for `mypy --strict` | `psycopg` (fine; one driver only), any ORM (banned) |
+| `pgvector` (Python) | the vector type codec for `asyncpg` (brings `numpy`); no `py.typed` → the contained `ignore_missing_imports` under `platform/storage`, the database adapter | hand-rolled encoding |
 | `opentelemetry-api`, `-sdk`, `-instrumentation-fastapi`, `-instrumentation-httpx` | traces and metrics, the standard | vendor SDKs |
 | `tiktoken` or the provider's tokeniser (adapter-local) | token counting for budgets before a call | estimating by characters |
 | `python-docx`, `python-pptx`, `pypdf` (adapter-local under `retrieval/parsers`) | document parsing for ingest; no `py.typed` → the contained `ignore_missing_imports` | shelling out to converters (unbounded), cloud parsers (content leaves) |

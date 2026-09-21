@@ -1,4 +1,4 @@
-"""The runner: parse, validate, assemble, call, validate_output, postprocess; cache in front."""
+"""The runner: parse, validate, [retrieve], assemble, call, validate_output, postprocess."""
 
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -15,6 +15,7 @@ class Stages[Req: BaseModel, Parsed, Out, Res: BaseModel]:
 
     parse: Callable[[Req, str, str | None], Parsed]
     validate: Callable[[Parsed, RuntimeContext], str]
+    retrieve: Callable[[Parsed, RuntimeContext], Awaitable[Parsed]] | None
     assemble: Callable[[Parsed, RuntimeContext], GenerateRequest]
     call: Callable[[GenerateRequest, RuntimeContext], Awaitable[GenerateResult]]
     validate_output: Callable[
@@ -33,12 +34,14 @@ async def run_stages[Req: BaseModel, Parsed, Out, Res: BaseModel](
     request_id: str,
     idempotency: str | None,
 ) -> Res:
-    """Run the stages in order with the cache in front of the call."""
+    """Run the stages in order with the cache in front of retrieval and the call."""
     parsed = stages.parse(request, request_id, idempotency)
     key = stages.validate(parsed, runtime)
     cached = runtime.cache.get(key)
     if cached is not None:
         return stages.from_cache(cached, request_id)
+    if stages.retrieve is not None:
+        parsed = await stages.retrieve(parsed, runtime)
     generate = stages.assemble(parsed, runtime)
     result = await stages.call(generate, runtime)
     output, result = await stages.validate_output(result, generate, parsed, runtime)

@@ -11,19 +11,21 @@ and is the contract (`RULE-003 §2`).
 | `ai.contract.version_mismatch` | 400 | envelope naming the served `capability_version` | every capability operation |
 | `ai.capability.unknown` | 404 | envelope | routing |
 | `ai.capability.disabled` | 503 | envelope; no `retry_after` — the switch is deliberate | stage 2 of every pipeline (`improve_story.run`) |
-| `ai.input.rejected` | 422 | envelope with a reason class (`restricted_pattern`, `control_sequence`; later `parser_failure`, `unsupported_kind`) — never the value | stage 2 (`improve_story.run`), parsers later |
+| `ai.input.rejected` | 422 | envelope with a reason class (`restricted_pattern`, `control_sequence`, `hierarchy_violation`, `target_language_required`; later `parser_failure`, `unsupported_kind`) — never the value | stage 2 of every pipeline, parsers later |
 | `ai.input.too_large` | 413 | envelope with the limit | stage 2 |
-| `ai.budget.exceeded` | 429 | envelope with `retry_after`; `Retry-After` header | stage 2 |
+| `ai.budget.exceeded` | 429 | envelope with `retry_after`; `Retry-After` header; with the detail `index_budget` when an organisation's corpus is full | stage 2; `index.upsert` |
 | `ai.provider.unavailable` | 503 | envelope with `retry_after`; never a fabricated result | adapters (breaker open, connection failure) |
 | `ai.provider.timeout` | 504 | envelope with `retry_after` | adapters |
 | `ai.provider.rejected` | 422 | envelope with the provider's reason class (content policy); never the provider's message | adapters |
 | `ai.provider.quota` | 429 | envelope with `retry_after` | adapters |
 | `ai.output.invalid` | 502 | envelope; the completion failed the schema twice | stage 6 |
-| `ai.output.unsafe` | 502 | envelope; the completion failed the leakage scanner; a security event is logged | stage 6 |
+| `ai.output.unsafe` | 502 | envelope; the completion failed the leakage scanner, or a summary named a participant outside the thread (`participant_not_in_thread`); a security event is logged | stage 6; `summarize.run` stage 7 |
+| `ai.index.document_too_large` | 413 | envelope with one `details` entry (`document_too_large`, how many) — nothing was embedded | `index.upsert`, before any provider call |
+| `ai.index.unavailable` | 503 | envelope with `retry_after`; the database did not answer; never a partial hit list | the retrieval package (`index.*`, `search.run`, the retrieve stage of `generate-children`) |
 | `internal.error` | 500 | envelope with `request_id` and nothing else | the app-level handler |
 
 Codes that arrive with later packages, so the design is visible now: `ai.input.unsupported` (415,
-`knowledge-ingest`), `ai.index.unavailable` and `ai.index.rebuilding` (503 with `retry_after`, the
-retrieval stage), `ai.job.not_found` (404, also for another organisation's job), `ai.job.expired`
+`knowledge-ingest`), `ai.index.rebuilding` (503 with `retry_after`, the
+retrieval stage during a rebuild), `ai.job.not_found` (404, also for another organisation's job), `ai.job.expired`
 (410, resubmit), `ai.job.failed` (200 on `jobs.get` with `status: failed` and the nested envelope).
 A code is declared in `contract/errors.py` only when something raises it (`tools/checks/errors`).

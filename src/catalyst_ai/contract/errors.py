@@ -23,6 +23,8 @@ class ErrorCode(StrEnum):
     PROVIDER_QUOTA = "ai.provider.quota"
     OUTPUT_INVALID = "ai.output.invalid"
     OUTPUT_UNSAFE = "ai.output.unsafe"
+    INDEX_DOCUMENT_TOO_LARGE = "ai.index.document_too_large"
+    INDEX_UNAVAILABLE = "ai.index.unavailable"
     INTERNAL_ERROR = "internal.error"
 
 
@@ -42,6 +44,8 @@ HTTP_STATUS = MappingProxyType(
         ErrorCode.PROVIDER_QUOTA: 429,
         ErrorCode.OUTPUT_INVALID: 502,
         ErrorCode.OUTPUT_UNSAFE: 502,
+        ErrorCode.INDEX_DOCUMENT_TOO_LARGE: 413,
+        ErrorCode.INDEX_UNAVAILABLE: 503,
         ErrorCode.INTERNAL_ERROR: 500,
     }
 )

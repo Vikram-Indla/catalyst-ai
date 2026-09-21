@@ -10,6 +10,6 @@ has no `Reviewed` threat model is a finding.
 | THREAT-001 | platform — token, storage, jobs, retention | with the scaffold |
 | THREAT-002 | rewrite | Draft — `THREAT-002-rewrite.md`, with `improve-story` v1 |
 | THREAT-003 | structured generation | Draft — `THREAT-003-structured-generation.md`, with `generate-children` v1 |
-| THREAT-004 | summaries | with `summarize-comments` |
-| THREAT-005 | retrieval and knowledge | with `similar-items` |
+| THREAT-004 | summaries and translation | Draft — `THREAT-004-summaries.md`, with `summarize` and `translate` v1 |
+| THREAT-005 | retrieval and knowledge | Draft — `THREAT-005-retrieval.md`, with `search` v1 |
 | THREAT-006 | assistant | with `assistant-chat` |

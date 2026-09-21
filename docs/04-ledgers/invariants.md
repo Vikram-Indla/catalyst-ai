@@ -14,7 +14,7 @@ Criticality: **Critical** = a breach is a security, tenancy or data-integrity in
 | INV-001 | Every tenant table carries `organization_id NOT NULL`, indexed | platform/storage | `tools/checks/tenancy`, `tools/checks/migrations` | Critical | ADR-002, ADR-006 |
 | INV-002 | Every query on a tenant table is scoped by `organization_id` | platform/storage | `tools/checks/tenancy`, `test_every_storage_query_is_tenant_scoped` | Critical | ADR-002 |
 | INV-003 | Every tenant table has RLS enabled with the `app.org_id` policy | platform/storage | `test_every_tenant_table_has_rls` | Critical | ADR-006 |
-| INV-004 | The application database role cannot bypass RLS | platform/storage | `catalyst-ai check` | Critical | ADR-006 |
+| INV-004 | The application database role cannot bypass RLS | platform/storage | the storage suite's raw-connection case (`SET ROLE catalyst_ai_app`, no `WHERE`: only the set organisation's rows; a write for another organisation refused); `FORCE ROW LEVEL SECURITY` on every tenant table | Critical | ADR-006 |
 | INV-005 | No module imports a product schema or configures the product database | boundary | `test_no_product_schema_import`, `test_no_product_database_config` | Critical | ADR-002 |
 | INV-006 | The service never calls the backend — no URL, no credential, no callback | boundary | `test_service_never_calls_backend` | Critical | ADR-002, ADR-007 |
 | INV-007 | Every request field declares a data class | contract | `tools/checks/classification`, `test_every_request_field_is_classified` | Critical | ARCH-002 §3 |

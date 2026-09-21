@@ -1,4 +1,4 @@
-"""The `catalyst-ai` entry point: serve · check · worker · migrate."""
+"""The `catalyst-ai` entry point: serve · check · migrate · reembed · retention · worker."""
 
 import argparse
 import asyncio
@@ -9,11 +9,14 @@ from pathlib import Path
 import uvicorn
 from pydantic import ValidationError
 
-from catalyst_ai.app import create_app, health
+from catalyst_ai.app import create_app, default_runtime, health
 from catalyst_ai.config import Settings, load_settings
 from catalyst_ai.platform.logging import configure_logging
+from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
+from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
 TOOL_VERSIONS = Path(".tool-versions")
+MIGRATIONS = Path("db/migrations")
 PYPROJECT = Path("pyproject.toml")
 DOCKERFILE = Path("Dockerfile")
 EXIT_OK = 0
@@ -77,25 +80,65 @@ def check(root: Path, *, load: bool) -> int:
     return EXIT_OK
 
 
+async def _migrate(settings: Settings) -> int:
+    applied = await migrate(settings.database_url.get_secret_value(), Path.cwd() / MIGRATIONS)
+    print(f"migrate: {len(applied)} applied " + " ".join(applied))
+    return EXIT_OK
+
+
+async def _job(settings: Settings, command: str) -> int:
+    runtime = default_runtime(settings)
+    storage = runtime.storage
+    if not isinstance(storage, PostgresStorage):
+        return EXIT_FAIL
+    await storage.connect()
+    try:
+        if command == "reembed":
+            report = await reembed(WORK_ITEMS, storage, runtime.provider)
+        else:
+            report = await retention(
+                WORK_ITEMS, storage, runtime.clock, settings.retrieval_document_ttl_days
+            )
+    finally:
+        await storage.close()
+    print(f"{command}: {report.organizations} organisations, {report.documents} documents")
+    return EXIT_OK
+
+
+def _run_command(command: str, settings: Settings) -> int:
+    if command == "serve":
+        asyncio.run(_serve(settings))
+        return EXIT_OK
+    if command == "migrate":
+        return asyncio.run(_migrate(settings))
+    return asyncio.run(_job(settings, command))
+
+
 def main(argv: list[str] | None = None) -> int:
     """Parse the subcommand and run it."""
     parser = argparse.ArgumentParser(prog="catalyst-ai")
     commands = parser.add_subparsers(dest="command", required=True)
-    commands.add_parser("serve")
-    commands.add_parser("worker")
-    commands.add_parser("migrate")
+    for name in ("serve", "worker", "migrate", "reembed", "retention"):
+        commands.add_parser(name)
     check_parser = commands.add_parser("check")
     check_parser.add_argument("--no-env", action="store_true")
     args = parser.parse_args(argv)
     if args.command == "check":
         return check(Path.cwd(), load=not args.no_env)
-    if args.command == "serve":
-        settings = load_settings()
-        configure_logging(settings.log_level.value)
-        asyncio.run(_serve(settings))
-        return EXIT_OK
-    print(f"{args.command}: unavailable until the storage package exists")
-    return EXIT_FAIL
+    if args.command == "worker":
+        print("worker: unavailable until the jobs table exists")
+        return EXIT_FAIL
+    return _with_settings(args.command)
+
+
+def _with_settings(command: str) -> int:
+    settings = load_settings()
+    configure_logging(settings.log_level.value)
+    try:
+        return _run_command(command, settings)
+    except StorageUnavailableError as error:
+        print(f"{command}: the database did not answer ({error})")
+        return EXIT_FAIL
 
 
 if __name__ == "__main__":

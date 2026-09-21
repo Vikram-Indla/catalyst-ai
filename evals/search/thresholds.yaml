@@ -1,0 +1,9 @@
+recall_at_10: 0.85
+mrr: 0.70
+tenant_isolation: 1.0
+provenance_present: 1.0
+kinds_respected: 1.0
+injection_inert: 1.0
+overall: 0.90
+p95_latency_ms: 2000
+p95_cost_micros: 400

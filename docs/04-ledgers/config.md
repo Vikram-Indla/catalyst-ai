@@ -26,6 +26,21 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `CAPABILITY_GENERATE_CHILDREN__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_GENERATE_CHILDREN__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
 | `CAPABILITY_GENERATE_CHILDREN__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_SEARCH` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `search` and the index operations |
+| `CAPABILITY_SEARCH__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch; off also skips the retrieve stage of `generate-children` |
+| `CAPABILITY_SEARCH__CACHE_TTL_SECONDS` | int | no | the descriptor's 0 | ≥ 0 | PUBLIC | Unused by v1 — search results are never cached |
+| `CAPABILITY_SEARCH__TIMEOUT_MS` | int | no | the descriptor's 10000 | > 0; ≤ the job line | PUBLIC | The embedding call's deadline |
+| `CAPABILITY_SUMMARIZE` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `summarize` |
+| `CAPABILITY_SUMMARIZE__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_SUMMARIZE__CACHE_TTL_SECONDS` | int | no | the descriptor's 900 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_SUMMARIZE__TIMEOUT_MS` | int | no | the descriptor's 20000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_TRANSLATE` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `translate` |
+| `CAPABILITY_TRANSLATE__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_TRANSLATE__CACHE_TTL_SECONDS` | int | no | the descriptor's 86400 | ≥ 0 | PUBLIC | Cache and idempotency TTL — a translation of the same text is stable for a day |
+| `CAPABILITY_TRANSLATE__TIMEOUT_MS` | int | no | the descriptor's 15000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `DATABASE_POOL_MAX` | int | no | `8` | positive | PUBLIC | Connections in the pool at most |
+| `RETRIEVAL_INDEX_MAX_CHUNKS_PER_ORGANIZATION` | int | no | `500000` | positive | PUBLIC | An organisation's corpus size in chunks at most; over it `index.upsert` is `ai.budget.exceeded` |
+| `RETRIEVAL_DOCUMENT_TTL_DAYS` | int | no | `400` | positive | PUBLIC | `catalyst-ai retention` forgets documents unseen this long |
 | `TENANT_BUDGET_DEFAULT_MICROS_PER_DAY` | int | no | platform default | positive | PUBLIC | Per-organisation daily spend cap unless overridden |
 | `TENANT_CONCURRENCY_MAX` | int | no | `8` | positive | PUBLIC | Concurrent provider calls per organisation |
 | `JOB_RESULT_TTL_SECONDS` | int | no | `86400` | positive | PUBLIC | Job results expire after this |

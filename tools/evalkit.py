@@ -1,21 +1,37 @@
-"""What the eval harness and the recorder share: an inert runtime over the fixture directory."""
+"""What the eval harness and the recorder share: the registry, an inert runtime, the database."""
 
+import contextlib
 import importlib.util
 import json
-from collections.abc import Awaitable, Callable
+import os
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
 import httpx
 from pydantic import SecretStr
+from testcontainers.core.utils import inside_container
+from testcontainers.postgres import PostgresContainer
 
+from catalyst_ai.capabilities.generate_children import run as generate_children
+from catalyst_ai.capabilities.improve_story import run as improve_story
+from catalyst_ai.capabilities.search import run as search_run
+from catalyst_ai.capabilities.search import run_upsert
+from catalyst_ai.capabilities.summarize import run as summarize
+from catalyst_ai.capabilities.translate import run as translate
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope
+from catalyst_ai.contract.generate_children import GenerateChildrenRequest
+from catalyst_ai.contract.improve_story import ImproveStoryRequest
+from catalyst_ai.contract.search import IndexUpsertRequest, SearchRequest
+from catalyst_ai.contract.summarize import SummarizeRequest
+from catalyst_ai.contract.translate import TranslateRequest
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.clock import SystemClock
 from catalyst_ai.platform.runtime import RuntimeContext
+from catalyst_ai.platform.storage import MemoryStorage, PostgresStorage, Storage, migrate
 from catalyst_ai.providers.gemini import GeminiProvider
 from tools import rules
 
@@ -23,6 +39,12 @@ FIXTURES_ROOT = rules.FIXTURES / "providers" / "gemini"
 INERT_DATABASE = "postgresql://eval:eval@localhost/eval"
 UNLIMITED_MICROS = 10**12
 CLIENT_TIMEOUT_S = 30.0
+DATABASE_VARIABLE = "CATALYST_AI_EVAL_DATABASE_URL"
+DATABASE_IMAGE = "pgvector/pgvector:pg17"
+MIGRATIONS = Path("db/migrations")
+CORPUS_FILE = "corpus.jsonl"
+UPSERT_BATCH = 100
+COMMAND_TIMEOUT_S = 30.0
 
 
 @dataclass(frozen=True)
@@ -77,9 +99,11 @@ def inert_settings(cache_ttl_seconds: int = 0) -> Settings:
 
 
 def runtime_over(
-    transport: httpx.AsyncBaseTransport, settings: Settings | None = None
+    transport: httpx.AsyncBaseTransport,
+    settings: Settings | None = None,
+    storage: Storage | None = None,
 ) -> RuntimeContext:
-    """Build a runtime whose provider talks to the given transport and nothing else."""
+    """Build a runtime over the given transport; storage is in memory unless one is given."""
     resolved = settings or inert_settings()
     clock = SystemClock()
     client = httpx.AsyncClient(timeout=CLIENT_TIMEOUT_S, transport=transport)
@@ -91,6 +115,7 @@ def runtime_over(
             clock, resolved.tenant_budget_default_micros_per_day, resolved.tenant_concurrency_max
         ),
         clock=clock,
+        storage=storage or MemoryStorage(clock),
     )
 
 
@@ -104,4 +129,89 @@ def percentile(values: list[float], share: float) -> float:
 
 
 Pipeline = Callable[..., Awaitable[ResponseEnvelope]]
-Registry = dict[str, tuple[type[RequestEnvelope], Pipeline]]
+Setup = Callable[[RuntimeContext, Path], Awaitable[None]]
+
+
+@dataclass(frozen=True)
+class SetSpec:
+    """How a set runs: its request model, its pipeline, an optional setup, the database need."""
+
+    request: type[RequestEnvelope]
+    pipeline: Pipeline
+    setup: Setup | None = None
+    needs_database: bool = False
+
+
+async def index_corpus(runtime: RuntimeContext, directory: Path) -> None:
+    """Index `corpus.jsonl` through the upsert operation, per organisation, in batches."""
+    lines = [
+        json.loads(line)
+        for line in (directory / CORPUS_FILE).read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    by_organization: dict[str, list[dict[str, object]]] = {}
+    for line in lines:
+        by_organization.setdefault(str(line["organization_id"]), []).append(line)
+    keys = ("external_id", "kind", "title", "text", "data_class", "content_hash")
+    for organization_id, documents in by_organization.items():
+        for start in range(0, len(documents), UPSERT_BATCH):
+            batch = documents[start : start + UPSERT_BATCH]
+            request = IndexUpsertRequest.model_validate(
+                {
+                    "organization_id": organization_id,
+                    "capability_version": "1.0.0",
+                    "corpus": "work_items",
+                    "documents": [{k: d[k] for k in keys} for d in batch],
+                }
+            )
+            await run_upsert(request, runtime, f"setup-{organization_id[:8]}-{start}")
+
+
+REGISTRY: dict[str, SetSpec] = {
+    "improve-story": SetSpec(ImproveStoryRequest, improve_story),
+    "generate-children": SetSpec(GenerateChildrenRequest, generate_children),
+    "search": SetSpec(SearchRequest, search_run, setup=index_corpus, needs_database=True),
+    "summarize": SetSpec(SummarizeRequest, summarize),
+    "translate": SetSpec(TranslateRequest, translate),
+}
+
+
+def container_dsn(container: PostgresContainer) -> str:
+    """Return the connection string that reaches the container from here.
+
+    Inside a container the published port is not routable, so the bridge address and the
+    container's own port are used; outside, the mapped port on the host.
+    """
+    if inside_container():
+        bridge = container.get_docker_client().bridge_ip(container.get_wrapped_container().id)
+        credentials = f"{container.username}:{container.password}"
+        return f"postgresql://{credentials}@{bridge}:{container.port}/{container.dbname}"
+    return str(container.get_connection_url())
+
+
+@contextlib.asynccontextmanager
+async def database(spec: SetSpec) -> AsyncIterator[Storage]:
+    """Yield the storage a set runs over: memory, the named database, or a throwaway container."""
+    clock = SystemClock()
+    if not spec.needs_database:
+        yield MemoryStorage(clock)
+        return
+    url = os.environ.get(DATABASE_VARIABLE)
+    if url:
+        async with _postgres(url, clock) as storage:
+            yield storage
+        return
+    with PostgresContainer(DATABASE_IMAGE, driver=None) as container:
+        async with _postgres(container_dsn(container), clock) as storage:
+            yield storage
+
+
+@contextlib.asynccontextmanager
+async def _postgres(url: str, clock: SystemClock) -> AsyncIterator[PostgresStorage]:
+    await migrate(url, MIGRATIONS)
+    storage = PostgresStorage(url, clock, 4, COMMAND_TIMEOUT_S)
+    await storage.connect()
+    try:
+        yield storage
+    finally:
+        await storage.close()

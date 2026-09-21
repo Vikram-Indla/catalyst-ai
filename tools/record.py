@@ -10,20 +10,13 @@ from pathlib import Path
 import httpx
 from pydantic import SecretStr
 
-from catalyst_ai.capabilities.generate_children import run as generate_children
-from catalyst_ai.capabilities.improve_story import run as improve_story
-from catalyst_ai.contract.generate_children import GenerateChildrenRequest
-from catalyst_ai.contract.improve_story import ImproveStoryRequest
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.providers.recorded import FIXTURE_SUFFIX, fixture_hash, write_fixture
 from tools import authored, evalkit, rules
 
 KEY_VARIABLE = "CATALYST_AI_RECORD_PROVIDER_KEY"
 MANIFEST = "_manifest.json"
-CAPABILITIES: evalkit.Registry = {
-    "improve-story": (ImproveStoryRequest, improve_story),
-    "generate-children": (GenerateChildrenRequest, generate_children),
-}
+EMBED_SUFFIX = ":batchEmbedContents"
 
 
 class RecordingTransport(httpx.AsyncBaseTransport):
@@ -42,6 +35,8 @@ class RecordingTransport(httpx.AsyncBaseTransport):
         if self._live is not None:
             upstream = await self._live.handle_async_request(request)
             status, payload = upstream.status_code, json.loads(await upstream.aread())
+        elif str(request.url).endswith(EMBED_SUFFIX):
+            status, payload = 200, authored.answer_embed(json.loads(body))
         else:
             status, payload = 200, authored.answer(json.loads(body))
         write_fixture(self._directory, key, status, payload)
@@ -63,14 +58,19 @@ async def record(name: str, *, live: bool) -> int:
             update={"provider_gemini_api_key": SecretStr(os.environ[KEY_VARIABLE])}
         )
     transport = RecordingTransport(directory, live=live)
-    runtime = evalkit.runtime_over(transport, settings)
-    model, pipeline = CAPABILITIES[name]
+    spec = evalkit.REGISTRY[name]
     raised: list[str] = []
-    for case in evalkit.load_cases(Path(rules.EVALS) / name / "set.jsonl"):
-        try:
-            await pipeline(model.model_validate(case.input), runtime, f"record-{case.id}")
-        except Error as error:
-            raised.append(f"{case.id}: {error.code.value} {[d.code for d in error.details]}")
+    async with evalkit.database(spec) as storage:
+        runtime = evalkit.runtime_over(transport, settings, storage)
+        if spec.setup is not None:
+            await spec.setup(runtime, Path(rules.EVALS) / name)
+        for case in evalkit.load_cases(Path(rules.EVALS) / name / "set.jsonl"):
+            try:
+                await spec.pipeline(
+                    spec.request.model_validate(case.input), runtime, f"record-{case.id}"
+                )
+            except Error as error:
+                raised.append(f"{case.id}: {error.code.value} {[d.code for d in error.details]}")
     for line in raised:
         print(f"raised  {line}")
     manifest = {

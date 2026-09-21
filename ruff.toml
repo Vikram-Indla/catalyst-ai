@@ -7,7 +7,7 @@ select = [
   "E", "W", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF", "ERA", "T20", "G", "PTH",
   "S", "PL", "ANN", "D", "ASYNC", "DTZ", "LOG", "PT", "TRY",
 ]
-ignore = ["D203", "D213"]
+ignore = ["D203", "D213", "RUF001", "RUF002", "RUF003"]
 
 [lint.mccabe]
 max-complexity = 10

@@ -135,6 +135,7 @@ def _cache_ttl(runtime: RuntimeContext) -> int:
 STAGES = Stages(
     parse=parse,
     validate=validate,
+    retrieve=None,
     assemble=assemble,
     call=call,
     validate_output=validate_output,

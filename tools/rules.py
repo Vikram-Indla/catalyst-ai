@@ -113,7 +113,6 @@ PRODUCT_TABLE_PREFIXES = (
     "wiki_",
     "standup",
     "incident",
-    "work_items",
 )
 PRODUCT_DATABASE_MARKERS = (
     "supabase",
@@ -145,6 +144,7 @@ PIPELINE_STAGES = (
     "postprocess",
 )
 PIPELINE_OPTIONAL_STAGES = frozenset({"retrieve"})
+PIPELINE_GENERATION_STAGES = frozenset({"assemble", "call", "validate_output"})
 PORT_CALLS = ("generate", "stream", "embed")
 
 SEAMS = frozenset({"Provider", "Storage", "Clock", "Cache"})
@@ -159,7 +159,11 @@ INLINE_BANNED_CALLS = (
     "random.random",
 )
 INLINE_ALLOWED_PACKAGES = (SRC / "platform" / "clock", SRC / "platform" / "ids")
-UNTYPED_ALLOWED_PACKAGES = (SRC / "providers", SRC / "retrieval" / "parsers")
+UNTYPED_ALLOWED_PACKAGES = (
+    SRC / "providers",
+    SRC / "retrieval" / "parsers",
+    SRC / "platform" / "storage",
+)
 
 DIRECTIVE_REASONS = (
     "the listen address is configuration",

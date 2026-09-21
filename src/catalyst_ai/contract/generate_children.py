@@ -163,3 +163,4 @@ class GenerateChildrenResponse(ResponseEnvelope):
     candidates: list[Candidate]
     empty_reason: EmptyReason | None
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    index_consulted: bool = False

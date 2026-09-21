@@ -13,8 +13,14 @@ from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.providers.faults import Fault, FaultTransport
 from catalyst_ai.providers.gemini import GeminiProvider
-from catalyst_ai.providers.gemini.adapter import BREAKER_FAILURES, build_body
-from catalyst_ai.providers.gemini.models import FLASH
+from catalyst_ai.providers.gemini.adapter import (
+    BREAKER_FAILURES,
+    EMBED_DIMENSIONS,
+    build_body,
+    build_embed_body,
+    normalise,
+)
+from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH
 from catalyst_ai.providers.port import EmbedRequest, GenerateRequest, ModelAlias, Segment
 
 OK_BODY: dict[str, object] = {
@@ -136,22 +142,72 @@ async def test_breaker_opens_after_failures_and_half_opens_later() -> None:
     assert transport.calls == calls_before + 1
 
 
-async def test_stream_and_embed_are_not_implemented_yet() -> None:
-    adapter, _, _ = _adapter([Fault()])
-    with pytest.raises(NotImplementedError):
-        adapter.stream(_request())
-    embed = EmbedRequest(
+def _embed_request(texts: list[str]) -> EmbedRequest:
+    return EmbedRequest(
         organization_id=uuid4(),
         capability="c",
         alias=ModelAlias.EMBED_DEFAULT,
-        texts=["x"],
-        timeout_ms=1,
+        texts=texts,
+        purpose="query",
+        timeout_ms=1000,
     )
-    with pytest.raises(NotImplementedError):
-        await adapter.embed(embed)
 
 
-def test_count_tokens_estimates_by_characters() -> None:
+def _embed_body(count: int) -> dict[str, object]:
+    return {"embeddings": [{"values": [1.0] + [0.0] * (EMBED_DIMENSIONS - 1)}] * count}
+
+
+async def test_stream_is_not_implemented_yet() -> None:
     adapter, _, _ = _adapter([Fault()])
-    assert adapter.count_tokens(ModelAlias.TEXT_DEFAULT, "x" * 40) == 10
-    assert adapter.count_tokens(ModelAlias.TEXT_DEFAULT, "") == 1
+    with pytest.raises(NotImplementedError):
+        adapter.stream(_request())
+
+
+def test_embed_body_carries_the_task_type_and_the_dimensions() -> None:
+    body = build_embed_body(_embed_request(["a", "b"]), EMBEDDING.model_id)
+    requests = body["requests"]
+    assert len(requests) == 2
+    assert requests[0]["taskType"] == "RETRIEVAL_QUERY"
+    assert requests[0]["outputDimensionality"] == EMBED_DIMENSIONS
+    assert requests[1]["content"] == {"parts": [{"text": "b"}]}
+
+
+async def test_embed_returns_unit_vectors_with_estimated_cost() -> None:
+    adapter, transport, _ = _adapter([Fault(body=_embed_body(2))])
+    result = await adapter.embed(_embed_request(["a" * 400, "b" * 400]))
+    assert len(result.vectors) == 2
+    assert all(len(vector) == EMBED_DIMENSIONS for vector in result.vectors)
+    assert abs(sum(v * v for v in result.vectors[0]) - 1.0) < 1e-9
+    assert result.usage.input_tokens == 200
+    assert result.usage.cost_micros == EMBEDDING.cost_micros(200, 0)
+    assert result.model_id == EMBEDDING.model_id
+    assert transport.calls == 1
+
+
+def test_normalise_scales_to_unit_length_and_leaves_a_null_vector() -> None:
+    assert normalise([3.0, 4.0]) == [0.6, 0.8]
+    assert normalise([0.0, 0.0]) == [0.0, 0.0]
+
+
+@pytest.mark.parametrize(
+    "body",
+    [{"embeddings": []}, {"embeddings": [{"values": [1.0, 2.0]}]}, {"other": 1}],
+    ids=["empty", "wrong size", "no key"],
+)
+async def test_embed_refuses_an_unreadable_body(body: dict[str, object]) -> None:
+    adapter, _, _ = _adapter([Fault(body=body)], ONCE)
+    with pytest.raises(Error) as caught:
+        await adapter.embed(_embed_request(["a"]))
+    assert caught.value.code is ErrorCode.PROVIDER_UNAVAILABLE
+
+
+async def test_embed_failures_map_to_the_catalog() -> None:
+    adapter, _, _ = _adapter([Fault(status=429)], ONCE)
+    with pytest.raises(Error) as caught:
+        await adapter.embed(_embed_request(["a"]))
+    assert caught.value.code is ErrorCode.PROVIDER_QUOTA
+
+
+def test_model_id_resolves_the_alias_through_the_register() -> None:
+    adapter, _, _ = _adapter([Fault()])
+    assert adapter.model_id(ModelAlias.EMBED_DEFAULT) == EMBEDDING.model_id

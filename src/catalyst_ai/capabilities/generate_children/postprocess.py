@@ -122,14 +122,17 @@ def candidate_confidence(
 
 
 def to_response(
-    output: ModelOutput, result: GenerateResult, request: GenerateChildrenRequest, request_id: str
+    output: ModelOutput,
+    result: GenerateResult,
+    request: GenerateChildrenRequest,
+    request_id: str,
+    indexed: tuple[str, ...] | None = None,
 ) -> GenerateChildrenResponse:
     """Validate the hierarchy, mark duplicates, bound, score, log the row, build the response."""
     check_hierarchy(output, request)
     level = expected_child_level(request)
-    marked = bound(
-        mark_duplicates(output.candidates, [s.title for s in request.siblings]), request.max_items
-    )
+    pool = [s.title for s in request.siblings] + [t for t in indexed or () if t]
+    marked = bound(mark_duplicates(output.candidates, pool), request.max_items)
     candidates = [
         Candidate(
             type=c.type,
@@ -153,6 +156,7 @@ def to_response(
         candidates=candidates,
         empty_reason=output.empty_reason if not new_ones else None,
         confidence=round(sum(new_ones) / len(new_ones), 2) if new_ones else None,
+        index_consulted=indexed is not None,
     )
 
 

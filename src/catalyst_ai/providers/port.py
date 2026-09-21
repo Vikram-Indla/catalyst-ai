@@ -79,6 +79,7 @@ class EmbedRequest(BaseModel):
     capability: str = Field(min_length=1)
     alias: ModelAlias
     texts: list[str] = Field(min_length=1)
+    purpose: Literal["document", "query"] = "document"
     timeout_ms: int = Field(gt=0)
 
 
@@ -109,4 +110,8 @@ class Provider(Protocol):
 
     def count_tokens(self, alias: ModelAlias, text: str) -> int:
         """Count the tokens the alias's model would see for the text."""
+        ...
+
+    def model_id(self, alias: ModelAlias) -> str:
+        """Return the concrete model the alias resolves to right now."""
         ...

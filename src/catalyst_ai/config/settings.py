@@ -69,6 +69,9 @@ class Settings(BaseSettings):
         SecretStr,
         Field(description="RESTRICTED · The service's own database; the application role"),
     ]
+    database_pool_max: Annotated[
+        int, Field(gt=0, description="PUBLIC · Connections in the pool at most")
+    ] = 8
     http_addr: Annotated[str, Field(description="PUBLIC · The contract listen address")] = ":8090"
     ops_addr: Annotated[str, Field(description="PUBLIC · /healthz, /readyz, metrics")] = ":9091"
     shutdown_drain_seconds: Annotated[
@@ -92,6 +95,13 @@ class Settings(BaseSettings):
     provider_log_retention_days: Annotated[
         int, Field(gt=0, description="PUBLIC · provider_calls retention")
     ] = 90
+    retrieval_index_max_chunks_per_organization: Annotated[
+        int, Field(gt=0, description="PUBLIC · An organisation's corpus size in chunks at most")
+    ] = 500_000
+    retrieval_document_ttl_days: Annotated[
+        int,
+        Field(gt=0, description="PUBLIC · The retention job forgets documents unseen this long"),
+    ] = 400
     provider_gemini_api_key: Annotated[
         SecretStr | None,
         Field(description="RESTRICTED · The first provider's key; read only by its adapter"),
@@ -113,6 +123,16 @@ class Settings(BaseSettings):
     capability_generate_children: Annotated[
         CapabilitySettings,
         Field(description="PUBLIC · generate-children: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_search: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · search and the index operations: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_summarize: Annotated[
+        CapabilitySettings, Field(description="PUBLIC · summarize: enabled, cache TTL, timeout")
+    ] = CapabilitySettings()
+    capability_translate: Annotated[
+        CapabilitySettings, Field(description="PUBLIC · translate: enabled, cache TTL, timeout")
     ] = CapabilitySettings()
 
     @field_validator("service_tokens", mode="before")

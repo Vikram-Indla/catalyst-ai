@@ -6,11 +6,7 @@ import sys
 import time
 from pathlib import Path
 
-from catalyst_ai.capabilities.generate_children import run as generate_children
-from catalyst_ai.capabilities.improve_story import run as improve_story
 from catalyst_ai.contract.envelopes import ResponseEnvelope
-from catalyst_ai.contract.generate_children import GenerateChildrenRequest
-from catalyst_ai.contract.improve_story import ImproveStoryRequest
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.providers.recorded import MissingFixtureError, RecordedTransport
@@ -20,28 +16,34 @@ from tools.checks.evals import thresholds
 RUNS = Path(".evals")
 P95 = 0.95
 MS = 1000.0
-CAPABILITIES: evalkit.Registry = {
-    "improve-story": (ImproveStoryRequest, improve_story),
-    "generate-children": (GenerateChildrenRequest, generate_children),
-}
 
 
 async def _run_case(
     case: evalkit.Case, runtime: RuntimeContext, name: str
 ) -> tuple[ResponseEnvelope, float]:
-    model, pipeline = CAPABILITIES[name]
-    request = model.model_validate(case.input)
+    spec = evalkit.REGISTRY[name]
+    request = spec.request.model_validate(case.input)
     started = time.perf_counter()
-    response = await pipeline(request, runtime, f"eval-{case.id}")
+    response = await spec.pipeline(request, runtime, f"eval-{case.id}")
     return response, (time.perf_counter() - started) * MS
 
 
 async def run_set(directory: Path) -> dict[str, object]:
-    """Run one set; return the scores per grader, the overall, the p95s and the failures."""
+    """Run one set over its storage; the setup indexes what the cases search."""
+    spec = evalkit.REGISTRY[directory.name]
+    async with evalkit.database(spec) as storage:
+        runtime = evalkit.runtime_over(
+            RecordedTransport(evalkit.FIXTURES_ROOT / directory.name), storage=storage
+        )
+        if spec.setup is not None:
+            await spec.setup(runtime, directory)
+        return await _grade_set(directory, runtime)
+
+
+async def _grade_set(directory: Path, runtime: RuntimeContext) -> dict[str, object]:
     name = directory.name
     cases = evalkit.load_cases(directory / "set.jsonl")
     graders = evalkit.load_graders(directory).GRADERS
-    runtime = evalkit.runtime_over(RecordedTransport(evalkit.FIXTURES_ROOT / name))
     per_grader: dict[str, list[float]] = {g: [] for g in graders}
     latencies: list[float] = []
     costs: list[float] = []
@@ -58,7 +60,7 @@ async def run_set(directory: Path) -> dict[str, object]:
             continue
         latencies.append(elapsed)
         costs.append(float(response.usage.cost_micros))
-        request = CAPABILITIES[name][0].model_validate(case.input)
+        request = evalkit.REGISTRY[name].request.model_validate(case.input)
         for grader_name, grader in graders.items():
             score = grader(request, response, case.expected)
             per_grader[grader_name].append(score)

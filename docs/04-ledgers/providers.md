@@ -13,14 +13,14 @@ this table fails `tools/checks/models`; a row without a retention setting fails 
 | `text-default` | `gemini` | `gemini-2.5-flash` | 1 048 576 | 300 / 2 500 | paid tier of the Gemini API: prompts and completions are not used to train models; no per-call flag exists — the tier is the setting (`providers/gemini/models.py` `RETENTION`) | `improve-story` v1 (authored fixtures) | 2026-09-18 |
 | `text-fast` | `gemini` | `gemini-2.5-flash-lite` | 1 048 576 | 100 / 400 | same | — | — |
 | `text-long` | `gemini` | `gemini-2.5-pro` | 1 048 576 | 1 250 / 10 000 | same | — | — |
-| `embed-default` | `gemini` | `gemini-embedding-001` | 2 048 | 150 / 0 | same | — | — |
+| `embed-default` | `gemini` | `gemini-embedding-001` | 2 048 | 150 / 0 (tokens estimated by characters: the batch endpoint reports no usage) | same | `search` v1 (authored fixtures); 768 of the 3 072 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, vectors normalised by the adapter | 2026-09-20 |
 | `grader-default` | = `text-default` | `gemini-2.5-flash` | | | same | — | — |
 
 ## Providers
 
 | Provider | Adapter | Transport | SDK row (`ADR-003 §3`) | No-retention option | Status |
 | --- | --- | --- | --- | --- | --- |
-| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent`, key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; verified at the first live recording | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
+| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent` and `:batchEmbedContents` (≤ 100 texts per call), key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; verified at the first live recording | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
 
 The previous system also used OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), two Anthropic
 models and Groq through its gateways. None is a row here; each would be a second adapter under

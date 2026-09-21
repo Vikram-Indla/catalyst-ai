@@ -6,6 +6,7 @@ from catalyst_ai.config import Settings
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import Cache
 from catalyst_ai.platform.clock import Clock
+from catalyst_ai.platform.storage import Storage
 from catalyst_ai.providers.port import Provider
 
 
@@ -18,3 +19,4 @@ class RuntimeContext:
     cache: Cache
     budgets: TenantBudgets
     clock: Clock
+    storage: Storage

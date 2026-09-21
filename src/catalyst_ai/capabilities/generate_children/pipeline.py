@@ -1,4 +1,4 @@
-"""The generate-children pipeline: parse, validate, assemble, call, validate_output, postprocess."""
+"""The generate-children pipeline: parse, validate, retrieve, assemble, call, validate, post."""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +9,7 @@ from catalyst_ai.capabilities.generate_children.postprocess import (
     from_cache,
     to_response,
 )
+from catalyst_ai.capabilities.generate_children.retrieve import indexed_siblings
 from catalyst_ai.capabilities.generate_children.schema import ModelOutput, output_schema
 from catalyst_ai.contract.generate_children import (
     GenerateChildrenRequest,
@@ -34,6 +35,7 @@ class Parsed:
     request_id: str
     idempotency: str | None
     user_texts: dict[str, str | None]
+    indexed_siblings: tuple[str, ...] | None = None
 
 
 def parse(request: GenerateChildrenRequest, request_id: str, idempotency: str | None) -> Parsed:
@@ -66,6 +68,20 @@ def validate(parsed: Parsed, runtime: RuntimeContext) -> str:
         idempotency=parsed.idempotency,
     )
     return admit(door, runtime)
+
+
+async def retrieve(parsed: Parsed, runtime: RuntimeContext) -> Parsed:
+    """Stage 3: the tenant's indexed items at the child level join the sibling pool."""
+    found = await indexed_siblings(parsed.request, expected_child_level(parsed.request), runtime)
+    if found is None:
+        return parsed
+    return Parsed(
+        parsed.request,
+        parsed.request_id,
+        parsed.idempotency,
+        parsed.user_texts,
+        indexed_siblings=found,
+    )
 
 
 def _target_section(prompt: PromptFile, target: str) -> str:
@@ -133,7 +149,13 @@ def postprocess(
 ) -> GenerateChildrenResponse:
     """Stage 7: settle the spend; then the hierarchy check, de-duplication, bounding, response."""
     runtime.budgets.settle(parsed.request.organization_id, result.usage.cost_micros)
-    return to_response(output, result, parsed.request, parsed.request_id)
+    return to_response(
+        output,
+        result,
+        parsed.request,
+        parsed.request_id,
+        parsed.indexed_siblings,
+    )
 
 
 def _cache_ttl(runtime: RuntimeContext) -> int:
@@ -144,6 +166,7 @@ def _cache_ttl(runtime: RuntimeContext) -> int:
 STAGES = Stages(
     parse=parse,
     validate=validate,
+    retrieve=retrieve,
     assemble=assemble,
     call=call,
     validate_output=validate_output,
