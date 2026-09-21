@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"\", \"sections\": [], \"empty_reason\": \"sources_insufficient\", \"rationale\": \"The sources carry too little to draft from.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 154,
+      "candidatesTokenCount": 32
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

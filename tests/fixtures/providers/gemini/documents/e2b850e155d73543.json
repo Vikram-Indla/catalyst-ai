@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"Only members with the export permission see the export button.\", \"chunk_ids\": [\"kb-main/doc-export#2\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 481,
+      "candidatesTokenCount": 47
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

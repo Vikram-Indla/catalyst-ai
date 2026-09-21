@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The rotation runs without a restart of the service.\", \"chunk_ids\": [\"kb-main/doc-certificate#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 308,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"planned\", \"name\": \"Planned\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"executing\", \"name\": \"Executing\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"blocked\", \"name\": \"Blocked\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"passed\", \"name\": \"Passed\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 3}, {\"key\": \"failed\", \"name\": \"Failed\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}], \"transitions\": [{\"from_key\": \"planned\", \"to_key\": \"executing\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Planned to Executing.\"}, {\"from_key\": \"executing\", \"to_key\": \"blocked\", \"kind\": \"exception\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Executing to Blocked.\"}, {\"from_key\": \"blocked\", \"to_key\": \"executing\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Blocked to Executing.\"}, {\"from_key\": \"executing\", \"to_key\": \"passed\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Executing to Passed.\"}, {\"from_key\": \"executing\", \"to_key\": \"failed\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Executing to Failed.\"}, {\"from_key\": \"failed\", \"to_key\": \"executing\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_executing\", \"rationale\": \"The description says it moves from Failed to Executing.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 153,
+      "candidatesTokenCount": 434
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Incident runbook\", \"text\": \"Alerts page the on-call engineer through the paging service. The on-call rota changes every Sunday at 09:00. After fifteen minutes without acknowledgement the lead is paged. After thirty minutes a bridge call is opened and the status page is updated.\", \"sources\": [\"doc-runbook\"]}, {\"heading\": \"Notes\", \"text\": \"The team decided to move the weekly sync to Thursday at ten.\", \"sources\": [\"notes\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 340,
+      "candidatesTokenCount": 140
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Offline drafts\", \"text\": \"A draft comment survives a page reload while offline. Drafts are kept in the browser for seven days. A draft is sent once when the connection returns. A draft older than seven days is dropped with a notice.\", \"sources\": [\"doc-drafts\"]}, {\"heading\": \"Certificate rotation\", \"text\": \"The signing certificate rotates every ninety days. The rotation runs without a restart of the service. An expired certificate is refused at sign-in with a clear message. The platform team is paged when a rotation fails.\", \"sources\": [\"doc-certificate\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 310,
+      "candidatesTokenCount": 174
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

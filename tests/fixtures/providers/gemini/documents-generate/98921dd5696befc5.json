@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Onboarding guide\", \"text\": \"New members receive a laptop on the first day. Accounts are created by the platform team within two business days. Every new member pairs with a buddy for the first week. The buddy books the introduction meetings with each hub\", \"sources\": [\"doc-onboarding\"]}, {\"heading\": \"Release process\", \"text\": \"Releases ship every two weeks on a Wednesday. A release freeze starts on the Monday before the release. Each release needs sign-off from the test lead and the release manager. Sign-off is recorded in the release hub before the freeze\", \"sources\": [\"doc-release\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 388,
+      "candidatesTokenCount": 182
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

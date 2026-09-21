@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The team decided to move the weekly sync to Thursday at ten.\", \"chunk_ids\": [\"kb-main/doc-injection#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 296,
+      "candidatesTokenCount": 48
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

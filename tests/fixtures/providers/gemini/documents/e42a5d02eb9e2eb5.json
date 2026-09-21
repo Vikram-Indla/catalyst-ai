@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"A draft older than seven days is dropped with a notice.\", \"chunk_ids\": [\"kb-main/doc-drafts#1\"]}, {\"text\": \"Drafts are kept in the browser for seven days.\", \"chunk_ids\": [\"kb-main/doc-drafts#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 283,
+      "candidatesTokenCount": 70
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

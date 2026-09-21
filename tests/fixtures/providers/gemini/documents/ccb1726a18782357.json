@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"After thirty minutes a bridge call is opened and the status page is updated.\", \"chunk_ids\": [\"kb-main/doc-runbook#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 480,
+      "candidatesTokenCount": 51
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

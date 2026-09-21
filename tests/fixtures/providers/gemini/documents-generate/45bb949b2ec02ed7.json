@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Certificate rotation\", \"text\": \"The signing certificate rotates every ninety days. The rotation runs without a restart of the service. An expired certificate is refused at sign-in with a clear message. The platform team is paged when a rotation fails.\", \"sources\": [\"doc-certificate\"]}, {\"heading\": \"Roadmap review\", \"text\": \"The quarterly roadmap review happens in the last week of each quarter. The sponsor chairs the review and the hub owners present. The review ends with a ranked list of themes for the next quarter. The ranked list is published\", \"sources\": [\"doc-roadmap\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 323,
+      "candidatesTokenCount": 179
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

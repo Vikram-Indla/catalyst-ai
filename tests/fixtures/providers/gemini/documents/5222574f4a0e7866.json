@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"A release freeze starts on the Monday before the release.\", \"chunk_ids\": [\"kb-main/doc-release#0\"]}, {\"text\": \"Sign-off is recorded in the release hub before the freeze ends.\", \"chunk_ids\": [\"kb-main/doc-release#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 308,
+      "candidatesTokenCount": 76
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

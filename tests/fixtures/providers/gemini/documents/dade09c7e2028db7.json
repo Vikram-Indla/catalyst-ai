@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The search index is rebuilt every night at two in the morning.\", \"chunk_ids\": [\"kb-main/doc-search#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 306,
+      "candidatesTokenCount": 47
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"reported\", \"name\": \"Reported\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"triaged\", \"name\": \"Triaged\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"in_work\", \"name\": \"In Work\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"fixed\", \"name\": \"Fixed\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"closed\", \"name\": \"Closed\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}, {\"key\": \"cancelled\", \"name\": \"Cancelled\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 5}], \"transitions\": [{\"from_key\": \"reported\", \"to_key\": \"triaged\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Reported to Triaged.\"}, {\"from_key\": \"triaged\", \"to_key\": \"in_work\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Triaged to In Work.\"}, {\"from_key\": \"in_work\", \"to_key\": \"triaged\", \"kind\": \"backward\", \"guards\": [], \"reason_code\": \"backward_to_triaged\", \"rationale\": \"The description says it moves from In Work to Triaged.\"}, {\"from_key\": \"in_work\", \"to_key\": \"fixed\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from In Work to Fixed.\"}, {\"from_key\": \"fixed\", \"to_key\": \"in_work\", \"kind\": \"reject\", \"guards\": [], \"reason_code\": \"reject_to_in_work\", \"rationale\": \"The description says it moves from Fixed to In Work.\"}, {\"from_key\": \"fixed\", \"to_key\": \"closed\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Fixed to Closed.\"}, {\"from_key\": \"closed\", \"to_key\": \"in_work\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_in_work\", \"rationale\": \"The description says it moves from Closed to In Work.\"}, {\"from_key\": null, \"to_key\": \"cancelled\", \"kind\": \"cancel\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from any status to Cancelled.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 168,
+      "candidatesTokenCount": 549
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

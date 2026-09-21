@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"reported\", \"name\": \"\u0645\u064f\u0628\u0644\u064e\u0651\u063a\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"triaged\", \"name\": \"\u0645\u064f\u0635\u0646\u064e\u0651\u0641\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"in_work\", \"name\": \"\u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"fixed\", \"name\": \"\u0645\u064f\u0635\u0644\u064e\u062d\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"closed\", \"name\": \"\u0645\u064f\u063a\u0644\u064e\u0642\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}, {\"key\": \"cancelled\", \"name\": \"\u0645\u064f\u0644\u063a\u0649\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 5}], \"transitions\": [{\"from_key\": \"reported\", \"to_key\": \"triaged\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0628\u0644\u064e\u0651\u063a \u0625\u0644\u0649 \u0645\u064f\u0635\u0646\u064e\u0651\u0641.\"}, {\"from_key\": \"triaged\", \"to_key\": \"in_work\", \"kind\": \"forward\", \"guards\": [\"assignee_set\"], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0635\u0646\u064e\u0651\u0641 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644.\"}, {\"from_key\": \"in_work\", \"to_key\": \"triaged\", \"kind\": \"backward\", \"guards\": [], \"reason_code\": \"backward_to_triaged\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644 \u0625\u0644\u0649 \u0645\u064f\u0635\u0646\u064e\u0651\u0641.\"}, {\"from_key\": \"in_work\", \"to_key\": \"fixed\", \"kind\": \"forward\", \"guards\": [\"fix_version_set\"], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644 \u0625\u0644\u0649 \u0645\u064f\u0635\u0644\u064e\u062d.\"}, {\"from_key\": \"fixed\", \"to_key\": \"in_work\", \"kind\": \"reject\", \"guards\": [], \"reason_code\": \"reject_to_in_work\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0635\u0644\u064e\u062d \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644.\"}, {\"from_key\": \"fixed\", \"to_key\": \"closed\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0635\u0644\u064e\u062d \u0625\u0644\u0649 \u0645\u064f\u063a\u0644\u064e\u0642.\"}, {\"from_key\": \"closed\", \"to_key\": \"in_work\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_in_work\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u063a\u0644\u064e\u0642 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u0639\u0645\u0644.\"}, {\"from_key\": null, \"to_key\": \"cancelled\", \"kind\": \"cancel\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 any status \u0625\u0644\u0649 \u0645\u064f\u0644\u063a\u0649.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 173,
+      "candidatesTokenCount": 537
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"detected\", \"name\": \"\u0645\u064f\u0643\u062a\u0634\u064e\u0641\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"acknowledged\", \"name\": \"\u0645\u064f\u0642\u064e\u0631\u0651 \u0628\u0647\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"mitigating\", \"name\": \"\u0642\u064a\u062f \u0627\u0644\u062a\u062e\u0641\u064a\u0641\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"monitoring\", \"name\": \"\u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u0642\u0628\u0629\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"resolved\", \"name\": \"\u0645\u064f\u0639\u0627\u0644\u064e\u062c\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}], \"transitions\": [{\"from_key\": \"detected\", \"to_key\": \"acknowledged\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0643\u062a\u0634\u064e\u0641 \u0625\u0644\u0649 \u0645\u064f\u0642\u064e\u0631\u0651 \u0628\u0647.\"}, {\"from_key\": \"acknowledged\", \"to_key\": \"mitigating\", \"kind\": \"forward\", \"guards\": [\"assignee_set\"], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0642\u064e\u0631\u0651 \u0628\u0647 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u062e\u0641\u064a\u0641.\"}, {\"from_key\": \"mitigating\", \"to_key\": \"monitoring\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062a\u062e\u0641\u064a\u0641 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u0642\u0628\u0629.\"}, {\"from_key\": \"monitoring\", \"to_key\": \"mitigating\", \"kind\": \"backward\", \"guards\": [], \"reason_code\": \"backward_to_mitigating\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u0642\u0628\u0629 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u062e\u0641\u064a\u0641.\"}, {\"from_key\": \"monitoring\", \"to_key\": \"resolved\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u0642\u0628\u0629 \u0625\u0644\u0649 \u0645\u064f\u0639\u0627\u0644\u064e\u062c.\"}, {\"from_key\": \"resolved\", \"to_key\": \"mitigating\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_mitigating\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u064f\u0639\u0627\u0644\u064e\u062c \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u062e\u0641\u064a\u0641.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 153,
+      "candidatesTokenCount": 449
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

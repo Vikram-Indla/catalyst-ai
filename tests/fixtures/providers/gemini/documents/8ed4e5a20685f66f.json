@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The signing certificate rotates every ninety days.\", \"chunk_ids\": [\"kb-main/doc-certificate#0\"]}, {\"text\": \"An expired certificate is refused at sign-in with a clear message.\", \"chunk_ids\": [\"kb-main/doc-certificate#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 314,
+      "candidatesTokenCount": 77
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -37,6 +37,119 @@ components:
       - integration
       title: Area
       type: string
+    AskRequest:
+      additionalProperties: false
+      description: A question over one space; the answer comes only from what the space's index holds.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        k:
+          data_class: PUBLIC
+          default: 8
+          description: Chunks to read
+          maximum: 20.0
+          minimum: 1.0
+          title: K
+          type: integer
+        kinds:
+          data_class: PUBLIC
+          description: Only documents of these kinds; empty = all
+          items:
+            type: string
+          maxItems: 20
+          title: Kinds
+          type: array
+        language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag; absent follows the question's
+          title: Language
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        question:
+          data_class: CONFIDENTIAL
+          description: The member's question
+          maxLength: 2000
+          minLength: 1
+          title: Question
+          type: string
+        space_id:
+          data_class: INTERNAL
+          description: The space asked
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$
+          title: Space Id
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - space_id
+      - question
+      title: AskRequest
+      type: object
+    AskResponse:
+      additionalProperties: false
+      description: The answer with a citation behind every claim, or not found.
+      properties:
+        answer:
+          maxLength: 8000
+          title: Answer
+          type: string
+        capability_version:
+          title: Capability Version
+          type: string
+        citations:
+          items:
+            $ref: '#/components/schemas/Citation'
+          maxItems: 40
+          title: Citations
+          type: array
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        not_found:
+          title: Not Found
+          type: boolean
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - answer
+      - citations
+      - not_found
+      - confidence
+      title: AskResponse
+      type: object
     Audience:
       description: 'Who reads the notes: the team, or the customers of the product.'
       enum:
@@ -131,6 +244,37 @@ components:
       - kind
       - title
       title: Change
+      type: object
+    Citation:
+      additionalProperties: false
+      description: 'One chunk an answer rests on: its id, its document, where in it, the words quoted.'
+      properties:
+        chunk_id:
+          title: Chunk Id
+          type: string
+        document_id:
+          title: Document Id
+          type: string
+        heading_path:
+          items:
+            type: string
+          title: Heading Path
+          type: array
+        position:
+          minimum: 0.0
+          title: Position
+          type: integer
+        quote:
+          maxLength: 300
+          title: Quote
+          type: string
+      required:
+      - chunk_id
+      - document_id
+      - position
+      - heading_path
+      - quote
+      title: Citation
       type: object
     CoveredRange:
       additionalProperties: false
@@ -235,6 +379,154 @@ components:
       - count
       - changes
       title: DigestGroup
+      type: object
+    DocumentFormat:
+      description: The formats the parsers accept; anything else is `document_unsupported`.
+      enum:
+      - docx
+      - pptx
+      - pdf
+      - markdown
+      - text
+      title: DocumentFormat
+      type: string
+    DraftRequest:
+      additionalProperties: false
+      description: A brief and the sources it may draw on; nothing outside them enters the draft.
+      properties:
+        brief:
+          data_class: CONFIDENTIAL
+          description: What the document should say
+          maxLength: 4000
+          minLength: 1
+          title: Brief
+          type: string
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        language:
+          anyOf:
+          - maxLength: 16
+            pattern: ^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$
+            type: string
+          - type: 'null'
+          data_class: PUBLIC
+          description: BCP 47 tag; absent follows the brief's
+          title: Language
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        sources:
+          data_class: CONFIDENTIAL
+          description: The texts with the ids sections cite
+          items:
+            $ref: '#/components/schemas/Source'
+          maxItems: 40
+          minItems: 1
+          title: Sources
+          type: array
+        target_words:
+          data_class: PUBLIC
+          default: 600
+          description: The length wanted, in words
+          maximum: 2000.0
+          minimum: 100.0
+          title: Target Words
+          type: integer
+      required:
+      - organization_id
+      - capability_version
+      - brief
+      - sources
+      title: DraftRequest
+      type: object
+    DraftResponse:
+      additionalProperties: false
+      description: A draft whose every section cites, or nothing with its reason.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        empty_reason:
+          anyOf:
+          - const: sources_insufficient
+            type: string
+          - type: 'null'
+          title: Empty Reason
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        sections:
+          items:
+            $ref: '#/components/schemas/DraftSection'
+          maxItems: 30
+          title: Sections
+          type: array
+        title:
+          maxLength: 500
+          title: Title
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - title
+      - sections
+      - empty_reason
+      - confidence
+      title: DraftResponse
+      type: object
+    DraftSection:
+      additionalProperties: false
+      description: One section of a draft with the sources it rests on.
+      properties:
+        heading:
+          maxLength: 500
+          minLength: 1
+          title: Heading
+          type: string
+        sources:
+          items:
+            type: string
+          maxItems: 40
+          minItems: 1
+          title: Sources
+          type: array
+        text:
+          maxLength: 8000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - heading
+      - text
+      - sources
+      title: DraftSection
       type: object
     Entry:
       additionalProperties: false
@@ -395,6 +687,62 @@ components:
       - id
       - title
       title: ExistingCase
+      type: object
+    ExistingStatus:
+      additionalProperties: false
+      description: A status of the scheme to extend, under either spelling; `name` and `order` are read.
+      properties:
+        category:
+          $ref: '#/components/schemas/catalyst_ai__contract__propose_workflow__StatusCategory'
+        initial:
+          default: false
+          title: Initial
+          type: boolean
+        key:
+          maxLength: 64
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          title: Key
+          type: string
+        label:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          deprecated: true
+          description: Read the engine's word instead; removed at 1.2.0
+          title: Label
+        name:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          title: Name
+        order:
+          anyOf:
+          - maximum: 25.0
+            minimum: 0.0
+            type: integer
+          - type: 'null'
+          title: Order
+        sort_order:
+          anyOf:
+          - maximum: 25.0
+            minimum: 0.0
+            type: integer
+          - type: 'null'
+          deprecated: true
+          description: Read the engine's word instead; removed at 1.2.0
+          title: Sort Order
+        terminal:
+          default: false
+          title: Terminal
+          type: boolean
+      required:
+      - key
+      - category
+      title: ExistingStatus
       type: object
     Fact:
       additionalProperties: false
@@ -1214,6 +1562,168 @@ components:
       - unchanged
       title: IndexedDocument
       type: object
+    IngestRequest:
+      additionalProperties: false
+      description: 'One document: bytes or text, its format, its class, its space; never trusted.'
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        content_base64:
+          anyOf:
+          - maxLength: 14000000
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The file's bytes, base64; parsed in a bounded subprocess
+          title: Content Base64
+        content_hash:
+          data_class: INTERNAL
+          description: sha256 of the bytes as the backend sent them; unchanged means no work
+          pattern: ^[0-9a-f]{64}$
+          title: Content Hash
+          type: string
+        data_class:
+          data_class: PUBLIC
+          description: The document's class; never RESTRICTED
+          enum:
+          - PUBLIC
+          - INTERNAL
+          - CONFIDENTIAL
+          title: Data Class
+          type: string
+        document_id:
+          data_class: INTERNAL
+          description: The backend's id; every citation names it
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$
+          title: Document Id
+          type: string
+        filename:
+          anyOf:
+          - maxLength: 255
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: For the record only; never opened
+          title: Filename
+        format:
+          $ref: '#/components/schemas/DocumentFormat'
+          data_class: PUBLIC
+          description: The declared format; the bytes are checked
+        kind:
+          data_class: PUBLIC
+          description: What the document is (wiki_page, attachment…)
+          pattern: ^[a-z][a-z0-9_]{0,39}$
+          title: Kind
+          type: string
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        space_id:
+          data_class: INTERNAL
+          description: The space the document belongs to
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$
+          title: Space Id
+          type: string
+        text:
+          anyOf:
+          - maxLength: 200000
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: Already-extracted text (markdown or plain) instead of bytes
+          title: Text
+        title:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: The title
+          title: Title
+      required:
+      - organization_id
+      - capability_version
+      - space_id
+      - document_id
+      - kind
+      - format
+      - data_class
+      - content_hash
+      title: IngestRequest
+      type: object
+    IngestResponse:
+      additionalProperties: false
+      description: What the index now holds for the document.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        chunks:
+          minimum: 0.0
+          title: Chunks
+          type: integer
+        document_id:
+          title: Document Id
+          type: string
+        embedding_model:
+          title: Embedding Model
+          type: string
+        embedding_version:
+          title: Embedding Version
+          type: string
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        headings:
+          items:
+            type: string
+          maxItems: 200
+          title: Headings
+          type: array
+        index_chunks:
+          minimum: 0.0
+          title: Index Chunks
+          type: integer
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        state:
+          enum:
+          - indexed
+          - unchanged
+          title: State
+          type: string
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - document_id
+      - state
+      - chunks
+      - headings
+      - embedding_model
+      - embedding_version
+      - index_chunks
+      title: IngestResponse
+      type: object
     KindCount:
       additionalProperties: false
       description: How many items of a kind changed in the window, as the backend counted them.
@@ -1498,7 +2008,7 @@ components:
           type: string
         statuses:
           items:
-            $ref: '#/components/schemas/Status-Output'
+            $ref: '#/components/schemas/Status'
           title: Statuses
           type: array
         transitions:
@@ -1752,11 +2262,11 @@ components:
       type: object
     Scheme:
       additionalProperties: false
-      description: 'A whole scheme: the statuses and the transitions between them.'
+      description: 'The scheme to extend: its statuses under either spelling and its transitions.'
       properties:
         statuses:
           items:
-            $ref: '#/components/schemas/Status-Input'
+            $ref: '#/components/schemas/ExistingStatus'
           maxItems: 25
           title: Statuses
           type: array
@@ -1928,6 +2438,30 @@ components:
       - title
       title: Sibling
       type: object
+    Source:
+      additionalProperties: false
+      description: One supplied source a draft may cite.
+      properties:
+        id:
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$
+          title: Id
+          type: string
+        text:
+          maxLength: 20000
+          minLength: 1
+          title: Text
+          type: string
+        title:
+          anyOf:
+          - maxLength: 500
+            type: string
+          - type: 'null'
+          title: Title
+      required:
+      - id
+      - text
+      title: Source
+      type: object
     StandupEntry:
       additionalProperties: false
       description: 'One participant''s standup: what was done, what is in hand, what blocks — by token.'
@@ -1961,45 +2495,9 @@ components:
       - blocked
       title: StandupEntry
       type: object
-    Status-Input:
+    Status:
       additionalProperties: false
-      description: 'One status of the scheme: its key, label, category and role.'
-      properties:
-        category:
-          $ref: '#/components/schemas/catalyst_ai__contract__propose_workflow__StatusCategory'
-        initial:
-          default: false
-          title: Initial
-          type: boolean
-        key:
-          maxLength: 64
-          pattern: ^[a-z][a-z0-9_]{0,63}$
-          title: Key
-          type: string
-        label:
-          maxLength: 120
-          minLength: 1
-          title: Label
-          type: string
-        sort_order:
-          maximum: 25.0
-          minimum: 0.0
-          title: Sort Order
-          type: integer
-        terminal:
-          default: false
-          title: Terminal
-          type: boolean
-      required:
-      - key
-      - label
-      - category
-      - sort_order
-      title: Status
-      type: object
-    Status-Output:
-      additionalProperties: false
-      description: 'One status of the scheme: its key, label, category and role.'
+      description: A proposed status; `label` and `sort_order` repeat `name` and `order` until 1.2.0.
       properties:
         category:
           $ref: '#/components/schemas/StatusCategory-Output'
@@ -2013,11 +2511,25 @@ components:
           title: Key
           type: string
         label:
+          deprecated: true
+          description: Read the engine's word instead; removed at 1.2.0
           maxLength: 120
           minLength: 1
           title: Label
           type: string
+        name:
+          maxLength: 120
+          minLength: 1
+          title: Name
+          type: string
+        order:
+          maximum: 25.0
+          minimum: 0.0
+          title: Order
+          type: integer
         sort_order:
+          deprecated: true
+          description: Read the engine's word instead; removed at 1.2.0
           maximum: 25.0
           minimum: 0.0
           title: Sort Order
@@ -2028,8 +2540,10 @@ components:
           type: boolean
       required:
       - key
-      - label
+      - name
       - category
+      - order
+      - label
       - sort_order
       title: Status
       type: object
@@ -2384,7 +2898,7 @@ components:
       type: object
     Transition:
       additionalProperties: false
-      description: One allowed move; `from_key` null means from any status; guards name engine conditions.
+      description: A transition as sent and returned; `requires_approval` is always false until 1.2.0.
       properties:
         from_key:
           anyOf:
@@ -2415,6 +2929,8 @@ components:
           title: Reason Code
         requires_approval:
           default: false
+          deprecated: true
+          description: Read the engine's word instead; removed at 1.2.0
           title: Requires Approval
           type: boolean
         to_key:
@@ -2727,6 +3243,320 @@ paths:
       x-capability: platform
       x-capability-version: 0.1.0
       x-error-codes: []
+  /v1/documents/ask:
+    post:
+      description: Answer only from the space's passages, every claim cited, or say not found.
+      operationId: documents.ask
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AskRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AskResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.token.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected, ai.provider.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.provider.quota'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.output.invalid, ai.output.unsafe'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.provider.timeout'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.index.unavailable, ai.input.rejected, ai.output.invalid, ai.output.unsafe, ai.provider.quota,
+            ai.provider.rejected, ai.provider.timeout, ai.provider.unavailable'
+      summary: Ask
+      tags:
+      - capabilities
+      x-capability: documents
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
+      - ai.index.unavailable
+  /v1/documents/generate:
+    post:
+      description: Draft from the supplied sources, every section citing what it rests on.
+      operationId: documents.generate
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DraftResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.token.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.too_large'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected, ai.provider.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.provider.quota'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.output.invalid, ai.output.unsafe'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.provider.timeout'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.input.rejected, ai.input.too_large, ai.output.invalid, ai.output.unsafe, ai.provider.quota,
+            ai.provider.rejected, ai.provider.timeout, ai.provider.unavailable'
+      summary: Generate
+      tags:
+      - capabilities
+      x-capability: documents
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
+  /v1/documents/ingest:
+    post:
+      description: Parse a document under limits and index it in its space.
+      operationId: documents.ingest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.token.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.index.document_too_large'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected, ai.provider.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.provider.quota'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.provider.timeout'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.index.document_too_large, ai.index.unavailable, ai.input.rejected, ai.provider.quota, ai.provider.rejected,
+            ai.provider.timeout, ai.provider.unavailable'
+      summary: Ingest
+      tags:
+      - capabilities
+      x-capability: documents
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.index.document_too_large
+      - ai.index.unavailable
   /v1/generate-children:
     post:
       description: Propose typed children of the parent at the next level; the backend decides creation.
@@ -3450,7 +4280,7 @@ paths:
       tags:
       - capabilities
       x-capability: propose-workflow
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled

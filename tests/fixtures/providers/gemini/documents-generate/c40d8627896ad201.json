@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Daily digest\", \"text\": \"The daily digest goes out at seven in the morning in the member's locale. A member with no activity in the window gets no digest. The digest lists the changed items and the comments addressed to the member. Counts in\", \"sources\": [\"doc-digest\"]}, {\"heading\": \"Offline drafts\", \"text\": \"A draft comment survives a page reload while offline. Drafts are kept in the browser for seven days. A draft is sent once when the connection returns. A draft older than seven days is dropped with a notice.\", \"sources\": [\"doc-drafts\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 316,
+      "candidatesTokenCount": 170
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

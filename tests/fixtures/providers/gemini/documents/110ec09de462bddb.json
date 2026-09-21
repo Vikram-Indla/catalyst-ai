@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"Hotfixes are tagged with the suffix hotfix in the version.\", \"chunk_ids\": [\"kb-main/doc-release#2\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 297,
+      "candidatesTokenCount": 47
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

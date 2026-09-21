@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"proposed\", \"name\": \"Proposed\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"under_review\", \"name\": \"Under Review\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"accepted\", \"name\": \"Accepted\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 2}, {\"key\": \"declined\", \"name\": \"Declined\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 3}, {\"key\": \"parked\", \"name\": \"Parked\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"order\": 4}], \"transitions\": [{\"from_key\": \"proposed\", \"to_key\": \"under_review\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Proposed to Under Review.\"}, {\"from_key\": \"under_review\", \"to_key\": \"accepted\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Under Review to Accepted.\"}, {\"from_key\": \"under_review\", \"to_key\": \"declined\", \"kind\": \"reject\", \"guards\": [], \"reason_code\": \"reject_to_declined\", \"rationale\": \"The description says it moves from Under Review to Declined.\"}, {\"from_key\": \"under_review\", \"to_key\": \"parked\", \"kind\": \"defer\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Under Review to Parked.\"}, {\"from_key\": \"parked\", \"to_key\": \"under_review\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Parked to Under Review.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 156,
+      "candidatesTokenCount": 402
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

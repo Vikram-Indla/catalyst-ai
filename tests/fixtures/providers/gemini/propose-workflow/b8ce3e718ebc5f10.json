@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"detected\", \"name\": \"Detected\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"acknowledged\", \"name\": \"Acknowledged\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"mitigating\", \"name\": \"Mitigating\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"monitoring\", \"name\": \"Monitoring\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"resolved\", \"name\": \"Resolved\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}], \"transitions\": [{\"from_key\": \"detected\", \"to_key\": \"acknowledged\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Detected to Acknowledged.\"}, {\"from_key\": \"acknowledged\", \"to_key\": \"mitigating\", \"kind\": \"forward\", \"guards\": [\"assignee_set\"], \"reason_code\": null, \"rationale\": \"The description says it moves from Acknowledged to Mitigating.\"}, {\"from_key\": \"mitigating\", \"to_key\": \"monitoring\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Mitigating to Monitoring.\"}, {\"from_key\": \"monitoring\", \"to_key\": \"mitigating\", \"kind\": \"backward\", \"guards\": [], \"reason_code\": \"backward_to_mitigating\", \"rationale\": \"The description says it moves from Monitoring to Mitigating.\"}, {\"from_key\": \"monitoring\", \"to_key\": \"resolved\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Monitoring to Resolved.\"}, {\"from_key\": \"resolved\", \"to_key\": \"mitigating\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_mitigating\", \"rationale\": \"The description says it moves from Resolved to Mitigating.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 156,
+      "candidatesTokenCount": 465
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

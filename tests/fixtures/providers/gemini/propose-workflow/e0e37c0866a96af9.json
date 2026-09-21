@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"backlog\", \"name\": \"Backlog\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"ready\", \"name\": \"Ready\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"in_progress\", \"name\": \"In Progress\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"in_review\", \"name\": \"In Review\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"done\", \"name\": \"Done\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}], \"transitions\": [{\"from_key\": \"backlog\", \"to_key\": \"ready\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from Backlog to Ready.\"}, {\"from_key\": \"ready\", \"to_key\": \"in_progress\", \"kind\": \"forward\", \"guards\": [\"assignee_set\"], \"reason_code\": null, \"rationale\": \"The description says it moves from Ready to In Progress.\"}, {\"from_key\": \"in_progress\", \"to_key\": \"in_review\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from In Progress to In Review.\"}, {\"from_key\": \"in_review\", \"to_key\": \"in_progress\", \"kind\": \"reject\", \"guards\": [], \"reason_code\": \"reject_to_in_progress\", \"rationale\": \"The description says it moves from In Review to In Progress.\"}, {\"from_key\": \"in_review\", \"to_key\": \"done\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"The description says it moves from In Review to Done.\"}, {\"from_key\": \"done\", \"to_key\": \"in_progress\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_in_progress\", \"rationale\": \"The description says it moves from Done to In Progress.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 164,
+      "candidatesTokenCount": 446
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

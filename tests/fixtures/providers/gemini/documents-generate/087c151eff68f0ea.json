@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Search cluster\", \"text\": \"The search index is rebuilt every night at two in the morning. A rebuild takes about forty minutes for the largest organisation. Archived items stay out of the default search results. A filter shows archived items when asked.\", \"sources\": [\"doc-search\"]}, {\"heading\": \"Daily digest\", \"text\": \"The daily digest goes out at seven in the morning in the member's locale. A member with no activity in the window gets no digest. The digest lists the changed items and the comments addressed to the member. Counts in\", \"sources\": [\"doc-digest\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 322,
+      "candidatesTokenCount": 175
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

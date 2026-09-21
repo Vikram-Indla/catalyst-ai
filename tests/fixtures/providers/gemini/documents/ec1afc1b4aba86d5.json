@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The on-call rota changes every Sunday at 09:00.\", \"chunk_ids\": [\"kb-main/doc-runbook#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 304,
+      "candidatesTokenCount": 44
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

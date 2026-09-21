@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"Archived items stay out of the default search results.\", \"chunk_ids\": [\"kb-main/doc-search#1\"]}, {\"text\": \"A filter shows archived items when asked.\", \"chunk_ids\": [\"kb-main/doc-search#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 485,
+      "candidatesTokenCount": 69
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

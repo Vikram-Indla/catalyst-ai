@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"After the third failure the invoice is marked as unpaid.\", \"chunk_ids\": [\"kb-main/doc-billing#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 489,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

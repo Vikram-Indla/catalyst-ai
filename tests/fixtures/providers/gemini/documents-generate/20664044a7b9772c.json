@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Offline drafts\", \"text\": \"A draft comment survives a page reload while offline. Drafts are kept in the browser for seven days. A draft is sent once when the connection returns. A draft older than seven days is dropped with a notice.\", \"sources\": [\"doc-drafts\"]}, {\"heading\": \"Certificate rotation\", \"text\": \"The signing certificate rotates every ninety days. The rotation runs without a restart of the service. An expired certificate is refused at sign-in with a clear message. The platform team is paged when a rotation fails.\", \"sources\": [\"doc-certificate\"]}, {\"heading\": \"Roadmap review\", \"text\": \"The quarterly roadmap review happens in the last week of each quarter. The sponsor chairs the review and the hub owners present. The review ends with a ranked list of themes for the next quarter. The ranked list is published\", \"sources\": [\"doc-roadmap\"]}, {\"heading\": \"Incident runbook\", \"text\": \"Alerts page the on-call engineer through the paging service. The on-call rota changes every Sunday at 09:00. After fifteen minutes without acknowledgement the lead is paged. After thirty minutes a bridge call is opened and the status page is updated.\", \"sources\": [\"doc-runbook\"]}, {\"heading\": \"Onboarding guide\", \"text\": \"New members receive a laptop on the first day. Accounts are created by the platform team within two business days. Every new member pairs with a buddy for the first week. The buddy books the introduction meetings with each hub\", \"sources\": [\"doc-onboarding\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 642,
+      "candidatesTokenCount": 404
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

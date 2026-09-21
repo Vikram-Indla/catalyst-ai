@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The old gateway stays in read-only mode for ninety days.\", \"chunk_ids\": [\"kb-main/doc-billing#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 492,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The rollback command lives in the deploy repository under scripts.\", \"chunk_ids\": [\"kb-main/doc-runbook#2\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 494,
+      "candidatesTokenCount": 49
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

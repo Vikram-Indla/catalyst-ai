@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"statuses\": [{\"key\": \"backlog\", \"name\": \"\u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0646\u062a\u0638\u0627\u0631\", \"category\": \"todo\", \"initial\": true, \"terminal\": false, \"order\": 0}, {\"key\": \"ready\", \"name\": \"\u062c\u0627\u0647\u0632\", \"category\": \"todo\", \"initial\": false, \"terminal\": false, \"order\": 1}, {\"key\": \"in_progress\", \"name\": \"\u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 2}, {\"key\": \"in_review\", \"name\": \"\u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629\", \"category\": \"in_progress\", \"initial\": false, \"terminal\": false, \"order\": 3}, {\"key\": \"done\", \"name\": \"\u0645\u0646\u062c\u0632\", \"category\": \"done\", \"initial\": false, \"terminal\": true, \"order\": 4}], \"transitions\": [{\"from_key\": \"backlog\", \"to_key\": \"ready\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u0627\u0626\u0645\u0629 \u0627\u0644\u0627\u0646\u062a\u0638\u0627\u0631 \u0625\u0644\u0649 \u062c\u0627\u0647\u0632.\"}, {\"from_key\": \"ready\", \"to_key\": \"in_progress\", \"kind\": \"forward\", \"guards\": [\"assignee_set\"], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u062c\u0627\u0647\u0632 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630.\"}, {\"from_key\": \"in_progress\", \"to_key\": \"in_review\", \"kind\": \"forward\", \"guards\": [\"all_subtasks_done\"], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629.\"}, {\"from_key\": \"in_review\", \"to_key\": \"in_progress\", \"kind\": \"reject\", \"guards\": [], \"reason_code\": \"reject_to_in_progress\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630.\"}, {\"from_key\": \"in_review\", \"to_key\": \"done\", \"kind\": \"forward\", \"guards\": [], \"reason_code\": null, \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0642\u064a\u062f \u0627\u0644\u0645\u0631\u0627\u062c\u0639\u0629 \u0625\u0644\u0649 \u0645\u0646\u062c\u0632.\"}, {\"from_key\": \"done\", \"to_key\": \"in_progress\", \"kind\": \"reopen\", \"guards\": [], \"reason_code\": \"reopen_to_in_progress\", \"rationale\": \"\u0627\u0644\u0648\u0635\u0641 \u064a\u0630\u0643\u0631 \u0627\u0644\u0627\u0646\u062a\u0642\u0627\u0644 \u0645\u0646 \u0645\u0646\u062c\u0632 \u0625\u0644\u0649 \u0642\u064a\u062f \u0627\u0644\u062a\u0646\u0641\u064a\u0630.\"}], \"empty_reason\": null, \"rationale\": \"One status per state named, one transition per move described.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 162,
+      "candidatesTokenCount": 440
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

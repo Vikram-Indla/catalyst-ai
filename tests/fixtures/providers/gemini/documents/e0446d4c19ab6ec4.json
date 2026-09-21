@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The security briefing runs every second Tuesday.\", \"chunk_ids\": [\"kb-main/doc-onboarding#2\"]}, {\"text\": \"Access to production is granted only after the security briefing.\", \"chunk_ids\": [\"kb-main/doc-onboarding#2\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 311,
+      "candidatesTokenCount": 75
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

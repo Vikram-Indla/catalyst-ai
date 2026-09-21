@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"Billing moves to the new gateway on the first of November.\", \"chunk_ids\": [\"kb-main/doc-billing#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 471,
+      "candidatesTokenCount": 47
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

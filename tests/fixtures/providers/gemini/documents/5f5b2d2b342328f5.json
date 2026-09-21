@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The quarterly roadmap review happens in the last week of each quarter.\", \"chunk_ids\": [\"kb-main/doc-roadmap#0\"]}, {\"text\": \"The sponsor chairs the review and the hub owners present.\", \"chunk_ids\": [\"kb-main/doc-roadmap#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 311,
+      "candidatesTokenCount": 77
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

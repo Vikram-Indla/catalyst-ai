@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The export writes every visible column of the board to a CSV file.\", \"chunk_ids\": [\"kb-main/doc-export#0\"]}, {\"text\": \"Hidden columns are never exported.\", \"chunk_ids\": [\"kb-main/doc-export#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 478,
+      "candidatesTokenCount": 70
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

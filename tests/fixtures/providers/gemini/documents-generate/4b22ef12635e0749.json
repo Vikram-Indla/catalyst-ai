@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Incident runbook\", \"text\": \"Alerts page the on-call engineer through the paging service. The on-call rota changes every Sunday at 09:00. After fifteen minutes without acknowledgement the lead is paged. After thirty minutes a bridge call is opened and the status page is updated.\", \"sources\": [\"doc-runbook\"]}, {\"heading\": \"Onboarding guide\", \"text\": \"New members receive a laptop on the first day. Accounts are created by the platform team within two business days. Every new member pairs with a buddy for the first week. The buddy books the introduction meetings with each hub\", \"sources\": [\"doc-onboarding\"]}, {\"heading\": \"Release process\", \"text\": \"Releases ship every two weeks on a Wednesday. A release freeze starts on the Monday before the release. Each release needs sign-off from the test lead and the release manager. Sign-off is recorded in the release hub before the freeze\", \"sources\": [\"doc-release\"]}, {\"heading\": \"Board export\", \"text\": \"The export writes every visible column of the board to a CSV file. Hidden columns are never exported. An export covers at most five thousand rows. Larger boards are exported in pages named by their page number. Only members with\", \"sources\": [\"doc-export\"]}, {\"heading\": \"Billing gateway\", \"text\": \"Billing moves to the new gateway on the first of November. The old gateway stays in read-only mode for ninety days. A failed charge is retried three times, one hour apart. After the third failure the invoice is marked as\", \"sources\": [\"doc-billing\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 706,
+      "candidatesTokenCount": 409
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

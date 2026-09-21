@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"A draft is sent once when the connection returns.\", \"chunk_ids\": [\"kb-main/doc-drafts#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 284,
+      "candidatesTokenCount": 44
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

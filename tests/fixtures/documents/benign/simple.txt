@@ -1,0 +1,3 @@
+Plain text document.
+
+Second paragraph of the plain text.

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The review ends with a ranked list of themes for the next quarter.\", \"chunk_ids\": [\"kb-main/doc-roadmap#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 312,
+      "candidatesTokenCount": 49
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

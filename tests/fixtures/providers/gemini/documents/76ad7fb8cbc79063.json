@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"The platform team is paged when a rotation fails.\", \"chunk_ids\": [\"kb-main/doc-certificate#1\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 304,
+      "candidatesTokenCount": 45
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

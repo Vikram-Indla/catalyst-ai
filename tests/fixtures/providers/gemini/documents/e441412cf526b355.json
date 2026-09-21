@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [{\"text\": \"A member with no activity in the window gets no digest.\", \"chunk_ids\": [\"kb-main/doc-digest#0\"]}], \"not_found\": false, \"rationale\": \"The best-matching passages.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 467,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

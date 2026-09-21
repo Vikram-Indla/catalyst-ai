@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"title\": \"Guide\", \"sections\": [{\"heading\": \"Board export\", \"text\": \"The export writes every visible column of the board to a CSV file. Hidden columns are never exported. An export covers at most five thousand rows. Larger boards are exported in pages named by their page number. Only members with\", \"sources\": [\"doc-export\"]}, {\"heading\": \"Billing gateway\", \"text\": \"Billing moves to the new gateway on the first of November. The old gateway stays in read-only mode for ninety days. A failed charge is retried three times, one hour apart. After the third failure the invoice is marked as\", \"sources\": [\"doc-billing\"]}, {\"heading\": \"Search cluster\", \"text\": \"The search index is rebuilt every night at two in the morning. A rebuild takes about forty minutes for the largest organisation. Archived items stay out of the default search results. A filter shows archived items when asked.\", \"sources\": [\"doc-search\"]}], \"empty_reason\": null, \"rationale\": \"One section per source, in the sources' own words.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 424,
+      "candidatesTokenCount": 251
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

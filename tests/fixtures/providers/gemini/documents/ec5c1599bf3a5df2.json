@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"claims\": [], \"not_found\": true, \"rationale\": \"No passage states an answer to the question.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 491,
+      "candidatesTokenCount": 23
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
