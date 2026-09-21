@@ -1,0 +1,13 @@
+schema_valid: 1.0
+covers_traceable: 1.0
+criteria_covered: 0.95
+given_when_then: 1.0
+bounded: 1.0
+areas_blended: 0.95
+artefacts_shaped: 1.0
+no_real_data: 1.0
+language_preserved: 0.95
+empty_when_nothing: 1.0
+overall: 0.97
+p95_latency_ms: 12000
+p95_cost_micros: 8000

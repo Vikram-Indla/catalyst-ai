@@ -1,0 +1,13 @@
+schema_valid: 1.0
+no_invented_entries: 1.0
+done_only_noted: 1.0
+every_done_change_noted: 0.95
+keys_traceable: 1.0
+audience_respected: 1.0
+highlights_bounded: 1.0
+language_preserved: 0.95
+no_forbidden_content: 1.0
+empty_when_nothing: 1.0
+overall: 0.97
+p95_latency_ms: 10000
+p95_cost_micros: 6000
