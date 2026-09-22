@@ -22,6 +22,8 @@ this table fails `tools/checks/models`; a row without a retention setting fails 
 | --- | --- | --- | --- | --- | --- |
 | `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent` and `:batchEmbedContents` (≤ 100 texts per call), key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; verified at the first live recording | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
 
+**Availability, 2026-09-26 (`F-034`).** A key created now is refused by all three text rows with `404 "no longer available to new users"`; the provider points at its 3.x generation. `gemini-embedding-001` still serves. The rows below are therefore what this service is *written and priced* against, not what a new key can reach: the first live recording waits on a project that predates the cutoff, or on a model migration with its own prices and re-measured budgets. Nothing here is edited on the strength of an error message.
+
 The previous system also used OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), two Anthropic
 models and Groq through its gateways. None is a row here; each would be a second adapter under
 `ADR-004` with a full eval re-run on the capabilities that switch.
