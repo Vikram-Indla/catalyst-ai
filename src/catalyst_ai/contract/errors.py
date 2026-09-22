@@ -26,6 +26,7 @@ class ErrorCode(StrEnum):
     OUTPUT_UNSAFE = "ai.output.unsafe"
     INDEX_DOCUMENT_TOO_LARGE = "ai.index.document_too_large"
     INDEX_UNAVAILABLE = "ai.index.unavailable"
+    JOB_NOT_FOUND = "ai.job.not_found"
     INTERNAL_ERROR = "internal.error"
 
 
@@ -48,6 +49,7 @@ HTTP_STATUS = MappingProxyType(
         ErrorCode.OUTPUT_UNSAFE: 502,
         ErrorCode.INDEX_DOCUMENT_TOO_LARGE: 413,
         ErrorCode.INDEX_UNAVAILABLE: 503,
+        ErrorCode.JOB_NOT_FOUND: 404,
         ErrorCode.INTERNAL_ERROR: 500,
     }
 )

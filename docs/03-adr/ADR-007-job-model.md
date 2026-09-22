@@ -1,7 +1,7 @@
 ---
 id: ADR-007
 title: The job model — synchronous operations with idempotency keys for short capabilities; polled jobs for long ones; the service never calls the backend
-status: Accepted
+status: Implemented
 date: 2026-09-18
 deciders: AI service lead, backend lead (announced; the backend must be able to call it)
 supersedes: —
@@ -76,7 +76,12 @@ concurrency the budgets allow, and the revisit trigger says when it is not.
   operation under this ADR, not a callback.
 - The backend asks for push instead of poll — re-open with the direction-of-calls question first.
 
+## Implementation
+
+Implemented as decided (`D-037`): the `jobs` table (the envelope verbatim, the payload and its hash, the state, the window), `POST /v1/documents/ingest:jobs` → `202 + Location`, `GET /v1/jobs/{id}` with `Retry-After` and results bound to the organisation, `catalyst-ai worker` over `FOR UPDATE SKIP LOCKED` with a per-organisation bound, `verify_stored` before every execution, `job_exp` expiry, drain on SIGTERM, results purged by the retention command; `documents.ingest` above 256 KiB is the first job capability.
+
 ## Enforcement
 
-`tools/checks/capabilities`, `test_service_never_calls_backend`, the job contract tests,
-`tests/storage/test_jobs.py`.
+`tools/checks/capabilities`, `test_service_never_calls_backend`, the job contract tests
+(`tests/contract/test_jobs.py`), the worker's tests, `tests/storage/test_jobs.py` (the real loop
+against the attacker's rows).

@@ -23,6 +23,7 @@ and is the contract (`RULE-003 §2`).
 | `ai.output.unsafe` | 502 | envelope; the completion failed the leakage scanner, or a summary, a standup line, a digest line, a release note or a post-mortem named a participant outside the data (`participant_not_in_thread`); a security event is logged | stage 6; `summarize.run` stage 7 |
 | `ai.index.document_too_large` | 413 | envelope with one `details` entry (`document_too_large`, how many) — nothing was embedded | `index.upsert`, before any provider call |
 | `ai.index.unavailable` | 503 | envelope with `retry_after`; the database did not answer; never a partial hit list | the retrieval package (`index.*`, `search.run`, the retrieve stage of `generate-children`) |
+| `ai.job.not_found` | 404 | envelope; the job is another organisation's or does not exist — never which | `jobs.get` |
 | `internal.error` | 500 | envelope with `request_id` and nothing else | the app-level handler |
 
 Codes that arrive with later packages, so the design is visible now: `ai.input.unsupported` (415,

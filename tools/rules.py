@@ -149,7 +149,7 @@ PIPELINE_OPTIONAL_STAGES = frozenset({"retrieve"})
 PIPELINE_GENERATION_STAGES = frozenset({"assemble", "call", "validate_output"})
 PORT_CALLS = ("generate", "stream", "embed")
 
-SEAMS = frozenset({"Provider", "Storage", "Clock", "Cache"})
+SEAMS = frozenset({"Provider", "Storage", "JobStore", "Clock", "Cache"})
 WIRING_MODULES = frozenset({"__init__.py", "app.py", "cli.py", "descriptor.py"})
 PARSER_MARKERS = ("retrieval/parsers/", "retrieval/chunking.py", "_parser.py")
 

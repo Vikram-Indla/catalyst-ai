@@ -2,7 +2,7 @@
 id: ARCH-012
 title: Dependency direction and architecture fitness
 status: Locked
-version: 1.0.0
+version: 1.0.1
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -52,7 +52,8 @@ scaffold.
 ## 3. Interfaces only at substitution boundaries
 
 A `Protocol` exists where a real substitution does: the `Provider` port (adapters and the
-recorded transport), `Storage` (PostgreSQL and the in-memory test double), `Clock`, `Cache`.
+recorded transport), `Storage` and `JobStore` (PostgreSQL and the in-memory test double),
+`Clock`, `Cache`.
 A protocol with one implementation that is not in the seams list fails
 `tools/checks/interfaces`.
 

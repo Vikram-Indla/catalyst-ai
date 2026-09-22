@@ -7,7 +7,7 @@ from catalyst_ai.contract.errors import HTTP_STATUS, PLATFORM_CODES, ErrorCode, 
 SCHEMAS = "#/components/schemas/{model}"
 ENVELOPE_REF = "#/components/schemas/ErrorEnvelope"
 FRAMEWORK_SCHEMAS = ("HTTPValidationError", "ValidationError")
-OK = "200"
+OK = "2"
 DEFAULT = "default"
 
 
@@ -19,8 +19,8 @@ def _error_response(codes: list[str]) -> dict[str, Any]:
 
 
 def _responses_of(operation: dict[str, Any]) -> dict[str, Any]:
-    """Return the operation's responses: 200 kept, one entry per error status, one default."""
-    responses = {k: v for k, v in operation.get("responses", {}).items() if k == OK}
+    """Return the operation's responses: the success kept, one per error status, one default."""
+    responses = {k: v for k, v in operation.get("responses", {}).items() if k.startswith(OK)}
     declared = {ErrorCode(code) for code in operation.get("x-error-codes", [])}
     by_status: dict[str, list[str]] = {}
     for code in sorted(declared | PLATFORM_CODES, key=str):

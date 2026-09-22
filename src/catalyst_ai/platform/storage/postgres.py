@@ -82,6 +82,17 @@ class PostgresStorage:
             await self._pool.close()
             self._pool = None
 
+    @property
+    def pool(self) -> asyncpg.Pool[Any] | None:
+        """The pool, for the job store that shares it; None before `connect`."""
+        return self._pool
+
+    @asynccontextmanager
+    async def tenant(self, organization_id: UUID) -> AsyncIterator[PoolConnectionProxy[Any]]:
+        """One transaction with the tenant set; the policy binds every statement inside it."""
+        async with self._tenant(organization_id) as connection:
+            yield connection
+
     @asynccontextmanager
     async def _tenant(self, organization_id: UUID) -> AsyncIterator[PoolConnectionProxy[Any]]:
         if self._pool is None:

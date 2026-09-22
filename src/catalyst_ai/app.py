@@ -11,7 +11,9 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
 from catalyst_ai.capabilities.assistant import router as assistant_router
+from catalyst_ai.capabilities.documents import descriptor as documents_descriptor
 from catalyst_ai.capabilities.documents import router as documents_router
+from catalyst_ai.capabilities.documents.jobs import run_ingest_payload
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
 from catalyst_ai.capabilities.generate_tests import router as generate_tests_router
 from catalyst_ai.capabilities.improve_story import router as improve_story_router
@@ -41,9 +43,10 @@ from catalyst_ai.platform.httpserver import (
     install_error_handlers,
     with_error_responses,
 )
+from catalyst_ai.platform.jobs import JobRunner, jobs_router
 from catalyst_ai.platform.observability import SecurityCounters
 from catalyst_ai.platform.runtime import RuntimeContext
-from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError
+from catalyst_ai.platform.storage import PostgresJobStore, PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
 
 CONTRACT_VERSION = "0.1.0"
@@ -105,7 +108,14 @@ async def ready(request: Request) -> ReadyResponse:
     """Report whether the process can serve; every dependency it has answers."""
     runtime: RuntimeContext = request.app.state.runtime
     checks = {"settings": True, "storage": await runtime.storage.ready()}
+    checks.update(_worker_check(request))
     return ReadyResponse(status="ready" if all(checks.values()) else "not_ready", checks=checks)
+
+
+def _worker_check(request: Request) -> dict[str, bool]:
+    """Report whether the worker still takes work; the API process has no worker to report."""
+    worker = getattr(request.app.state, "worker", None)
+    return {} if worker is None else {"worker": not worker.draining}
 
 
 def _with_examples(document: dict[str, Any]) -> dict[str, Any]:
@@ -114,7 +124,7 @@ def _with_examples(document: dict[str, Any]) -> dict[str, Any]:
             responses = operation.get("responses", {})
             operation.setdefault("x-error-codes", list(PLATFORM_ERROR_CODES))
             for status, response in responses.items():
-                if status == "200":
+                if status.startswith("2"):
                     response.setdefault("x-example", "see the contract tests")
     return document
 
@@ -158,6 +168,12 @@ def default_runtime(
     """Build the production runtime: system clock, Gemini adapter, in-process cache and caps."""
     clock = SystemClock()
     client = httpx.AsyncClient(timeout=PROVIDER_CLIENT_TIMEOUT_S, transport=transport)
+    storage = PostgresStorage(
+        settings.database_url.get_secret_value(),
+        clock,
+        settings.database_pool_max,
+        STORAGE_COMMAND_TIMEOUT_S,
+    )
     return RuntimeContext(
         settings=settings,
         provider=GeminiProvider(settings, client, clock),
@@ -166,13 +182,14 @@ def default_runtime(
             clock, settings.tenant_budget_default_micros_per_day, settings.tenant_concurrency_max
         ),
         clock=clock,
-        storage=PostgresStorage(
-            settings.database_url.get_secret_value(),
-            clock,
-            settings.database_pool_max,
-            STORAGE_COMMAND_TIMEOUT_S,
-        ),
+        storage=storage,
+        jobs=PostgresJobStore(storage),
     )
+
+
+def job_runners() -> dict[str, JobRunner]:
+    """Return the capabilities a job may run, by name; assembled here so the worker imports none."""
+    return {documents_descriptor.name: run_ingest_payload}
 
 
 @asynccontextmanager
@@ -223,4 +240,5 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(documents_router)
     app.include_router(assistant_router)
     app.include_router(unfurl_router)
+    app.include_router(jobs_router)
     return app

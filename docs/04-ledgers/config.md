@@ -74,6 +74,9 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `TENANT_BUDGET_DEFAULT_MICROS_PER_DAY` | int | no | platform default | positive | PUBLIC | Per-organisation daily spend cap unless overridden |
 | `TENANT_CONCURRENCY_MAX` | int | no | `8` | positive | PUBLIC | Concurrent provider calls per organisation |
 | `JOB_RESULT_TTL_SECONDS` | int | no | `86400` | positive | PUBLIC | Job results expire after this |
+| `JOB_TIMEOUT_SECONDS` | int | no | `600` | 1..3600 | PUBLIC | A job's execution deadline in the worker; past it the row is `failed` with `ai.provider.timeout` |
+| `WORKER_CONCURRENCY` | int | no | `4` | 1..64 | PUBLIC | Jobs one worker process runs at once |
+| `WORKER_CONCURRENCY_PER_ORGANIZATION` | int | no | `2` | 1..64 | PUBLIC | Jobs of one organisation running at once across the queue; the claim skips an organisation at its bound |
 | `PROVIDER_LOG_RETENTION_DAYS` | int | no | `90` | positive | PUBLIC | `provider_calls` retention |
 
 Rows that arrive with later packages, declared here so the design is visible: `TENANT_BUDGET_OVERRIDES`

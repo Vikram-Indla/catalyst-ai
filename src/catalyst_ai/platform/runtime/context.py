@@ -1,12 +1,12 @@
 """The runtime context a pipeline receives: the seams, the settings and the clock."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from catalyst_ai.config import Settings
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import Cache
 from catalyst_ai.platform.clock import Clock
-from catalyst_ai.platform.storage import Storage
+from catalyst_ai.platform.storage import JobStore, MemoryJobStore, Storage
 from catalyst_ai.providers.port import Provider
 
 
@@ -20,3 +20,4 @@ class RuntimeContext:
     budgets: TenantBudgets
     clock: Clock
     storage: Storage
+    jobs: JobStore = field(default_factory=MemoryJobStore)

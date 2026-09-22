@@ -38,7 +38,7 @@ obtains configuration on this side (a public key is all there is) · anyone read
 | # | Attacker | Entry point | Attack | Mitigation (code) | Verified by | ASVS / LLM |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | holder of a stolen bearer | any operation | present `Authorization: Bearer <token>` | there is no token: the scheme is the signed envelope, a bearer is `malformed` → `401`; no code path reads a bearer (`tools/checks/origin`) | `test_the_old_bearer_and_a_missing_header_are_refused_alike`; the check red on its plant | V3.1 |
-| 2 | database writer | the `jobs` table | insert a row claiming an organisation and a capability | a row carries the API's verified envelope and its payload hash; `verify_stored` refuses a missing or made-up envelope, a swapped organisation or capability, an edited payload, a closed job window → `quarantined`, never run (`INV-054`) | `test_the_attackers_rows_are_quarantined`, `test_a_forged_signature_under_a_known_key_id_is_quarantined` | V4.1 |
+| 2 | database writer | the `jobs` table | insert a row claiming an organisation and a capability, or edit a queued row's payload | a row carries the API's verified envelope and the payload; the worker hashes the payload bytes it is about to run and verifies the envelope against that hash, the row's organisation and capability, and the job window → `quarantined`, never run (`INV-054`, `INV-055`); the payload is never parsed before the proof clears | `test_the_attackers_rows_inserted_into_the_database_are_quarantined_on_the_real_loop` (six rows raw-inserted into PostgreSQL while the worker runs), `test_the_attackers_rows_are_quarantined_on_the_running_loop`, `test_the_attackers_rows_are_quarantined` | V4.1 |
 | 3 | network | any operation | replay a captured request within its window | `jti` remembered until `exp` plus the skew in the replay store (`auth_nonces`, platform state); the second presentation is `replayed` → `401` | `test_a_replayed_envelope_is_refused_the_second_time`, `test_a_nonce_is_honoured_once_within_its_window`, the storage test | V3.2 |
 | 4 | network, backend bug | any operation | a valid envelope for organisation A on a body naming organisation B | `bh` binds the exact bytes; a re-signed body under A's envelope fails `org` equals `organization_id` → `401` without saying which | `test_an_envelope_swapped_onto_another_organisation_is_refused`, `test_organisation_mismatch_is_refused_without_detail_and_logged_with_it` | V4.2 |
 | 5 | network | any operation | edit the payload after signing | `bh` mismatch → `401` | `test_a_payload_edited_after_signing_is_refused`, `test_expired_unknown_key_and_edited_payload_are_refused` | V3.5 |
@@ -52,12 +52,13 @@ obtains configuration on this side (a public key is all there is) · anyone read
 
 ## Residual risk
 
-- The job half is born verified but not yet exercised by a worker: the job model (`ADR-007`)
-  has no table today. `verify_stored` and the `quarantined` state are the contract the table
-  will be built to; the "real worker loop" proof lands with it.
+- The worker's proof is only as strong as the payload hash it computes: a row whose payload was
+  swapped for another legitimately signed payload of the same organisation and capability would
+  run the other job's work — the same work the backend already asked for, under its own tenant.
 - The replay store shares the service's database; a database write attacker can delete a nonce
-  and replay once within the window. That attacker still cannot forge an envelope (threat 2),
-  so the blast radius is one repeated legitimate request.
+  and replay once within the window, or requeue a finished job row so its work runs twice. That
+  attacker still cannot forge an envelope (threat 2), so the blast radius is one repeated
+  legitimate request or one repeated idempotent ingest.
 - The clock is the system's on both sides; the tolerance is five seconds by default. A machine
   whose clock drifts further refuses everything loudly rather than quietly.
-- Accepted by: pending the lead (`D-035`, `D-036`).
+- Accepted by: pending the lead (`D-035`, `D-036`, `D-037`).

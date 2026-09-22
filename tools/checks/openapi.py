@@ -19,7 +19,10 @@ def operation_violations(document: dict[str, Any], where: str) -> list[Violation
             for key in REQUIRED_EXTENSIONS:
                 if key not in operation:
                     violations.append(Violation(where, 1, f"{label} lacks {key}"))
-            ok_response = operation.get("responses", {}).get("200", {})
+            responses = operation.get("responses", {})
+            ok_response: dict[str, object] = next(
+                (r for s, r in responses.items() if s.startswith("2")), {}
+            )
             if "x-example" not in ok_response and "example" not in str(ok_response):
                 violations.append(Violation(where, 1, f"{label} lacks an example"))
     for name, schema in document.get("components", {}).get("schemas", {}).items():

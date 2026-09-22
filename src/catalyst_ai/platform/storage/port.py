@@ -1,9 +1,11 @@
 """The Storage seam: the service's own database as typed operations; tests substitute it."""
 
+from datetime import datetime
 from typing import Protocol
 from uuid import UUID
 
 from catalyst_ai.contract.search import Corpus
+from catalyst_ai.platform.storage.jobrows import JobRow
 from catalyst_ai.platform.storage.rows import (
     ChunkRow,
     DocumentRecord,
@@ -78,4 +80,36 @@ class Storage(Protocol):
 
     async def remember_nonce(self, nonce: str, expires_at: int, now: int) -> bool:
         """Record a proof's nonce until it expires; False when it was seen before (a replay)."""
+        ...
+
+
+class JobStore(Protocol):
+    """The jobs table behind one seam: born from the verified path, claimed under a bound."""
+
+    async def create_job(self, row: JobRow) -> JobRow:
+        """Insert the row, or return the organisation's existing row for the request hash."""
+        ...
+
+    async def read_job(self, organization_id: UUID, job_id: UUID) -> JobRow | None:
+        """Return the organisation's row; None for any other organisation's or an unknown id."""
+        ...
+
+    async def claim_job(self, now: datetime, per_organization: int) -> JobRow | None:
+        """Take the oldest queued row whose organisation runs fewer than the bound."""
+        ...
+
+    async def finish_job(self, row: JobRow) -> None:
+        """Store the row in its final state."""
+        ...
+
+    async def requeue_job(self, organization_id: UUID, job_id: UUID) -> None:
+        """Return a running row to the queue."""
+        ...
+
+    async def count_jobs(self, state: str, organization_id: UUID | None = None) -> int:
+        """How many rows are in the state — one organisation's, or every organisation's."""
+        ...
+
+    async def purge_jobs(self, before: datetime) -> int:
+        """Delete final rows whose result expired before the instant; return how many."""
         ...

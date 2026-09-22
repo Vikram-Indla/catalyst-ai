@@ -7,9 +7,8 @@ that the backend did not sign for it.
 
 A job row is never trusted for being in the table. Before executing, the worker verifies the
 envelope the row carries — signature, issuer, audience, the organisation and capability the row
-names, the hash of its payload, and the job window — and moves a failing row to `quarantined`
-with the reason. The job model's table (`ADR-007`) lands with the first long capability; the
-gate and the state exist today (`verify_stored`, `JobState.QUARANTINED`).
+names, the hash of the payload bytes it is about to run, and the job window — and moves a
+failing row to `quarantined` with the reason (`catalyst-ai worker`, `platform/jobs`).
 
 **What it means.** By reason:
 

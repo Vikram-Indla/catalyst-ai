@@ -31,7 +31,7 @@ left the backend's runtime, and when a person who could read it leaves.
 ## Emergency (the private key is suspected leaked)
 
 Steps 1–3 at once, then step 5 without waiting: a job signed with the leaked key is quarantined
-by its worker rather than run (`docs/06-runbooks/quarantine.md`), and the backend resubmits it
+by its worker rather than run (`docs/06-runbooks/job-quarantine.md`), and the backend resubmits it
 under the new key. A short window of `401`s is the price of certainty.
 
 ## What to check

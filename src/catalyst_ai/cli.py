@@ -3,16 +3,21 @@
 import argparse
 import asyncio
 import re
+import signal
 import sys
+from collections.abc import Callable, Coroutine
 from pathlib import Path
+from typing import Any
 
 import uvicorn
 from pydantic import ValidationError
 
-from catalyst_ai.app import create_app, default_runtime, health
+from catalyst_ai.app import create_app, default_runtime, health, job_runners
 from catalyst_ai.config import Settings, load_settings
 from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
+from catalyst_ai.platform.jobs import Worker
 from catalyst_ai.platform.logging import configure_logging
+from catalyst_ai.platform.observability import SecurityCounters
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
@@ -101,18 +106,72 @@ async def _job(settings: Settings, command: str) -> int:
             report = await retention(
                 WORK_ITEMS, storage, runtime.clock, settings.retrieval_document_ttl_days
             )
+            purged = await runtime.jobs.purge_jobs(runtime.clock.now())
+            print(f"retention: {purged} expired job results purged")
     finally:
         await storage.close()
     print(f"{command}: {report.organizations} organisations, {report.documents} documents")
     return EXIT_OK
 
 
+def _install_stop(stop: asyncio.Event) -> None:
+    loop = asyncio.get_running_loop()
+    for name in ("SIGTERM", "SIGINT"):
+        number = getattr(signal, name, None)
+        if number is None:
+            continue
+        try:
+            loop.add_signal_handler(number, stop.set)
+        except (NotImplementedError, RuntimeError):
+            signal.signal(number, lambda *_: stop.set())
+
+
+async def _worker(settings: Settings) -> int:
+    """Run the worker: claim, verify the stored proof, execute; drain on SIGTERM."""
+    runtime = default_runtime(settings)
+    storage = runtime.storage
+    if not isinstance(storage, PostgresStorage):
+        return EXIT_FAIL
+    await storage.connect()
+    ops = create_app(settings, runtime)
+    ops.include_router(health)
+    worker = Worker(
+        runtime,
+        runtime.jobs,
+        job_runners(),
+        KeyRegistry.from_config(settings.auth_public_keys),
+        SecurityCounters(),
+    )
+    ops.state.worker = worker
+    host, port = _split_addr(settings.ops_addr)
+    server = uvicorn.Server(
+        uvicorn.Config(ops, host=host, port=port, log_config=None, access_log=False)
+    )
+    stop = asyncio.Event()
+    _install_stop(stop)
+    serving = asyncio.create_task(server.serve())
+    try:
+        await worker.serve(stop)
+    finally:
+        server.should_exit = True
+        await serving
+        await storage.close()
+    return EXIT_OK
+
+
+async def _serve_ok(settings: Settings) -> int:
+    await _serve(settings)
+    return EXIT_OK
+
+
 def _run_command(command: str, settings: Settings) -> int:
-    if command == "serve":
-        asyncio.run(_serve(settings))
-        return EXIT_OK
-    if command == "migrate":
-        return asyncio.run(_migrate(settings))
+    commands: dict[str, Callable[[Settings], Coroutine[Any, Any, int]]] = {
+        "serve": _serve_ok,
+        "migrate": _migrate,
+        "worker": _worker,
+    }
+    if command in commands:
+        return asyncio.run(commands[command](settings))
     return asyncio.run(_job(settings, command))
 
 
@@ -127,9 +186,6 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "check":
         return check(Path.cwd(), load=not args.no_env)
-    if args.command == "worker":
-        print("worker: unavailable until the jobs table exists")
-        return EXIT_FAIL
     return _with_settings(args.command)
 
 

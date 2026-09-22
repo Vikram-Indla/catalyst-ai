@@ -15,6 +15,8 @@ MAX_KEYS = 2
 PUBLIC_KEY_BYTES = 32
 MAX_SKEW_S = 60
 MAX_TTL_S = 300
+MAX_JOB_TIMEOUT_S = 3_600
+MAX_WORKER_CONCURRENCY = 64
 
 
 @dataclass(frozen=True)
@@ -144,6 +146,19 @@ class Settings(BaseSettings):
     job_result_ttl_seconds: Annotated[
         int, Field(gt=0, description="PUBLIC · Job results expire after this")
     ] = 86_400
+    job_timeout_seconds: Annotated[
+        int, Field(gt=0, le=MAX_JOB_TIMEOUT_S, description="PUBLIC · A job's execution deadline")
+    ] = 600
+    worker_concurrency: Annotated[
+        int,
+        Field(gt=0, le=MAX_WORKER_CONCURRENCY, description="PUBLIC · Jobs one worker runs at once"),
+    ] = 4
+    worker_concurrency_per_organization: Annotated[
+        int,
+        Field(
+            gt=0, le=MAX_WORKER_CONCURRENCY, description="PUBLIC · Jobs of one organisation at once"
+        ),
+    ] = 2
     provider_log_retention_days: Annotated[
         int, Field(gt=0, description="PUBLIC · provider_calls retention")
     ] = 90

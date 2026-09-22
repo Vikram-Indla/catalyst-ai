@@ -7,7 +7,7 @@ key; nothing here is a secret and nothing here is deployed.
 
 import base64
 import secrets
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from uuid import UUID
 
 import httpx
@@ -101,24 +101,27 @@ class SigningAuth(httpx.Auth):
         clock: Clock | None = None,
         signer: Signer | None = None,
         organization_id: UUID = ORG,
+        claims: Mapping[str, object] | None = None,
         **overrides: object,
     ) -> None:
         """Hold the route lookup, the clock the app verifies against, and any forged claims."""
         self._lookup = lookup
         self._organization_id = organization_id
         self._signer = signer or Signer(clock=clock)
-        self._overrides = overrides
+        self._overrides = {**(claims or {}), **overrides}
 
     def auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
         """Attach the envelope, then send."""
+        query = request.url.query
         scope: Scope = {
             "type": "http",
             "method": request.method,
             "path": request.url.path,
             "root_path": "",
+            "query_string": query,
         }
         capability = self._lookup(scope) or ""
-        organization_id = organization_of(request.content) or self._organization_id
+        organization_id = organization_of(request.content, query) or self._organization_id
         request.headers["Authorization"] = self._signer.sign(
             organization_id, capability, request.content, **self._overrides
         )

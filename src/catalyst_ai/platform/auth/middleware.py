@@ -8,6 +8,7 @@ whose organisation is the body's and whose capability is the route's.
 import json
 from collections.abc import Callable, Iterator, MutableMapping, Sequence
 from typing import Any
+from urllib.parse import parse_qs
 from uuid import UUID
 
 from fastapi import APIRouter, FastAPI, Request
@@ -67,11 +68,15 @@ def capability_of(app: FastAPI) -> Lookup:
     return lookup
 
 
-def organization_of(body: bytes) -> UUID | None:
-    """Return the tenant the body names, or None when it names none the envelope could match."""
+def organization_of(body: bytes, query: bytes = b"") -> UUID | None:
+    """Return the tenant the body names — or, for a body-less request, the query string names."""
     try:
-        parsed = json.loads(body)
-        value = parsed.get(ORGANIZATION_FIELD) if isinstance(parsed, dict) else None
+        if body:
+            parsed = json.loads(body)
+            value = parsed.get(ORGANIZATION_FIELD) if isinstance(parsed, dict) else None
+        else:
+            values = parse_qs(query.decode("ascii", errors="replace")).get(ORGANIZATION_FIELD, [])
+            value = values[0] if len(values) == 1 else None
         return UUID(value) if isinstance(value, str) else None
     except ValueError:
         return None
@@ -138,7 +143,8 @@ class OriginMiddleware:
             return
         body = await _read_body(receive)
         request = Request(scope)
-        binding = Binding(body, organization_of(body), self._lookup(scope))
+        organization = organization_of(body, scope.get("query_string", b""))
+        binding = Binding(body, organization, self._lookup(scope))
         now = int(self._clock.now().timestamp())
         verdict = await self._verifier.verify(request.headers.get("authorization"), binding, now)
         if isinstance(verdict, Refusal):
