@@ -65,3 +65,10 @@ Green light: given
 
 ## Next
 The backend's acknowledgement; the lead's answers to Q-011..Q-016; the live recording when the key arrives.
+
+## Addendum — three lines cited a decision that is not this repository's
+Two lines of `docs/04-ledgers/capabilities.md` and one of `evals/assistant/README.md` cited an
+id from outside this repository for the "authored until a key exists" rule; a reviewer's check
+caught it on the README while it was untracked, and the ledger's two went to `main` with this
+record before the report was read. All three now cite `D-009`, which is the rule. Nothing else
+moved; `make verify-fast` green. Commit: `docs: cite the repository's own decision for authored evidence`.

@@ -7,7 +7,7 @@ contract: a previous function is retired only when the capability that replaces 
 with its eval set green and the backend calls it.
 
 States: `built` (descriptor, eval set, contract test) with its evidence `authored` (fixtures
-from the stand-ins, DD-025) or `recorded` (a live recording); the previous functions carry a
+from the stand-ins, D-009) or `recorded` (a live recording); the previous functions carry a
 final state each in the last section — `retired` (replaced, by which capability), `retired-changed`
 (replaced with a deliberate change of behaviour, by which decision) or `dropped` (with the reason).
 No row waits to be built. Inputs are the request
@@ -77,7 +77,7 @@ participant label chosen by the backend — never a name (`Q-001`).
 Every assisted function of the previous system, with one final state. `retired` names the
 capability, its version and its eval set; `retired-changed` also names the decision that changed
 the behaviour; `dropped` gives the reason and, where the product might want the behaviour back,
-the open question. Evidence is `authored` for every row today (DD-025): the fixtures are the
+the open question. Evidence is `authored` for every row today (D-009): the fixtures are the
 stand-ins' until a provider key exists; the mapping is final, the evidence is not.
 
 | Previous function | State | Replaced by · decision · reason | Evidence |

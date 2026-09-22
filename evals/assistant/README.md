@@ -34,4 +34,5 @@ Authored: `tools/authored_assistant.py` answers the last turn from the numbered 
 stemmed word overlap, cites each sentence it keeps, and says not found on an instruction, an
 off-topic cue or no overlap. The fixtures are the event-stream text verbatim (`raw`), so the
 live and the replayed path share one parser. Live recording: `make record LIVE=1
-CAP=assistant` when a key exists (DD-025 applies: authored until then).
+CAP=assistant` when a key exists (D-009: authored until then; the first live run re-states
+the numbers).
