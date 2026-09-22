@@ -766,6 +766,7 @@ components:
       - ai.output.unsafe
       - ai.index.document_too_large
       - ai.index.unavailable
+      - ai.job.not_found
       - internal.error
     ErrorDetail:
       additionalProperties: false
@@ -1892,6 +1893,113 @@ components:
       - embedding_version
       - index_chunks
       title: IngestResponse
+      type: object
+    JobAccepted:
+      additionalProperties: false
+      description: What a `:jobs` submission returns with `202` and `Location`.
+      properties:
+        capability:
+          maxLength: 64
+          title: Capability
+          type: string
+        job_id:
+          format: uuid
+          title: Job Id
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        retry_after_ms:
+          exclusiveMinimum: 0.0
+          title: Retry After Ms
+          type: integer
+        state:
+          $ref: '#/components/schemas/JobState'
+      required:
+      - job_id
+      - state
+      - capability
+      - retry_after_ms
+      - request_id
+      title: JobAccepted
+      type: object
+    JobState:
+      description: Where a job is; the last four are final.
+      enum:
+      - queued
+      - running
+      - succeeded
+      - failed
+      - expired
+      - quarantined
+      title: JobState
+      type: string
+    JobStatus:
+      additionalProperties: false
+      description: 'What `jobs.get` returns: the state, and the result or the error once the job is final.
+
+
+        `expired` and `quarantined` carry no detail of why — the reason is the service''s security
+
+        log, never the caller''s. The result is the capability''s own response, whole.'
+      properties:
+        attempts:
+          minimum: 0.0
+          title: Attempts
+          type: integer
+        capability:
+          maxLength: 64
+          title: Capability
+          type: string
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        error:
+          anyOf:
+          - $ref: '#/components/schemas/ErrorBody'
+          - type: 'null'
+        finished_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Finished At
+        job_id:
+          format: uuid
+          title: Job Id
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        result:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Result
+        retry_after_ms:
+          anyOf:
+          - exclusiveMinimum: 0.0
+            type: integer
+          - type: 'null'
+          title: Retry After Ms
+        started_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          title: Started At
+        state:
+          $ref: '#/components/schemas/JobState'
+      required:
+      - job_id
+      - capability
+      - state
+      - attempts
+      - created_at
+      - request_id
+      title: JobStatus
       type: object
     KindCount:
       additionalProperties: false
@@ -4271,7 +4379,7 @@ paths:
       - ai.output.unsafe
   /v1/documents/ingest:
     post:
-      description: Parse a document under limits and index it in its space.
+      description: Parse a document under limits and index it in its space; above the size line, a job.
       operationId: documents.ingest
       requestBody:
         content:
@@ -4310,7 +4418,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.index.document_too_large'
+          description: 'The error envelope; codes: ai.index.document_too_large, ai.input.too_large'
         '422':
           content:
             application/json:
@@ -4348,8 +4456,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
-            ai.index.document_too_large, ai.index.unavailable, ai.input.rejected, ai.provider.quota, ai.provider.rejected,
-            ai.provider.timeout, ai.provider.unavailable'
+            ai.index.document_too_large, ai.index.unavailable, ai.input.rejected, ai.input.too_large,
+            ai.provider.quota, ai.provider.rejected, ai.provider.timeout, ai.provider.unavailable'
       summary: Ingest
       tags:
       - capabilities
@@ -4365,6 +4473,78 @@ paths:
       - ai.provider.rejected
       - ai.provider.quota
       - ai.index.document_too_large
+      - ai.index.unavailable
+      - ai.input.too_large
+  /v1/documents/ingest:jobs:
+    post:
+      description: 'Accept the document as a job: the door now, the parse and the index in the worker.'
+      operationId: documents.ingest_job
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestRequest'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAccepted'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, auth.origin.unverifiable'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.contract.version_mismatch,
+            ai.index.unavailable, ai.input.rejected'
+      summary: Ingest Job
+      tags:
+      - capabilities
+      x-capability: documents
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
       - ai.index.unavailable
   /v1/generate-children:
     post:
@@ -4885,6 +5065,78 @@ paths:
       - ai.provider.timeout
       - ai.provider.rejected
       - ai.provider.quota
+  /v1/jobs/{job_id}:
+    get:
+      description: Return the job's state with `Retry-After` until it is final, then its result or error.
+      operationId: jobs.get
+      parameters:
+      - in: path
+        name: job_id
+        required: true
+        schema:
+          format: uuid
+          title: Job Id
+          type: string
+      - description: The tenant the job belongs to
+        in: query
+        name: organization_id
+        required: true
+        schema:
+          description: The tenant the job belongs to
+          format: uuid
+          title: Organization Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobStatus'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown, ai.job.not_found'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.unverifiable'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.job.not_found'
+      summary: Get Job
+      tags:
+      - jobs
+      x-capability: jobs
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.job.not_found
   /v1/post-mortem:
     post:
       description: Draft a blameless post-mortem; every fact cites an entry, people are tokens.
