@@ -1,25 +1,15 @@
 """The Provider port: the only way a model is reached, and the models that cross it."""
 
 from collections.abc import AsyncIterator
-from enum import StrEnum
 from typing import Literal, Protocol
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from catalyst_ai.contract.envelopes import Usage
+from catalyst_ai.contract.models import ModelAlias
 
 MAX_OUTPUT_TOKENS_CEILING = 65_536
-
-
-class ModelAlias(StrEnum):
-    """What a capability names; the register resolves it to a provider and a model id."""
-
-    TEXT_DEFAULT = "text-default"
-    TEXT_FAST = "text-fast"
-    TEXT_LONG = "text-long"
-    EMBED_DEFAULT = "embed-default"
-    GRADER_DEFAULT = "grader-default"
 
 
 class Segment(BaseModel):
@@ -115,3 +105,15 @@ class Provider(Protocol):
     def model_id(self, alias: ModelAlias) -> str:
         """Return the concrete model the alias resolves to right now."""
         ...
+
+
+__all__ = [
+    "EmbedRequest",
+    "EmbedResult",
+    "GenerateRequest",
+    "GenerateResult",
+    "ModelAlias",
+    "Provider",
+    "Segment",
+    "StreamFrame",
+]

@@ -2,9 +2,13 @@
 
 An alert without a runbook is a page at three in the morning with nothing to read; a runbook
 nothing points at rots. The SLO ledger names the alert per objective, so the three files —
-`ops/alerts.yaml`, `docs/06-runbooks/`, `docs/04-ledgers/slos.md` — must agree. Two pages are
-exempt from the second rule: the index, and the kill switch, which is a decision an operator
-takes and never an alert that fires.
+`ops/alerts.yaml`, `docs/06-runbooks/`, `docs/04-ledgers/slos.md` — must agree.
+
+The rule worth failing the gate over is one-directional: **no alert without a runbook that
+exists**, and no alert the SLO ledger never names. The other direction is a report: a runbook
+may exist for a procedure nothing alerts on (rotation, a rebuild, the kill switch), and failing
+the gate for it once pushed two alerts to point at pages about something else — an operator
+paged at two in the morning reading the wrong page is worse than a runbook with no alert.
 """
 
 import re
@@ -20,7 +24,7 @@ RUNBOOKS = Path("docs") / "06-runbooks"
 SLOS = Path("docs") / "04-ledgers" / "slos.md"
 INDEX = "README.md"
 ALERT_NAME = re.compile(r"`?([A-Z][A-Za-z]+)`?")
-UNPOINTED = frozenset({"README.md", "kill-switch.md"})
+UNPOINTED = frozenset({"README.md"})
 
 
 Document = dict[str, object]
@@ -68,7 +72,7 @@ def coverage_violations(document: object, slos: str, runbooks: set[str]) -> list
             violations.append(Violation(SLOS.as_posix(), 1, f"{alert} is in no SLO row"))
     pointed = {Path(_runbook(rule)).name for rule in _rules(document)}
     for runbook in sorted(runbooks - pointed - UNPOINTED):
-        violations.append(Violation(ALERTS.as_posix(), 1, f"no alert points at {runbook}"))
+        print(f"report: no alert points at {runbook}; a procedure may exist without an alert")
     return violations
 
 

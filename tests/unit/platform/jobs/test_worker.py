@@ -76,7 +76,7 @@ def _worker(
     runtime: RuntimeContext, runner: JobRunner
 ) -> tuple[Worker, MemoryJobStore, SecurityCounters]:
     store = MemoryJobStore()
-    counters = SecurityCounters()
+    counters = SecurityCounters(runtime.metrics)
     keys = KeyRegistry.from_config(origin.PUBLIC_KEYS)
     worker = Worker(runtime, store, {CAP: runner}, keys, counters)
     return worker, store, counters
@@ -125,7 +125,11 @@ async def test_an_unknown_capability_fails_and_the_deadline_is_enforced() -> Non
     assert timed_out.state == "failed"
     assert '"code":"ai.provider.timeout"' in str(timed_out.error)
     unknown_worker = Worker(
-        runtime, store, {}, KeyRegistry.from_config(origin.PUBLIC_KEYS), SecurityCounters()
+        runtime,
+        store,
+        {},
+        KeyRegistry.from_config(origin.PUBLIC_KEYS),
+        SecurityCounters(runtime.metrics),
     )
     row = await store.create_job(_row(runtime, b"nobody"))
     assert await unknown_worker.run_once() is True

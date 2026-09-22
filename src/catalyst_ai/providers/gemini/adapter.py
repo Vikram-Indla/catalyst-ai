@@ -158,7 +158,7 @@ class GeminiProvider:
 
     async def generate(self, request: GenerateRequest) -> GenerateResult:
         """Run one generation; every failure is a catalog error with the raw detail in the log."""
-        spec = aliases.resolve(request.alias, self._settings)
+        spec = aliases.resolve(request.alias, self._settings, request.capability)
         started = self._clock.now()
         try:
             response = await self._call_with_guards(
@@ -175,7 +175,7 @@ class GeminiProvider:
         The breaker and the status mapping guard the connection; a stream is never retried,
         since a retry would repeat deltas the caller already passed on.
         """
-        spec = aliases.resolve(request.alias, self._settings)
+        spec = aliases.resolve(request.alias, self._settings, request.capability)
         url = f"{self._url(spec, streaming.STREAM_METHOD)}?{streaming.STREAM_QUERY}"
         breaker = self._breaker(spec.model_id)
         started = self._clock.now()
@@ -208,7 +208,7 @@ class GeminiProvider:
 
     async def embed(self, request: EmbedRequest) -> EmbedResult:
         """Embed the texts in one batch call; tokens are estimated, the API reports none."""
-        spec = aliases.resolve(request.alias, self._settings)
+        spec = aliases.resolve(request.alias, self._settings, request.capability)
         request_id = f"embed-{request.capability}"
         started = self._clock.now()
         try:

@@ -9,6 +9,8 @@ from typing import Annotated, Self
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from catalyst_ai.contract.models import TextAlias
+
 ENV_PREFIX = "CATALYST_AI_"
 MIN_KEYS = 1
 MAX_KEYS = 2
@@ -87,6 +89,10 @@ class CapabilitySettings(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     enabled: Annotated[bool, Field(description="PUBLIC · The kill switch")] = True
+    model_alias: Annotated[
+        TextAlias | None,
+        Field(description="PUBLIC · This capability's alias, over the environment's default"),
+    ] = None
     cache_ttl_seconds: Annotated[
         int | None, Field(ge=0, description="PUBLIC · Overrides the descriptor's cache TTL")
     ] = None
@@ -180,10 +186,16 @@ class Settings(BaseSettings):
             description="INTERNAL · The provider's API origin; a proxy may replace it",
         ),
     ] = "https://generativelanguage.googleapis.com"
-    model_text_default: Annotated[
-        str | None,
-        Field(description="PUBLIC · Overrides text-default with another register id"),
-    ] = None
+    model_text_alias: Annotated[
+        TextAlias,
+        Field(
+            description=(
+                "PUBLIC · The alias a capability asking for text gets in this environment; "
+                "the register resolves it to a model and its price. The default is the row the "
+                "sets were measured on; a deployment may select a cheaper one"
+            )
+        ),
+    ] = TextAlias.TEXT_DEFAULT
     capability_improve_story: Annotated[
         CapabilitySettings, Field(description="PUBLIC · improve-story: enabled, cache TTL, timeout")
     ] = CapabilitySettings()
@@ -229,6 +241,12 @@ class Settings(BaseSettings):
     capability_translate: Annotated[
         CapabilitySettings, Field(description="PUBLIC · translate: enabled, cache TTL, timeout")
     ] = CapabilitySettings()
+
+    def capability(self, name: str) -> CapabilitySettings:
+        """Return one capability's knobs by name; an unknown name gets the defaults."""
+        field = f"capability_{name.replace('-', '_')}"
+        knobs = getattr(self, field, None)
+        return knobs if isinstance(knobs, CapabilitySettings) else CapabilitySettings()
 
     @field_validator("auth_public_keys")
     @classmethod

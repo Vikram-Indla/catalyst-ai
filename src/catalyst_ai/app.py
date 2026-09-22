@@ -49,6 +49,7 @@ from catalyst_ai.platform.observability import (
     MeteredProvider,
     RequestMetricsMiddleware,
     SecurityCounters,
+    metrics_router,
 )
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresJobStore, PostgresStorage, StorageUnavailableError
@@ -210,6 +211,24 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     if isinstance(storage, PostgresStorage):
         await storage.close()
+
+
+def create_ops_app(settings: Settings, runtime: RuntimeContext) -> FastAPI:
+    """Build the ops port's app: liveness, readiness and the scrape, and nothing else.
+
+    It shares the process's runtime and its registry, and it carries neither the proof of
+    origin (a collector signs nothing) nor the request metrics (a probe is not traffic).
+    """
+    app = FastAPI(title=TITLE, version=CONTRACT_VERSION, docs_url=None, redoc_url=None)
+    app.state.runtime = runtime
+    app.state.metrics = runtime.metrics
+    app.state.settings = settings
+    app.state.draining = False
+    app.add_middleware(RequestIdMiddleware)
+    install_error_handlers(app)
+    app.include_router(health)
+    app.include_router(metrics_router)
+    return app
 
 
 def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> FastAPI:

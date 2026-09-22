@@ -7,7 +7,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from catalyst_ai.app import create_app, job_runners
+from catalyst_ai.app import create_app, create_ops_app, job_runners
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.documents import IngestResponse
 from catalyst_ai.contract.jobs import JobAccepted, JobStatus
@@ -55,7 +55,7 @@ def _runtime(**overrides: object) -> RuntimeContext:
 
 def _worker(runtime: RuntimeContext) -> tuple[Worker, SecurityCounters]:
     keys = KeyRegistry.from_config(origin.PUBLIC_KEYS)
-    counters = SecurityCounters()
+    counters = SecurityCounters(runtime.metrics)
     return Worker(runtime, runtime.jobs, job_runners(), keys, counters), counters
 
 
@@ -206,3 +206,31 @@ async def test_the_attackers_rows_are_quarantined_on_the_running_loop() -> None:
     real = await store.read_job(origin.ORG, accepted.job_id)
     assert real is not None
     assert real.state == "succeeded"
+
+
+async def test_a_quarantined_row_reaches_the_ops_port_the_worker_shares() -> None:
+    """The worker counts into the process's registry, so the scrape can see a quarantine."""
+    runtime = _runtime()
+    store = runtime.jobs
+    assert isinstance(store, MemoryJobStore)
+    client, _ = _client(runtime, runtime.settings, job_exp=_job_exp(runtime))
+    body = ingest_request().model_dump(mode="json")
+    accepted = JobAccepted.model_validate((await client.post(SUBMIT, json=body)).json())
+    legitimate = await store.read_job(origin.ORG, accepted.job_id)
+    assert legitimate is not None
+    store.plant(replace(legitimate, id=new_id(), request_hash="planted", envelope=""))
+    worker = Worker(
+        runtime,
+        store,
+        job_runners(),
+        KeyRegistry.from_config(origin.PUBLIC_KEYS),
+        SecurityCounters(runtime.metrics),
+    )
+    while await worker.run_once():
+        pass
+    ops = create_ops_app(runtime.settings, runtime)
+    transport = httpx.ASGITransport(app=ops, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://ops") as scraper:
+        scrape = await scraper.get("/metrics")
+    assert 'catalyst_ai_job_quarantined_total{reason="malformed"} 1' in scrape.text
+    assert 'catalyst_ai_jobs{state="queued"} 0' in scrape.text

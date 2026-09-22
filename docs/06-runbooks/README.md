@@ -15,3 +15,5 @@ line to the capability runbook; a `built` capability without one is a finding (`
 | `key-rotation.md` | rotating the backend's signing key with two public keys active; the emergency sequence; what to watch | the origin middleware (present) |
 | `job-quarantine.md` | a job row that failed its proof; a rise in refused origins — reasons, the first three commands, when to page | the origin middleware (present); the worker when the table lands |
 | `capabilities.md` | one line per capability: what to check when quality drops, the switch, what the backend shows | `improve-story` (present) |
+| `origin-refusals.md` | the door is turning callers away: the reason table, what each one means, when to page | the origin middleware (present) |
+| `replay-store-down.md` | the replay store cannot answer and the door fails closed; every capability is down | the origin middleware (present) |

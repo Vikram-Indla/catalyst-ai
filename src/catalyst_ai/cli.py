@@ -12,12 +12,12 @@ from typing import Any
 import uvicorn
 from pydantic import ValidationError
 
-from catalyst_ai.app import create_app, default_runtime, health, job_runners
+from catalyst_ai.app import create_app, create_ops_app, default_runtime, job_runners
 from catalyst_ai.config import Settings, load_settings
 from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
 from catalyst_ai.platform.jobs import Worker
 from catalyst_ai.platform.logging import configure_logging
-from catalyst_ai.platform.observability import SecurityCounters, metrics_router
+from catalyst_ai.platform.observability import SecurityCounters
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
@@ -37,9 +37,7 @@ def _split_addr(addr: str) -> tuple[str, int]:
 async def _serve(settings: Settings) -> None:
     runtime = default_runtime(settings)
     app = create_app(settings, runtime)
-    ops = create_app(settings, runtime)
-    ops.include_router(health)
-    ops.include_router(metrics_router)
+    ops = create_ops_app(settings, runtime)
     servers = []
     for target, addr in ((app, settings.http_addr), (ops, settings.ops_addr)):
         host, port = _split_addr(addr)
@@ -150,15 +148,13 @@ async def _worker(settings: Settings) -> int:
     if not isinstance(storage, PostgresStorage):
         return EXIT_FAIL
     await storage.connect()
-    ops = create_app(settings, runtime)
-    ops.include_router(health)
-    ops.include_router(metrics_router)
+    ops = create_ops_app(settings, runtime)
     worker = Worker(
         runtime,
         runtime.jobs,
         job_runners(),
         KeyRegistry.from_config(settings.auth_public_keys),
-        SecurityCounters(),
+        SecurityCounters(runtime.metrics),
     )
     ops.state.worker = worker
     host, port = _split_addr(settings.ops_addr)

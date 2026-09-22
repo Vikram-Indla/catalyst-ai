@@ -80,7 +80,7 @@ def _attack(
 
 
 def _worker(runtime: RuntimeContext, store: PostgresJobStore) -> tuple[Worker, SecurityCounters]:
-    counters = SecurityCounters()
+    counters = SecurityCounters(runtime.metrics)
     keys = KeyRegistry.from_config(origin.PUBLIC_KEYS)
     return Worker(runtime, store, {CAP: _echo}, keys, counters), counters
 

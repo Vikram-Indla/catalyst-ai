@@ -2,7 +2,7 @@
 id: ARCH-005
 title: Providers and the port
 status: Locked
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -43,6 +43,14 @@ the capability never sees:
 | Output schema | passed to the provider's structured-output feature where one exists; validated again in stage 6 regardless |
 | Errors | mapped to the catalog: `ai.provider.unavailable`, `ai.provider.timeout`, `ai.provider.rejected` (content policy), `ai.provider.quota`; the raw provider message goes to the log under the request id, never to the caller |
 | Fault injection | a test-only mode that fails, delays or truncates on demand, for the outage rehearsals runbooks name |
+
+Configuration selects an **alias**, never a model id: `MODEL_TEXT_ALIAS` (and a capability's
+own `CAPABILITY_<NAME>_MODEL_ALIAS`) carry one of `text-default`, `text-fast`, `text-long`,
+and the register resolves it to the model and its price. An alias outside that vocabulary
+fails at settings load rather than at the first call, and no environment can reach a model
+the register has not priced (`D-040`). `embed-default` and `grader-default` are not
+selectable: changing the first invalidates every stored vector, and the second is the
+measuring instrument, not the product (`RULE-008 §3`).
 
 ## 3. The recorded transport
 

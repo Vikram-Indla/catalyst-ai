@@ -1,9 +1,13 @@
 """The metrics the ops port exposes: counters and histograms, labelled by ids, never by content.
 
-One in-process registry per process, rendered in the Prometheus text exposition format on the
-ops port — the format every collector scrapes, so the collector stays the only exporter
+One registry per process — the ops port renders it and every part of the process counts into
+it — in the Prometheus text exposition format on the
+the format every collector scrapes, so the collector stays the only exporter
 (`ARCH-010 §2`). A label value is a capability, a model, an outcome, a reason or an
 organisation id; a prompt, a completion or any member's text never reaches this module.
+The bucket bounds carry an edge at every latency objective the SLO ledger states (0.8 s for
+retrieval, 8 s for generation), because a quantile interpolated across the threshold it is
+judged by measures nothing.
 """
 
 from collections.abc import Iterable, Mapping
@@ -11,7 +15,7 @@ from dataclasses import dataclass
 from threading import Lock
 
 PREFIX = "catalyst_ai_"
-BUCKETS_S = (0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0)
+BUCKETS_S = (0.05, 0.1, 0.25, 0.5, 0.8, 1.0, 2.5, 5.0, 8.0, 10.0, 30.0, 60.0)
 REQUESTS = "http_requests"
 REQUEST_SECONDS = "http_request_duration_seconds"
 PROVIDER_CALLS = "provider_calls"
@@ -90,6 +94,11 @@ class Metrics:
         """Set a gauge to a value read at this moment."""
         with self._lock:
             self._gauges[_key(name, labels)] = value
+
+    def drop_gauge(self, name: str, labels: Labels | None = None) -> None:
+        """Forget a gauge: a value nobody can read now is not a measurement (F-030's family)."""
+        with self._lock:
+            self._gauges.pop(_key(name, labels), None)
 
     def observe(self, name: str, value: float, labels: Labels | None = None) -> None:
         """Record one observation in a histogram, in seconds."""

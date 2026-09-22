@@ -19,7 +19,8 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `OTEL_EXPORTER_ENDPOINT` | URL | no | unset | `http(s)://` | INTERNAL | Where traces and metrics go; unset means stdout in development, refused in production |
 | `PROVIDER_GEMINI_API_KEY` | secret | for live calls | unset | non-empty when the adapter serves an alias | RESTRICTED | The first provider's key; read only by its adapter; unset means every call fails as `ai.provider.rejected` |
 | `PROVIDER_GEMINI_BASE_URL` | URL | no | the provider's origin | `https://` | INTERNAL | Overridable for a proxy; never a product host |
-| `MODEL_TEXT_DEFAULT` | string | no | the register's resolution | a `gemini/<id>` present in the register | PUBLIC | Resolves `text-default`; a value outside the register fails at startup |
+| `MODEL_TEXT_ALIAS` | enum | no | `text-default` | `text-default` \| `text-fast` \| `text-long` — an alias, never a model id | PUBLIC | Which row of the register text work runs on in this environment; a capability may be lifted above it with `CAPABILITY_<NAME>_MODEL_ALIAS`. The default is the row the eval floors and the recorded fixtures were measured on; `text-fast` is the cheapest |
+| `CAPABILITY_<NAME>_MODEL_ALIAS` | enum | no | unset | as above; unset means the environment's default | PUBLIC | One capability's alias, over the environment's default — for the one capability that needs a longer context or a better model |
 | `CAPABILITY_IMPROVE_STORY` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `improve-story` |
 | `CAPABILITY_IMPROVE_STORY__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch (`RULE-009 §2`) |
 | `CAPABILITY_IMPROVE_STORY__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |

@@ -1,7 +1,8 @@
 """The ops port's `/metrics`: the process's counters, plus the gauges read at scrape time.
 
 The route is on the ops port only — never on the contract port, where the proof of origin
-governs — and it carries no content: every line is a metric name, id labels and a number.
+governs, and where a collector that signs nothing could not reach it anyway — and it carries no
+content: every line is a metric name, id labels and a number.
 """
 
 from fastapi import APIRouter, Request
@@ -21,8 +22,15 @@ async def read_gauges(metrics: Metrics, jobs: JobStore) -> None:
         try:
             depth = await jobs.count_jobs(state)
         except StorageUnavailableError:
+            _forget(metrics)
             return
         metrics.set_gauge(JOBS, float(depth), {"state": state})
+
+
+def _forget(metrics: Metrics) -> None:
+    """Drop the queue gauges: a depth nobody could read this time is not the depth now."""
+    for state in (QUEUED, RUNNING):
+        metrics.drop_gauge(JOBS, {"state": state})
 
 
 @router.get("/metrics", response_class=PlainTextResponse)

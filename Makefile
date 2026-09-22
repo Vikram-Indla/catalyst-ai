@@ -14,7 +14,7 @@ WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
 
-.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage drill load evals evals-affected security selftest verify verify-fast ci ci-cold stamp-check serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load evals evals-affected security selftest verify verify-fast ci ci-cold stamp-check serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -64,6 +64,10 @@ storage:
 drill:
 	$(RUN) python -m tools.drill --capability $(CAP)
 
+drills:
+	$(RUN) python -m tools.drill --capability summarize
+	$(RUN) python -m tools.drill --capability improve-story
+
 load:
 	$(RUN) python -m tools.load --concurrency $(or $(N),16) --rounds $(or $(ROUNDS),4)
 
@@ -85,7 +89,7 @@ selftest:
 coverage-check:
 	$(RUN) python -m tools.checks.gate --only coverage
 
-verify: lint api-check ledgers-check test coverage-check storage evals budgets-check security selftest
+verify: lint api-check ledgers-check test coverage-check storage drills evals budgets-check security selftest
 	@echo "VERIFY GREEN"
 
 verify-fast: lint-fast evals-affected

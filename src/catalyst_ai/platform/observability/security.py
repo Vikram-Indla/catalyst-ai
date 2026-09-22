@@ -13,9 +13,9 @@ JOB_QUARANTINED = "job_quarantined"
 class SecurityCounters:
     """The security events' view of the process metrics: one counter per event and reason."""
 
-    def __init__(self, metrics: Metrics | None = None) -> None:
-        """Count into the process's metrics; a fresh registry when none is given (tests)."""
-        self.metrics = metrics or Metrics()
+    def __init__(self, metrics: Metrics) -> None:
+        """Count into the process's metrics — the one the ops port renders, always passed in."""
+        self.metrics = metrics
 
     def count(self, event: str, reason: str) -> None:
         """Add one to the (event, reason) cell."""

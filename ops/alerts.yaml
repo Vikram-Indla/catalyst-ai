@@ -20,18 +20,34 @@ groups:
         expr: |
           histogram_quantile(
             0.95,
-            sum by (operation, le) (rate(catalyst_ai_http_request_duration_seconds_bucket[1h]))
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation!~"search.*|jobs.*"}[1h])
+            )
           ) > 8
         for: 15m
         labels:
           severity: ticket
         annotations:
-          summary: "{{ $labels.operation }} p95 is over its budget"
+          summary: "{{ $labels.operation }} p95 is over its 8 s generation budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: RetrievalLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"search.*"}[1h])
+            )
+          ) > 0.8
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 800 ms retrieval budget"
           runbook: docs/06-runbooks/capabilities.md
       - alert: OutputRefusalsHigh
         expr: |
           sum(rate(catalyst_ai_errors_total{code=~"ai.output.*"}[6h]))
-            / sum(rate(catalyst_ai_http_requests_total[6h])) > 0.01
+            / sum(rate(catalyst_ai_http_requests_total{operation!="unknown"}[6h])) > 0.01
         for: 30m
         labels:
           severity: ticket
@@ -42,6 +58,7 @@ groups:
         expr: |
           sum(rate(catalyst_ai_cache_lookups_total{result="hit"}[6h]))
             / sum(rate(catalyst_ai_cache_lookups_total[6h])) < 0.2
+            and sum(rate(catalyst_ai_cache_lookups_total[6h])) > 0.05
         for: 1h
         labels:
           severity: ticket
@@ -82,19 +99,21 @@ groups:
     interval: 1m
     rules:
       - alert: TenantBudgetExhausted
-        expr: sum(increase(catalyst_ai_errors_total{code="ai.budget.exceeded"}[1d])) > 0
-        for: 5m
+        expr: sum(rate(catalyst_ai_errors_total{code="ai.budget.exceeded"}[1h])) > 0.01
+        for: 15m
         labels:
           severity: ticket
         annotations:
-          summary: "an organisation is being refused on its daily budget"
+          summary: >-
+            budget refusals are steady; the tenant is not in this series — read
+            sum by (organization) (increase(catalyst_ai_provider_cost_micros_total[1d]))
           runbook: docs/06-runbooks/budget-exhaustion.md
 
   - name: catalyst-ai-jobs
     interval: 30s
     rules:
       - alert: JobQueueBacklog
-        expr: catalyst_ai_jobs{state="queued"} > 50
+        expr: max by (state) (catalyst_ai_jobs{state="queued"}) > 50
         for: 15m
         labels:
           severity: ticket
@@ -120,7 +139,7 @@ groups:
           severity: page
         annotations:
           summary: "a request carried a forged envelope under a known key id"
-          runbook: docs/06-runbooks/key-rotation.md
+          runbook: docs/06-runbooks/origin-refusals.md
       - alert: OriginRefusalsHigh
         expr: sum(rate(catalyst_ai_origin_refused_total[1h])) > 0.2
         for: 15m
@@ -128,7 +147,7 @@ groups:
           severity: ticket
         annotations:
           summary: "refused origins are steady — a clock, a rotation or something that is not the backend"
-          runbook: docs/06-runbooks/job-quarantine.md
+          runbook: docs/06-runbooks/origin-refusals.md
 
   - name: catalyst-ai-storage
     interval: 30s
@@ -148,4 +167,4 @@ groups:
           severity: page
         annotations:
           summary: "the replay store cannot answer; the door is failing closed"
-          runbook: docs/06-runbooks/retention.md
+          runbook: docs/06-runbooks/replay-store-down.md

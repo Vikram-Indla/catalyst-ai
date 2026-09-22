@@ -7,6 +7,7 @@ import pytest
 from catalyst_ai.platform.observability import (
     JOB_QUARANTINED,
     ORIGIN_REFUSED,
+    Metrics,
     SecurityCounters,
     Where,
     security_event,
@@ -14,7 +15,7 @@ from catalyst_ai.platform.observability import (
 
 
 def test_counters_sum_over_reasons_and_start_at_zero() -> None:
-    counters = SecurityCounters()
+    counters = SecurityCounters(Metrics())
     assert counters.value(ORIGIN_REFUSED) == 0
     counters.count(ORIGIN_REFUSED, "expired")
     counters.count(ORIGIN_REFUSED, "expired")
@@ -29,7 +30,7 @@ def test_counters_sum_over_reasons_and_start_at_zero() -> None:
 def test_an_event_is_logged_with_its_reason_and_ids_and_counted(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    counters = SecurityCounters()
+    counters = SecurityCounters(Metrics())
     where = Where("req-1", capability="summarize", key_id="k1")
     with caplog.at_level(logging.WARNING, logger="catalyst_ai.security"):
         security_event(counters, ORIGIN_REFUSED, "bad_signature", where)
