@@ -1535,7 +1535,7 @@ components:
       - external_ids
       title: IndexDeleteRequest
       type: object
-    IndexDeleteResponse:
+    IndexDeleteResult:
       additionalProperties: false
       description: How many chunks were removed.
       properties:
@@ -1568,7 +1568,7 @@ components:
       - usage
       - request_id
       - deleted_chunks
-      title: IndexDeleteResponse
+      title: IndexDeleteResult
       type: object
     IndexDocument:
       additionalProperties: false
@@ -1662,7 +1662,7 @@ components:
       - documents
       title: IndexUpsertRequest
       type: object
-    IndexUpsertResponse:
+    IndexUpsertResult:
       additionalProperties: false
       description: One line per document and the corpus size afterwards.
       properties:
@@ -1701,7 +1701,7 @@ components:
       - request_id
       - results
       - index_chunks
-      title: IndexUpsertResponse
+      title: IndexUpsertResult
       type: object
     IndexedDocument:
       additionalProperties: false
@@ -4717,7 +4717,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexDeleteResponse'
+                $ref: '#/components/schemas/IndexDeleteResult'
           description: Successful Response
           x-example: see the contract tests
         '400':
@@ -4802,7 +4802,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IndexUpsertResponse'
+                $ref: '#/components/schemas/IndexUpsertResult'
           description: Successful Response
           x-example: see the contract tests
         '400':
