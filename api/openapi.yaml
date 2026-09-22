@@ -746,8 +746,11 @@ components:
       type: object
     ErrorCode:
       description: Every code a response may carry; the ledger is generated from this enum.
-      enum:
-      - auth.token.invalid
+      title: ErrorCode
+      type: string
+      x-extensible-enum:
+      - auth.origin.invalid
+      - auth.origin.unverifiable
       - validation.invalid_input
       - ai.contract.version_mismatch
       - ai.capability.unknown
@@ -764,8 +767,6 @@ components:
       - ai.index.document_too_large
       - ai.index.unavailable
       - internal.error
-      title: ErrorCode
-      type: string
     ErrorDetail:
       additionalProperties: false
       description: One field-level detail of a validation or rejection error.
@@ -3671,6 +3672,15 @@ components:
       - value
       title: Fact
       type: object
+  securitySchemes:
+    CatalystEnvelope:
+      description: 'Proof of origin, signed by the backend: `<claims>.<signature>` where claims is the
+        base64url of a JSON object {iss: backend, aud: catalyst-ai, org, cap, sub, iat, exp (at most 60
+        s after iat), jti, kid, bh (hex SHA-256 of the request body), job_exp?} and signature is the base64url
+        of the Ed25519 signature over the ASCII bytes of the claims segment, by the private key `kid`
+        names. The service holds public keys only.'
+      scheme: Catalyst-Envelope
+      type: http
 info:
   description: One contract for the Go backend; see ENGINEERING.md.
   title: Catalyst One AI service
@@ -3700,7 +3710,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -3713,12 +3723,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.unverifiable'
         default:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           description: 'The error envelope; codes: '
+      security: []
       summary: Live
       tags:
       - health
@@ -3748,7 +3765,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -3761,12 +3778,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.unverifiable'
         default:
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
           description: 'The error envelope; codes: '
+      security: []
       summary: Ready
       tags:
       - health
@@ -3811,7 +3835,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -3853,7 +3877,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -3949,7 +3974,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -3991,7 +4016,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4062,7 +4088,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4098,7 +4124,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4168,7 +4195,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4210,7 +4237,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4271,7 +4298,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4307,7 +4334,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4376,7 +4404,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4418,7 +4446,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4488,7 +4516,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4530,7 +4558,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4600,7 +4628,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4642,7 +4670,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4703,7 +4731,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4739,7 +4767,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, auth.origin.unverifiable'
         default:
           content:
             application/json:
@@ -4788,7 +4816,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4824,7 +4852,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -4894,7 +4923,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -4936,7 +4965,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5006,7 +5035,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5042,7 +5071,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5111,7 +5140,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5153,7 +5182,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5214,7 +5243,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5250,7 +5279,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.index.unavailable, ai.provider.unavailable,
+            auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5319,7 +5349,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5361,7 +5391,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5431,7 +5461,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5473,7 +5503,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5543,7 +5573,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: auth.token.invalid'
+          description: 'The error envelope; codes: auth.origin.invalid'
         '404':
           content:
             application/json:
@@ -5585,7 +5615,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
-          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
         '504':
           content:
             application/json:
@@ -5617,3 +5647,5 @@ paths:
       - ai.provider.quota
       - ai.output.invalid
       - ai.output.unsafe
+security:
+- CatalystEnvelope: []
