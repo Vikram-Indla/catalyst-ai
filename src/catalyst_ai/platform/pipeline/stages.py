@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel
 
+from catalyst_ai.platform.observability.metrics import CACHE_LOOKUPS
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.providers.port import GenerateRequest, GenerateResult
 
@@ -42,6 +43,7 @@ async def run_stages[Req: BaseModel, Parsed, Out, Res: BaseModel](
     parsed = stages.parse(request, request_id, idempotency)
     key = stages.validate(parsed, runtime)
     cached = runtime.cache.get(key)
+    runtime.metrics.count(CACHE_LOOKUPS, {"result": "hit" if cached else "miss"})
     if cached is not None:
         return stages.from_cache(cached, request_id)
     if stages.retrieve is not None:

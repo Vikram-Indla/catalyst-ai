@@ -3,6 +3,7 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from dataclasses import replace
 from types import MappingProxyType
 from typing import Any
 
@@ -44,7 +45,11 @@ from catalyst_ai.platform.httpserver import (
     with_error_responses,
 )
 from catalyst_ai.platform.jobs import JobRunner, jobs_router
-from catalyst_ai.platform.observability import SecurityCounters
+from catalyst_ai.platform.observability import (
+    MeteredProvider,
+    RequestMetricsMiddleware,
+    SecurityCounters,
+)
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresJobStore, PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
@@ -113,9 +118,11 @@ async def ready(request: Request) -> ReadyResponse:
 
 
 def _worker_check(request: Request) -> dict[str, bool]:
-    """Report whether the worker still takes work; the API process has no worker to report."""
+    """Report whether this process still takes work: the worker's drain, or the API's."""
     worker = getattr(request.app.state, "worker", None)
-    return {} if worker is None else {"worker": not worker.draining}
+    if worker is not None:
+        return {"worker": not worker.draining}
+    return {"serving": not getattr(request.app.state, "draining", False)}
 
 
 def _with_examples(document: dict[str, Any]) -> dict[str, Any]:
@@ -211,8 +218,12 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
         title=TITLE, version=CONTRACT_VERSION, docs_url=None, redoc_url=None, lifespan=_lifespan
     )
     context = runtime or default_runtime(settings)
+    metrics = context.metrics
+    app.state.metrics = metrics
+    app.state.draining = False
+    app.state.security = SecurityCounters(metrics)
+    context = replace(context, provider=MeteredProvider(context.provider, metrics, context.clock))
     app.state.runtime = context
-    app.state.security = SecurityCounters()
     verifier = Verifier(
         KeyRegistry.from_config(settings.auth_public_keys),
         context.storage,
@@ -226,6 +237,7 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
         lookup=capability_of(app),
     )
     app.add_middleware(RequestIdMiddleware)
+    app.add_middleware(RequestMetricsMiddleware, metrics=app.state.metrics, clock=context.clock)
     install_error_handlers(app)
     app.include_router(health)
     app.include_router(improve_story_router)

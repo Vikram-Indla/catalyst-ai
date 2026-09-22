@@ -25,6 +25,7 @@ CHECKS = (
     "readonly",
     "origin",
     "vocabulary",
+    "alerts",
     "classification",
     "routes",
     "contract",

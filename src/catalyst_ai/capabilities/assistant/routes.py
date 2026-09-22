@@ -67,7 +67,8 @@ async def turn(body: TurnRequest, request: Request) -> StreamingResponse:
     """Answer one turn as typed frames; every stream ends with `done` or `error`."""
     request_id = request_id_of(request)
     events = stream(body, request.app.state.runtime, request_id)
-    return stream_response(frames_of(events), error_frame(request_id), request_id)
+    metrics = request.app.state.runtime.metrics
+    return stream_response(frames_of(events), error_frame(request_id), request_id, metrics)
 
 
 @router.post(

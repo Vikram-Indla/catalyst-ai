@@ -1,6 +1,7 @@
 """health.live and health.ready through the app: shape, exemption from auth, request id."""
 
 import httpx
+from fastapi import FastAPI
 
 from catalyst_ai.contract.health import LiveResponse, ReadyResponse
 from catalyst_ai.platform.httpserver import REQUEST_ID_HEADER
@@ -18,7 +19,18 @@ async def test_health_ready_returns_ready_with_checks(client: httpx.AsyncClient)
     assert response.status_code == 200
     ready = ReadyResponse.model_validate(response.json())
     assert ready.status == "ready"
-    assert ready.checks == {"settings": True, "storage": True}
+    assert ready.checks == {"settings": True, "storage": True, "serving": True}
+
+
+async def test_health_ready_turns_false_while_the_process_drains(
+    client: httpx.AsyncClient, app: FastAPI
+) -> None:
+    app.state.draining = True
+    response = await client.get("/readyz")
+    ready = ReadyResponse.model_validate(response.json())
+    assert ready.status == "not_ready"
+    assert ready.checks["serving"] is False
+    app.state.draining = False
 
 
 async def test_health_live_echoes_a_supplied_request_id(client: httpx.AsyncClient) -> None:

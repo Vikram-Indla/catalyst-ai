@@ -1,0 +1,125 @@
+{
+  "title": "Catalyst AI — the service",
+  "uid": "catalyst-ai-service",
+  "schemaVersion": 39,
+  "editable": false,
+  "refresh": "1m",
+  "time": { "from": "now-6h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "operation",
+        "type": "query",
+        "query": "label_values(catalyst_ai_http_requests_total, operation)",
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Calls per capability",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (operation) (rate(catalyst_ai_http_requests_total{operation=~\"$operation\"}[5m]))",
+          "legendFormat": "{{operation}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Refusals by code",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (code) (rate(catalyst_ai_errors_total[5m]))",
+          "legendFormat": "{{code}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p50 / p95 per capability",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (operation, le) (rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~\"$operation\"}[5m])))",
+          "legendFormat": "p50 {{operation}}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (operation, le) (rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~\"$operation\"}[5m])))",
+          "legendFormat": "p95 {{operation}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Provider calls by outcome",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum by (outcome) (rate(catalyst_ai_provider_calls_total[5m]))",
+          "legendFormat": "{{outcome}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Tokens per capability",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum by (capability, direction) (rate(catalyst_ai_provider_tokens_total[5m]))",
+          "legendFormat": "{{capability}} {{direction}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Spend per organisation (micro-dollars per day)",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum by (organization) (increase(catalyst_ai_provider_cost_micros_total[1d]))",
+          "legendFormat": "{{organization}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Cache hit rate",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(rate(catalyst_ai_cache_lookups_total{result=\"hit\"}[5m])) / sum(rate(catalyst_ai_cache_lookups_total[5m]))",
+          "legendFormat": "hit rate"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jobs: queued and running",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "targets": [
+        { "expr": "catalyst_ai_jobs", "legendFormat": "{{state}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Security: refused origins and quarantined jobs",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "expr": "sum by (reason) (rate(catalyst_ai_origin_refused_total[5m]))",
+          "legendFormat": "origin {{reason}}"
+        },
+        {
+          "expr": "sum by (reason) (rate(catalyst_ai_job_quarantined_total[5m]))",
+          "legendFormat": "job {{reason}}"
+        }
+      ]
+    }
+  ]
+}

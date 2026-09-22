@@ -7,6 +7,7 @@ from pathlib import Path
 
 import httpx
 import pytest
+from fastapi import FastAPI
 from hypothesis import settings as hypothesis_settings
 from hypothesis.configuration import set_hypothesis_home_dir
 from pydantic import SecretStr
@@ -35,9 +36,13 @@ def settings() -> Settings:
 
 
 @pytest.fixture
-async def client(settings: Settings) -> AsyncIterator[httpx.AsyncClient]:
+def app(settings: Settings) -> FastAPI:
     runtime = default_runtime(settings)
-    app = create_app(settings, replace(runtime, storage=MemoryStorage(runtime.clock)))
+    return create_app(settings, replace(runtime, storage=MemoryStorage(runtime.clock)))
+
+
+@pytest.fixture
+async def client(app: FastAPI) -> AsyncIterator[httpx.AsyncClient]:
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
     async with httpx.AsyncClient(
         transport=transport,

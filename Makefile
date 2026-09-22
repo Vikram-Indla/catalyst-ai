@@ -14,7 +14,7 @@ WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
 
-.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage evals evals-affected security selftest verify verify-fast ci ci-cold stamp-check serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage drill load evals evals-affected security selftest verify verify-fast ci ci-cold stamp-check serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -60,6 +60,12 @@ test-fast:
 
 storage:
 	$(RUN) pytest tests/storage -q
+
+drill:
+	$(RUN) python -m tools.drill --capability $(CAP)
+
+load:
+	$(RUN) python -m tools.load --concurrency $(or $(N),16) --rounds $(or $(ROUNDS),4)
 
 evals:
 	@if ls evals/*/set.jsonl >/dev/null 2>&1; then $(RUN) python -m tools.evals; else echo "evals: no eval set yet, nothing to run"; fi

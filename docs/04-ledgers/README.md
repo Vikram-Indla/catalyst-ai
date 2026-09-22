@@ -16,6 +16,7 @@ fails on drift. Three are written by hand.
 | `contracts-changelog.md` | **By hand** | Every contract change, with what the backend must do now |
 | `parsers.md` | **By hand**, with the descriptor of `documents` | Per format: the library, why it beats the standard library, the limits and their reason classes, what is not parsed |
 | `retirement.md` | **By hand** | Per previous function: `live` / `shadow` / `retired`, date, the capability, the eval run that justified it — created with the first `built` capability |
+| `slos.md` | what the service promises, the metric that measures each promise, and the alert that fires | by hand, with the alerts |
 
 Until `make ledgers` exists, the generated files are written by hand from their sources in the
 same change as the source; a drift between a ledger and its source is a finding.

@@ -1,12 +1,15 @@
-"""ARCH-009 §1: the service verifies and never signs; the static bearer is gone for good.
+"""ARCH-009 §1 and §5: the service verifies and never signs, and a secret is read in one place.
 
-Three rules over `src/`: a signing primitive is never imported and no key is ever generated
+Four rules over `src/`: a signing primitive is never imported and no key is ever generated
 (the private key exists only in the backend); the cryptography package is imported by one
 module, the key registry; and no code path reads a service token or a bearer — the words
-themselves may not appear, so a fallback cannot creep back.
+themselves may not appear, so a fallback cannot creep back. And every secret of the settings is
+read by exactly one module — the adapter its key belongs to, the migrator its database URL —
+so a second reader is a decision, not an accident.
 """
 
 from pathlib import Path
+from types import MappingProxyType
 
 from tools import rules
 from tools.checks.gate import Violation, imported_names, parse, relative, walk
@@ -16,6 +19,13 @@ KEY_MODULE = rules.SRC / "platform" / "auth" / "keys.py"
 SIGNING_NAMES = ("PrivateKey", "generate_private_key", "Ed25519PrivateKey")
 SIGNING_CALLS = (".sign(", "PrivateKey.generate(", "private_bytes")
 BEARER_WORDS = ("service_token", "SERVICE_TOKEN", "Bearer ", "bearer_token")
+SECRET_READERS = MappingProxyType(
+    {
+        "provider_gemini_api_key": ("providers/gemini/adapter.py",),
+        "record_provider_key": ("tools/record.py",),
+        "database_url": ("app.py", "cli.py"),
+    }
+)
 
 
 def _violations_in(path: Path, root: Path) -> list[Violation]:
@@ -34,9 +44,22 @@ def _violations_in(path: Path, root: Path) -> list[Violation]:
     return violations
 
 
+def secret_violations(root: Path) -> list[Violation]:
+    """Report a module reading a secret that is not the one module allowed to read it."""
+    violations = []
+    for path in walk(root, rules.SRC):
+        where = relative(path, root)
+        text = path.read_text(encoding="utf-8")
+        for secret, readers in SECRET_READERS.items():
+            reads = f".{secret}" in text and ".get_secret_value()" in text
+            if reads and not where.endswith(readers):
+                violations.append(Violation(where, 1, f"reads {secret}, which is not its secret"))
+    return violations
+
+
 def run(root: Path) -> list[Violation]:
-    """Report any signing primitive, stray cryptography import or bearer left in the source."""
+    """Report any signing primitive, stray cryptography import, bearer or second secret reader."""
     violations: list[Violation] = []
     for path in walk(root, rules.SRC):
         violations += _violations_in(path, root)
-    return violations
+    return violations + secret_violations(root)

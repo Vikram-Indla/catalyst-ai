@@ -5,6 +5,7 @@ from datetime import date
 from pathlib import Path
 
 from tools.checks import (
+    alerts,
     budgets,
     changelog,
     ci,
@@ -33,6 +34,16 @@ LOW_COVERAGE = {
     "totals": {"percent_covered": 50.0},
 }
 DEPRECATED_DOCUMENT = {"paths": {"/v1/old": {"post": {"deprecated": True}}}}
+BAD_ALERTS = {
+    "groups": [
+        {
+            "rules": [
+                {"alert": "NoRunbook", "annotations": {}},
+                {"alert": "Missing", "annotations": {"runbook": "docs/06-runbooks/nope.md"}},
+            ]
+        }
+    ]
+}
 BAD_REGISTRY = "| INV-001 | x | o | `tools/checks/nope` | C | S |"
 
 VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
@@ -63,6 +74,10 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     ),
     "journeys": lambda: journeys.check({"foo.run": ["ai.x.y"]}, set(), ""),
     "coverage": lambda: coverage.check(LOW_COVERAGE),
+    "alerts": lambda: (
+        alerts.alert_violations(BAD_ALERTS, {"capabilities.md"}, "w")
+        + alerts.coverage_violations(BAD_ALERTS, "", {"orphan.md"})
+    ),
     "vocabulary": lambda: vocabulary.check_lines(
         ["decided under " + "CA" + "T-0" + "07" + " by " + "il" + "ya-go"], "w"
     ),

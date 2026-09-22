@@ -17,7 +17,7 @@ from catalyst_ai.config import Settings, load_settings
 from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
 from catalyst_ai.platform.jobs import Worker
 from catalyst_ai.platform.logging import configure_logging
-from catalyst_ai.platform.observability import SecurityCounters
+from catalyst_ai.platform.observability import SecurityCounters, metrics_router
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
@@ -35,15 +35,32 @@ def _split_addr(addr: str) -> tuple[str, int]:
 
 
 async def _serve(settings: Settings) -> None:
-    app = create_app(settings)
-    ops = create_app(settings)
+    runtime = default_runtime(settings)
+    app = create_app(settings, runtime)
+    ops = create_app(settings, runtime)
     ops.include_router(health)
+    ops.include_router(metrics_router)
     servers = []
     for target, addr in ((app, settings.http_addr), (ops, settings.ops_addr)):
         host, port = _split_addr(addr)
-        config = uvicorn.Config(target, host=host, port=port, log_config=None, access_log=False)
+        config = uvicorn.Config(
+            target,
+            host=host,
+            port=port,
+            log_config=None,
+            access_log=False,
+            timeout_graceful_shutdown=settings.shutdown_drain_seconds,
+        )
         servers.append(uvicorn.Server(config))
-    await asyncio.gather(*(server.serve() for server in servers))
+    stop = asyncio.Event()
+    _install_stop(stop)
+    serving = [asyncio.create_task(server.serve()) for server in servers]
+    await stop.wait()
+    for target in (app, ops):
+        target.state.draining = True
+    for server in servers:
+        server.should_exit = True
+    await asyncio.gather(*serving)
 
 
 def _declared_python_versions(root: Path) -> dict[str, str]:
@@ -135,6 +152,7 @@ async def _worker(settings: Settings) -> int:
     await storage.connect()
     ops = create_app(settings, runtime)
     ops.include_router(health)
+    ops.include_router(metrics_router)
     worker = Worker(
         runtime,
         runtime.jobs,

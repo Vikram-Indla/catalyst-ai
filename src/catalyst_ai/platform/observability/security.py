@@ -1,8 +1,9 @@
 """Security events: one structured log line per refusal and a counter by reason, never content."""
 
 import logging
-from collections import Counter
 from dataclasses import dataclass
+
+from catalyst_ai.platform.observability.metrics import Metrics
 
 log = logging.getLogger("catalyst_ai.security")
 ORIGIN_REFUSED = "origin_refused"
@@ -10,21 +11,21 @@ JOB_QUARANTINED = "job_quarantined"
 
 
 class SecurityCounters:
-    """Counters the metrics endpoint reads, held by the app, keyed by event and reason."""
+    """The security events' view of the process metrics: one counter per event and reason."""
 
-    def __init__(self) -> None:
-        """Start at zero."""
-        self._counts: Counter[tuple[str, str]] = Counter()
+    def __init__(self, metrics: Metrics | None = None) -> None:
+        """Count into the process's metrics; a fresh registry when none is given (tests)."""
+        self.metrics = metrics or Metrics()
 
     def count(self, event: str, reason: str) -> None:
         """Add one to the (event, reason) cell."""
-        self._counts[(event, reason)] += 1
+        self.metrics.count(event, {"reason": reason})
 
     def value(self, event: str, reason: str | None = None) -> int:
         """Return one cell, or the sum over every reason of the event."""
         if reason is not None:
-            return self._counts[(event, reason)]
-        return sum(count for (name, _), count in self._counts.items() if name == event)
+            return int(self.metrics.value(event, {"reason": reason}))
+        return int(self.metrics.total(event))
 
 
 @dataclass(frozen=True)

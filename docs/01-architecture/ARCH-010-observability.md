@@ -2,7 +2,7 @@
 id: ARCH-010
 title: Observability without content
 status: Locked
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -25,7 +25,11 @@ when it is a request field) and fails on one.
 calls, tokens, cost and latency per capability, model and organisation; cache hits and misses;
 budget refusals; circuit state per provider; job queue depth and age. Traces span the pipeline
 stages by name (`parse` … `postprocess`) with attributes limited to the row in §1. OpenTelemetry
-is the only exporter; vendor SDKs are not register rows.
+is the only exporter; vendor SDKs are not register rows. The ops port serves them as the
+Prometheus text exposition format at `/metrics` — the format every collector, including the
+OpenTelemetry collector, scrapes without translation (`D-039`); the contract port serves no
+metrics. The objectives those numbers answer to are `docs/04-ledgers/slos.md`, the rules over
+them `ops/alerts.yaml`, and every rule names a runbook.
 
 ## 3. Logs
 

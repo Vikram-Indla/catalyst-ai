@@ -1,0 +1,151 @@
+# Alerting rules over the metrics the ops port exposes (docs/04-ledgers/slos.md).
+# Prometheus rule format: the one an OpenTelemetry collector, Prometheus, Mimir or Grafana Cloud
+# all read without translation. Every rule names its runbook; tools/checks/alerts refuses a rule
+# whose runbook does not exist and a runbook no rule names.
+groups:
+  - name: catalyst-ai-capabilities
+    interval: 30s
+    rules:
+      - alert: CapabilityErrorBudgetBurn
+        expr: |
+          sum by (operation) (rate(catalyst_ai_http_requests_total{status="5xx"}[1h]))
+            / sum by (operation) (rate(catalyst_ai_http_requests_total[1h])) > 0.01
+        for: 15m
+        labels:
+          severity: page
+        annotations:
+          summary: "{{ $labels.operation }} is burning its availability budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (rate(catalyst_ai_http_request_duration_seconds_bucket[1h]))
+          ) > 8
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: OutputRefusalsHigh
+        expr: |
+          sum(rate(catalyst_ai_errors_total{code=~"ai.output.*"}[6h]))
+            / sum(rate(catalyst_ai_http_requests_total[6h])) > 0.01
+        for: 30m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "more than one answer in a hundred is refused as invalid or unsafe"
+          runbook: docs/06-runbooks/eval-drift.md
+      - alert: CacheHitRateLow
+        expr: |
+          sum(rate(catalyst_ai_cache_lookups_total{result="hit"}[6h]))
+            / sum(rate(catalyst_ai_cache_lookups_total[6h])) < 0.2
+        for: 1h
+        labels:
+          severity: ticket
+        annotations:
+          summary: "the cache is serving almost nothing; a key or a TTL moved"
+          runbook: docs/06-runbooks/capabilities.md
+
+  - name: catalyst-ai-provider
+    interval: 30s
+    rules:
+      - alert: ProviderFailing
+        expr: |
+          sum by (model) (
+            rate(catalyst_ai_provider_calls_total{outcome=~"ai.provider.*"}[1h])
+          ) / sum by (model) (rate(catalyst_ai_provider_calls_total[1h])) > 0.05
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: "{{ $labels.model }} is failing more than one call in twenty"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket[1h])
+            )
+          ) > 8
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits too long on the provider"
+          runbook: docs/06-runbooks/provider-outage.md
+
+  - name: catalyst-ai-tenants
+    interval: 1m
+    rules:
+      - alert: TenantBudgetExhausted
+        expr: sum(increase(catalyst_ai_errors_total{code="ai.budget.exceeded"}[1d])) > 0
+        for: 5m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "an organisation is being refused on its daily budget"
+          runbook: docs/06-runbooks/budget-exhaustion.md
+
+  - name: catalyst-ai-jobs
+    interval: 30s
+    rules:
+      - alert: JobQueueBacklog
+        expr: catalyst_ai_jobs{state="queued"} > 50
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "the job queue is not draining"
+          runbook: docs/06-runbooks/job-backlog.md
+      - alert: JobQuarantined
+        expr: increase(catalyst_ai_job_quarantined_total[1h]) > 0
+        for: 0m
+        labels:
+          severity: page
+        annotations:
+          summary: "a job row failed its stored proof — {{ $labels.reason }}"
+          runbook: docs/06-runbooks/job-quarantine.md
+
+  - name: catalyst-ai-origin
+    interval: 30s
+    rules:
+      - alert: OriginForged
+        expr: increase(catalyst_ai_origin_refused_total{reason="bad_signature"}[1h]) > 0
+        for: 0m
+        labels:
+          severity: page
+        annotations:
+          summary: "a request carried a forged envelope under a known key id"
+          runbook: docs/06-runbooks/key-rotation.md
+      - alert: OriginRefusalsHigh
+        expr: sum(rate(catalyst_ai_origin_refused_total[1h])) > 0.2
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "refused origins are steady — a clock, a rotation or something that is not the backend"
+          runbook: docs/06-runbooks/job-quarantine.md
+
+  - name: catalyst-ai-storage
+    interval: 30s
+    rules:
+      - alert: IndexUnavailable
+        expr: sum(rate(catalyst_ai_errors_total{code="ai.index.unavailable"}[15m])) > 0
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "the retrieval index is not answering"
+          runbook: docs/06-runbooks/index-rebuild.md
+      - alert: OriginUnverifiable
+        expr: sum(rate(catalyst_ai_errors_total{code="auth.origin.unverifiable"}[15m])) > 0
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: "the replay store cannot answer; the door is failing closed"
+          runbook: docs/06-runbooks/retention.md

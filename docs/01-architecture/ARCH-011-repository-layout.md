@@ -2,7 +2,7 @@
 id: ARCH-011
 title: Repository layout
 status: Locked
-version: 1.0.0
+version: 1.0.1
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -32,6 +32,7 @@ catalyst-ai/
 ├── api/openapi.yaml              rendered from the models by `make api`; committed; drift fails CI
 ├── evals/<name>/                 set.jsonl  graders.py  thresholds.yaml  README.md
 ├── db/migrations/                forward-only SQL, one per change, timestamped
+├── ops/                          alerts.yaml (the rules over the ops port's metrics) · dashboards/*.json
 ├── tests/
 │   ├── unit/                     mirrors src/catalyst_ai/ — one test module per logic module
 │   ├── architecture/             the fitness tests (ARCH-012 §4)

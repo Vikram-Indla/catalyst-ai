@@ -2,7 +2,7 @@
 id: RULE-006
 title: Enforcement — every rule is a check
 status: Binding
-version: 1.2.0
+version: 1.3.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -48,6 +48,7 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | A read-only capability imports no client, socket, writer or ingest path (ARCH-002 §1; the assistant's rule, INV-050) | zero violations in the packages `rules.READ_ONLY_CAPABILITIES` names | `tools/checks/readonly` | AI-010 |
 | The service verifies and never signs: no signing primitive, no key generation, no cryptography import outside the key registry, no bearer or service token in the source (ARCH-009 §1, §5; INV-053) | zero violations under `src/` | `tools/checks/origin` | AI-015 |
 | No id of the lead's private planning, no name of its files and no name of its people anywhere in the repository (RULE-005 §1) | zero lines carrying the shapes, in every text file | `tools/checks/vocabulary` | AI-015 |
+| Every alert names a runbook that exists, every runbook is named, every objective has its alert (`docs/04-ledgers/slos.md`) | zero disagreements between the alerts, the runbooks and the SLO ledger | `tools/checks/alerts`| `tools/checks/vocabulary` | AI-015 |
 | Routes thin: ≤ 6 statements, no branch on content (RULE-001 §2) | zero violations | `tools/checks/routes` | AI-002 |
 | Typed boundary: no `dict[str, Any]`, `Any` or raw JSON in routes, pipeline surfaces or the port (RULE-003 §1, §3) | zero violations | `tools/checks/contract` + `tools/checks/ports` | AI-002 |
 | Rendered document equals the committed one; every operation carries `x-capability`, versions, `x-error-codes`, an example (RULE-003 §1) | zero drift; zero missing | `tools/checks/openapi` (`make api && git diff --exit-code api/`) | AI-002 |

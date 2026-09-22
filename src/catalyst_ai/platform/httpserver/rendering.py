@@ -11,6 +11,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.ids import new_request_id
+from catalyst_ai.platform.observability.metrics import ERRORS
 
 REQUEST_ID_HEADER = "X-Request-Id"
 RETRY_AFTER_HEADER = "Retry-After"
@@ -26,12 +27,21 @@ def request_id_of(request: Request) -> str:
 
 def render_error(request: Request, error: Error) -> JSONResponse:
     """Render a catalog error as the envelope with the status and headers the code implies."""
+    _count(request, error)
     request_id = request_id_of(request)
     headers = {REQUEST_ID_HEADER: request_id}
     if error.retry_after_ms is not None:
         headers[RETRY_AFTER_HEADER] = str(max(1, error.retry_after_ms // MS_PER_SECOND))
     body = error.envelope(request_id).model_dump(mode="json", exclude_none=True)
     return JSONResponse(status_code=error.status, content=body, headers=headers)
+
+
+def _count(request: Request, error: Error) -> None:
+    """Count the refusal by its code; a scope without an app carries no registry."""
+    app = request.scope.get("app")
+    metrics = getattr(getattr(app, "state", None), "metrics", None)
+    if metrics is not None:
+        metrics.count(ERRORS, {"code": error.code.value})
 
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
