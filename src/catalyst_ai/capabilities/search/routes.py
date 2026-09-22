@@ -8,9 +8,9 @@ from catalyst_ai.capabilities.search.pipeline import run
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.search import (
     IndexDeleteRequest,
-    IndexDeleteResponse,
+    IndexDeleteResult,
     IndexUpsertRequest,
-    IndexUpsertResponse,
+    IndexUpsertResult,
     SearchRequest,
     SearchResponse,
 )
@@ -51,10 +51,10 @@ def _extra(codes: tuple[ErrorCode, ...]) -> dict[str, object]:
 @router.post(
     "/v1/index/upsert",
     operation_id="index.upsert",
-    response_model=IndexUpsertResponse,
+    response_model=IndexUpsertResult,
     openapi_extra=_extra(UPSERT_ERROR_CODES),
 )
-async def index_upsert(body: IndexUpsertRequest, request: Request) -> IndexUpsertResponse:
+async def index_upsert(body: IndexUpsertRequest, request: Request) -> IndexUpsertResult:
     """Index or re-index documents of the caller's organisation; unchanged hashes cost nothing."""
     return await run_upsert(body, request.app.state.runtime, request_id_of(request))
 
@@ -62,10 +62,10 @@ async def index_upsert(body: IndexUpsertRequest, request: Request) -> IndexUpser
 @router.post(
     "/v1/index/delete",
     operation_id="index.delete",
-    response_model=IndexDeleteResponse,
+    response_model=IndexDeleteResult,
     openapi_extra=_extra(DELETE_ERROR_CODES),
 )
-async def index_delete(body: IndexDeleteRequest, request: Request) -> IndexDeleteResponse:
+async def index_delete(body: IndexDeleteRequest, request: Request) -> IndexDeleteResult:
     """Forget documents by key."""
     return await run_delete(body, request.app.state.runtime, request_id_of(request))
 

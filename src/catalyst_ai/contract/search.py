@@ -116,7 +116,7 @@ class IndexedDocument(BaseModel):
     unchanged: bool
 
 
-class IndexUpsertResponse(ResponseEnvelope):
+class IndexUpsertResult(ResponseEnvelope):
     """One line per document and the corpus size afterwards."""
 
     model_config = ConfigDict(extra="forbid")
@@ -144,7 +144,7 @@ class IndexDeleteRequest(RequestEnvelope):
     ]
 
 
-class IndexDeleteResponse(ResponseEnvelope):
+class IndexDeleteResult(ResponseEnvelope):
     """How many chunks were removed."""
 
     model_config = ConfigDict(extra="forbid")

@@ -5,9 +5,9 @@ from uuid import UUID
 from catalyst_ai.capabilities.search import descriptor
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.contract.search import (
-    IndexDeleteResponse,
+    IndexDeleteResult,
     IndexedDocument,
-    IndexUpsertResponse,
+    IndexUpsertResult,
     SearchRequest,
     SearchResponse,
 )
@@ -57,11 +57,11 @@ def to_response(found: Found, request: SearchRequest, request_id: str) -> Search
 
 def to_upsert_response(
     outcome: UpsertOutcome, organization_id: UUID, request_id: str
-) -> IndexUpsertResponse:
+) -> IndexUpsertResult:
     """Build the upsert response; the usage row is logged when the port was called."""
     if outcome.usage != NO_USAGE:
         log_provider_call(_row(organization_id, outcome.model_id, outcome.usage, request_id))
-    return IndexUpsertResponse(
+    return IndexUpsertResult(
         capability_version=descriptor.version,
         prompt_version=descriptor.prompt_version,
         model=_model(outcome.model_id),
@@ -82,9 +82,9 @@ def to_upsert_response(
     )
 
 
-def to_delete_response(deleted: int, model_id: str, request_id: str) -> IndexDeleteResponse:
+def to_delete_response(deleted: int, model_id: str, request_id: str) -> IndexDeleteResult:
     """Build the delete response; nothing was embedded, the usage is empty."""
-    return IndexDeleteResponse(
+    return IndexDeleteResult(
         capability_version=descriptor.version,
         prompt_version=descriptor.prompt_version,
         model=_model(model_id),

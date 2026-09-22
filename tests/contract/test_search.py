@@ -5,7 +5,7 @@ import pytest
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings, Settings
-from catalyst_ai.contract.search import IndexUpsertResponse, SearchResponse
+from catalyst_ai.contract.search import IndexUpsertResult, SearchResponse
 from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.platform.runtime import RuntimeContext
@@ -99,7 +99,7 @@ async def test_index_upsert_indexes_and_reports_unchanged_on_repeat() -> None:
     client, provider = _scripted()
     first = await client.post(UPSERT, json=_upsert())
     assert first.status_code == 200, first.text
-    indexed = IndexUpsertResponse.model_validate(first.json())
+    indexed = IndexUpsertResult.model_validate(first.json())
     assert [r.unchanged for r in indexed.results] == [False, False]
     assert indexed.index_chunks == 2
     assert indexed.results[0].embedding_version == "d768-r1"

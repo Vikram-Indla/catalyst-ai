@@ -21,6 +21,7 @@ from tools.checks import (
     openapi,
     prclass,
     sessions,
+    vocabulary,
 )
 from tools.checks.gate import Violation
 from tools.checks.gitinfo import Commit
@@ -62,6 +63,9 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     ),
     "journeys": lambda: journeys.check({"foo.run": ["ai.x.y"]}, set(), ""),
     "coverage": lambda: coverage.check(LOW_COVERAGE),
+    "vocabulary": lambda: vocabulary.check_lines(
+        ["decided under " + "CA" + "T-0" + "07" + " by " + "il" + "ya-go"], "w"
+    ),
 }
 
 

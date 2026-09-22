@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.1.0
+version: 1.2.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -36,6 +36,12 @@ created: 2026-09-18
   `make ci` where Docker is available and otherwise the full `make verify`, printing that parity
   with the CI image is not proven. A red hook blocks. `make test-fast` (the unit tree, last
   failures first, no coverage) and `make evals-affected` exist for iteration; neither is evidence.
+- **The repository speaks of "the lead" and "a contributor" and of nothing behind them.** No
+  id of the lead's private planning, no name of its files and no name of its people is written
+  anywhere in the tree — records, ledgers, code, fixtures, commit lines alike.
+  `tools/checks/vocabulary` refuses the shapes (assembled at run time, so they never sit in the
+  tree) in `verify-fast` and `verify`; a line that needs one of them is rewritten in the
+  repository's own words.
 
 ## §2 Sessions and git — the hybrid rule
 

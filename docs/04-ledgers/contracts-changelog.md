@@ -17,6 +17,12 @@ Entry template:
 
 ---
 
+## 2026-09-24 · AI-015 (follow-up) · search (the index operations)
+**Kind:** FIX (two response schema names; no wire change)
+**What:** the response schemas of `index.upsertDocuments` and `index.deleteDocuments` are now `IndexUpsertResult` and `IndexDeleteResult` (were `IndexUpsertResponse`, `IndexDeleteResponse`). The operation ids, paths, fields and values are unchanged; only the component names in the document moved, because the backend's generator derives wrapper types from the operation ids that collided with the old names.
+**Backend must:** regenerate the client at this pin and drop the overlay that renamed the two operation ids; nothing else.
+**Compatibility:** additive on the wire — no request or response byte changes.
+
 ## 2026-09-24 · AI-015 · platform — the proof of origin
 **Kind:** CHANGE (the authentication scheme of every operation — breaking for the only caller, by the lead's decision `D-035`; the static bearer is removed, not kept as a fallback); ADD (`auth.origin.invalid`, `auth.origin.unverifiable`); REMOVE (`auth.token.invalid`, `SERVICE_TOKENS`); ADD (`AUTH_PUBLIC_KEYS`, `AUTH_CLOCK_SKEW_SECONDS`, `AUTH_MAX_TTL_SECONDS`)
 **What:** `Authorization: Catalyst-Envelope <claims>.<signature>` on every operation but the health routes. `claims` is the unpadded base64url of a JSON object `{iss: "backend", aud: "catalyst-ai", org: <organisation uuid>, cap: <capability name as the document's x-capability>, sub: <the acting principal's opaque id>, iat, exp (≤ iat + 60), jti: <nonce, unique per request>, kid: <key id>, bh: <hex SHA-256 of the request body bytes exactly as sent>, job_exp?: <the capability's budget window, for job operations>}`; `signature` is the unpadded base64url of the 64-byte Ed25519 signature over the ASCII bytes of the `claims` segment, by the private key `kid` names. The service verifies signature, issuer, audience, window (clock skew `AUTH_CLOCK_SKEW_SECONDS`), the nonce once, the body hash, and that `org` equals the body's `organization_id` and `cap` equals the operation's capability. Refused: `401 auth.origin.invalid` with no detail (the reason is a security event on the service's side); `503 auth.origin.unverifiable` with `Retry-After` when the replay store cannot answer. The document declares the scheme as `CatalystEnvelope`.

@@ -24,6 +24,7 @@ CHECKS = (
     "boundary",
     "readonly",
     "origin",
+    "vocabulary",
     "classification",
     "routes",
     "contract",
@@ -75,6 +76,7 @@ FAST = frozenset(
         "logs",
         "network",
         "mypy_overrides",
+        "vocabulary",
     }
 )
 

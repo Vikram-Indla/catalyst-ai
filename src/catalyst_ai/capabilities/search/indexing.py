@@ -7,9 +7,9 @@ from catalyst_ai.contract.envelopes import RequestEnvelope
 from catalyst_ai.contract.search import (
     Corpus,
     IndexDeleteRequest,
-    IndexDeleteResponse,
+    IndexDeleteResult,
     IndexUpsertRequest,
-    IndexUpsertResponse,
+    IndexUpsertResult,
 )
 from catalyst_ai.platform.pipeline import Door, admit
 from catalyst_ai.platform.runtime import RuntimeContext
@@ -49,7 +49,7 @@ def job_for(request: RequestEnvelope, corpus: Corpus, runtime: RuntimeContext) -
 
 async def run_upsert(
     request: IndexUpsertRequest, runtime: RuntimeContext, request_id: str
-) -> IndexUpsertResponse:
+) -> IndexUpsertResult:
     """Index the documents: door, budget, chunk, embed, store; unchanged ones are touched."""
     texts: dict[str, str | None] = {
         document.external_id: embedding_input(document.title, document.text)
@@ -67,7 +67,7 @@ async def run_upsert(
 
 async def run_delete(
     request: IndexDeleteRequest, runtime: RuntimeContext, request_id: str
-) -> IndexDeleteResponse:
+) -> IndexDeleteResult:
     """Forget the keys: door, then the delete."""
     admit_index(request, {}, runtime)
     job = job_for(request, request.corpus, runtime)
