@@ -1,30 +1,32 @@
 """unfurl.run through the app: a card from supplied content; the door; no URL field."""
 
 import httpx
-from pydantic import SecretStr
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings
 from catalyst_ai.contract.unfurl import UnfurlResponse
+from catalyst_ai.platform.auth import capability_of
 from tests.unit.capabilities.improve_story.conftest import (
     ScriptedProvider,
     make_runtime,
     make_settings,
 )
 from tests.unit.capabilities.unfurl.conftest import card_text, unfurl_request
+from tools.origin import SigningAuth
 
 UNFURL = "/v1/unfurl"
 
 
 def _client(texts: list[str], **overrides: object) -> httpx.AsyncClient:
-    settings = make_settings(service_tokens=[SecretStr("test-token")], **overrides)
-    app = create_app(settings, make_runtime(ScriptedProvider(texts), settings))
+    settings = make_settings(**overrides)
+    runtime = make_runtime(ScriptedProvider(texts), settings)
+    app = create_app(settings, runtime)
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
     return httpx.AsyncClient(
         transport=transport,
         base_url="http://testserver",
         timeout=30.0,
-        headers={"Authorization": "Bearer test-token"},
+        auth=SigningAuth(capability_of(app), runtime.clock),
     )
 
 

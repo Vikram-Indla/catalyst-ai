@@ -4,11 +4,11 @@ from collections.abc import AsyncIterator
 
 import httpx
 import pytest
-from pydantic import SecretStr
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings, Settings
 from catalyst_ai.contract.documents import AskResponse, DraftResponse, IngestResponse
+from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.providers.faults import Fault, FaultTransport
@@ -30,6 +30,7 @@ from tests.unit.capabilities.improve_story.conftest import (
     make_settings,
 )
 from tools import evalkit
+from tools.origin import SigningAuth
 
 FIXTURES = REPO_ROOT / "tests" / "fixtures" / "providers" / "gemini" / "documents"
 DOCUMENTS = REPO_ROOT / "tests" / "fixtures" / "documents"
@@ -45,21 +46,19 @@ def _client(runtime: RuntimeContext, settings: Settings) -> httpx.AsyncClient:
         transport=transport,
         base_url="http://testserver",
         timeout=30.0,
-        headers={"Authorization": "Bearer test-token"},
+        auth=SigningAuth(capability_of(app), runtime.clock),
     )
 
 
 def _scripted(texts: list[str], **overrides: object) -> tuple[httpx.AsyncClient, ScriptedProvider]:
     provider = ScriptedProvider(texts)
-    settings = make_settings(service_tokens=[SecretStr("test-token")], **overrides)
+    settings = make_settings(**overrides)
     return _client(make_runtime(provider, settings), settings), provider
 
 
 @pytest.fixture
 async def recorded() -> AsyncIterator[httpx.AsyncClient]:
-    settings = evalkit.inert_settings(cache_ttl_seconds=3600).model_copy(
-        update={"service_tokens": [SecretStr("test-token")]}
-    )
+    settings = evalkit.inert_settings(cache_ttl_seconds=3600)
     runtime = evalkit.runtime_over(RecordedTransport(FIXTURES), settings)
     await evalkit.ingest_corpus(runtime, REPO_ROOT / "evals" / "documents")
     client = _client(runtime, settings)
@@ -172,9 +171,7 @@ async def test_documents_switch_version_scanner_and_budget() -> None:
     ids=["unavailable", "timeout", "quota", "rejected"],
 )
 async def test_documents_provider_failures(fault: Fault, code: str) -> None:
-    settings = evalkit.inert_settings().model_copy(
-        update={"service_tokens": [SecretStr("test-token")]}
-    )
+    settings = evalkit.inert_settings()
     base = evalkit.runtime_over(FaultTransport([fault]), settings)
     client_http = httpx.AsyncClient(transport=FaultTransport([fault]), timeout=1.0)
     provider = GeminiProvider(

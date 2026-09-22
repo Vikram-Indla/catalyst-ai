@@ -8,7 +8,14 @@ from tools.checks.gate import Violation, parse, relative, walk
 
 CATALOG = rules.SRC / "contract" / "errors.py"
 ENUM_NAME = "ErrorCode"
-PLATFORM_RAISERS = frozenset({"AUTH_INVALID", "VALIDATION_INVALID_INPUT", "INTERNAL_ERROR"})
+PLATFORM_RAISERS = frozenset(
+    {
+        "AUTH_ORIGIN_INVALID",
+        "AUTH_ORIGIN_UNVERIFIABLE",
+        "VALIDATION_INVALID_INPUT",
+        "INTERNAL_ERROR",
+    }
+)
 ROUTING_CODES = frozenset({"CAPABILITY_UNKNOWN"})
 SDK_EXCEPTION_MARKERS = ("httpx.", "HTTPStatusError", "ConnectError", "ReadTimeout")
 

@@ -61,6 +61,7 @@ class MemoryStorage:
         self._documents: dict[Key, DocumentRecord] = {}
         self._chunks: dict[Key, list[ChunkRow]] = {}
         self._seen: dict[Key, datetime] = {}
+        self._nonces: dict[str, int] = {}
 
     async def ready(self) -> bool:
         """Answer always."""
@@ -183,6 +184,14 @@ class MemoryStorage:
             if key[0] == cut.organization_id and key[1] == cut.corpus and seen < cut.before
         ]
         return [external_id for _, external_id in sorted(due)[: cut.limit]]
+
+    async def remember_nonce(self, nonce: str, expires_at: int, now: int) -> bool:
+        """Forget what has expired, then record the nonce once."""
+        self._nonces = {seen: until for seen, until in self._nonces.items() if until > now}
+        if nonce in self._nonces:
+            return False
+        self._nonces[nonce] = expires_at
+        return True
 
 
 def _hit(document: DocumentRecord, chunk: ChunkRow, score: float) -> StoredHit:

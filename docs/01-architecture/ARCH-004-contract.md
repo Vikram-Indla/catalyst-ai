@@ -2,7 +2,7 @@
 id: ARCH-004
 title: The contract
 status: Locked
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -29,7 +29,7 @@ the two one.
 | Base path | `/v1/` — additive changes only; a breaking change is `/v2/` for the affected operation, the old one carrying `Deprecation` and `Sunset` headers for at least one minor release |
 | Operation | `POST /v1/<capability>` for synchronous capabilities; `POST /v1/<capability>:jobs` + `GET /v1/jobs/{id}` for long ones; `POST /v1/<capability>:stream` for streaming (`ADR-007`) |
 | `operationId` | `<capability>.<verb>` (`improve_story.run`, `knowledge_ingest.submit`, `jobs.get`) |
-| Authentication | `Authorization: Bearer <service token>` on every operation; `401` with `auth.token.invalid` otherwise |
+| Authentication | `Authorization: Catalyst-Envelope <claims>.<signature>` on every operation — an Ed25519 signature by the backend over claims bound to the organisation, the capability, the body hash and a time (≤ 60 s), with a nonce honoured once; `401` with `auth.origin.invalid` and no detail otherwise, `503` with `auth.origin.unverifiable` when the replay store cannot answer; the health routes are exempt; the document declares the scheme (`D-035`) |
 | Tenant | `organization_id` (UUID) is a required field of every request body and a required query parameter of every `GET`; never inferred |
 | Idempotency | `Idempotency-Key` header honoured on every `POST`; the same key and organisation returns the cached result for the cache TTL (`ARCH-008 §3`) |
 | Casing | JSON `snake_case` (the models' own field names; no alias layer to drift) |

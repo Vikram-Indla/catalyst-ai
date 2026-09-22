@@ -23,6 +23,7 @@ CHECKS = (
     "globals",
     "boundary",
     "readonly",
+    "origin",
     "classification",
     "routes",
     "contract",

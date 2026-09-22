@@ -6,7 +6,8 @@ and is the contract (`RULE-003 §2`).
 
 | Code | Status | Degradation the backend receives | Raised by |
 | --- | --- | --- | --- |
-| `auth.token.invalid` | 401 | envelope; no retry | middleware, every operation |
+| `auth.origin.invalid` | 401 | envelope without detail (the reason is in the security log); no retry — sign again | the origin middleware, every operation |
+| `auth.origin.unverifiable` | 503 | envelope with `Retry-After`; the replay store did not answer, nothing was proven | the origin middleware, every operation |
 | `validation.invalid_input` | 400 | envelope with one `details` entry per field | FastAPI validation, every operation |
 | `ai.contract.version_mismatch` | 400 | envelope naming the served `capability_version` | every capability operation |
 | `ai.capability.unknown` | 404 | envelope | routing |

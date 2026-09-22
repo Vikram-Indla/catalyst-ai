@@ -9,7 +9,8 @@ from pydantic import BaseModel, ConfigDict, Field
 class ErrorCode(StrEnum):
     """Every code a response may carry; the ledger is generated from this enum."""
 
-    AUTH_INVALID = "auth.token.invalid"
+    AUTH_ORIGIN_INVALID = "auth.origin.invalid"
+    AUTH_ORIGIN_UNVERIFIABLE = "auth.origin.unverifiable"
     VALIDATION_INVALID_INPUT = "validation.invalid_input"
     CONTRACT_VERSION_MISMATCH = "ai.contract.version_mismatch"
     CAPABILITY_UNKNOWN = "ai.capability.unknown"
@@ -30,7 +31,8 @@ class ErrorCode(StrEnum):
 
 HTTP_STATUS = MappingProxyType(
     {
-        ErrorCode.AUTH_INVALID: 401,
+        ErrorCode.AUTH_ORIGIN_INVALID: 401,
+        ErrorCode.AUTH_ORIGIN_UNVERIFIABLE: 503,
         ErrorCode.VALIDATION_INVALID_INPUT: 400,
         ErrorCode.CONTRACT_VERSION_MISMATCH: 400,
         ErrorCode.CAPABILITY_UNKNOWN: 404,
@@ -52,7 +54,8 @@ HTTP_STATUS = MappingProxyType(
 
 PLATFORM_CODES = frozenset(
     {
-        ErrorCode.AUTH_INVALID,
+        ErrorCode.AUTH_ORIGIN_INVALID,
+        ErrorCode.AUTH_ORIGIN_UNVERIFIABLE,
         ErrorCode.VALIDATION_INVALID_INPUT,
         ErrorCode.CAPABILITY_UNKNOWN,
         ErrorCode.INTERNAL_ERROR,

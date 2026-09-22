@@ -159,3 +159,13 @@ async def test_documents_corpus_holds_rls_and_the_space_prefix(
     assert await _raw_rows_as(database_url, b) == ["kb/theirs"]
     await storage.delete_documents(a, "documents", ["kb/runbook", "other/secret"])
     await storage.delete_documents(b, "documents", ["kb/theirs"])
+
+
+async def test_a_nonce_is_remembered_once_and_forgotten_when_it_expires(
+    storage: PostgresStorage,
+) -> None:
+    nonce = f"n-{uuid4()}"
+    assert await storage.remember_nonce(nonce, expires_at=1_000, now=900) is True
+    assert await storage.remember_nonce(nonce, expires_at=1_000, now=950) is False
+    assert await storage.remember_nonce(nonce, expires_at=1_000, now=999) is False
+    assert await storage.remember_nonce(nonce, expires_at=2_000, now=1_000) is True

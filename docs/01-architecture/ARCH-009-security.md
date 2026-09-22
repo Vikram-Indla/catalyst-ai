@@ -2,7 +2,7 @@
 id: ARCH-009
 title: Security — injection, leakage, abuse, secrets
 status: Locked
-version: 1.0.0
+version: 1.1.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -17,7 +17,8 @@ capability family has a threat model (`docs/05-threat-models/`) before productio
 
 | Boundary | Where trust changes |
 | --- | --- |
-| Service token | middleware verifies `Authorization: Bearer` against configuration (constant-time compare); `401` before any route; rotation supports two active tokens |
+| Origin | the backend signs every request (Ed25519, its private key only in its own runtime); the service holds the public keys by `kid` (two during a rotation) and verifies before any route: signature, issuer, audience, a window of at most 60 s with a bounded clock skew, a nonce honoured once (the replay store), the body hash, and the organisation and capability the request itself names; a failure is `401` without detail, logged as a security event with its reason and counted; the service holds no signing key and no static token (`tools/checks/origin`, `D-035`) |
+| Job | a job row is never trusted for being in the table: it carries the envelope the API verified and the hash of its payload, and the worker verifies both again before executing under the job's own window (`job_exp`); a row that fails is `quarantined` with the reason, never run (`D-036`) |
 | Tenant | `organization_id` from the validated request; set on the storage session before any query; never from a header alone |
 | Input | every user-supplied text is `CONFIDENTIAL` data; it is delimited and role-separated in assembly and is never an instruction (`RULE-008 §2`) |
 | Provider | the completion is untrusted: parsed against the schema, scanned for leakage, never executed, never rendered as markup by this service |
@@ -52,10 +53,13 @@ never a degraded answer.
 
 ## 5. Secrets
 
-Provider keys, the service token and the database URL come only from the runtime environment
+Provider keys, the backend's public keys and the database URL come only from the runtime environment
 through the settings object (`RULE-003 §5`); `gitleaks` runs in `make verify-fast`; `pip-audit`
 in `make security`; the image is scanned. A key never appears in a log, an error, a trace or a
-fixture; recorded fixtures are scrubbed on capture (`ARCH-005 §3`).
+fixture; recorded fixtures are scrubbed on capture (`ARCH-005 §3`). The service holds no
+private key and no shared secret with the backend: a leak on this side forges nothing
+(`tools/checks/origin` refuses a signing primitive, a stray cryptography import or a bearer
+in the tree). Key rotation is `docs/06-runbooks/key-rotation.md`.
 
 ## 6. Documents
 

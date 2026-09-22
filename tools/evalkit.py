@@ -49,7 +49,7 @@ from catalyst_ai.platform.clock import SystemClock
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import MemoryStorage, PostgresStorage, Storage, migrate
 from catalyst_ai.providers.gemini import GeminiProvider
-from tools import rules
+from tools import origin, rules
 
 FIXTURES_ROOT = rules.FIXTURES / "providers" / "gemini"
 INERT_DATABASE = "postgresql://eval:eval@localhost/eval"
@@ -108,7 +108,7 @@ def inert_settings(cache_ttl_seconds: int = 0) -> Settings:
     """Build settings that never reach a real provider; a zero cache TTL keeps every case a call."""
     return Settings(
         environment=Environment.DEVELOPMENT,
-        service_tokens=[SecretStr("eval")],
+        auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr(INERT_DATABASE),
         tenant_budget_default_micros_per_day=UNLIMITED_MICROS,
         capability_improve_story=CapabilitySettings(cache_ttl_seconds=cache_ttl_seconds),

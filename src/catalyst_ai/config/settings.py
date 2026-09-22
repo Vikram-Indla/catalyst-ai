@@ -1,14 +1,57 @@
 """Settings: every variable declared with its type, validation, data class and description."""
 
+import base64
+import binascii
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
-from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ENV_PREFIX = "CATALYST_AI_"
-MIN_TOKENS = 1
-MAX_TOKENS = 2
+MIN_KEYS = 1
+MAX_KEYS = 2
+PUBLIC_KEY_BYTES = 32
+MAX_SKEW_S = 60
+MAX_TTL_S = 300
+
+
+@dataclass(frozen=True)
+class PublicKeyEntry:
+    """One configured verification key: its id and its 32 raw bytes."""
+
+    key_id: str
+    raw: bytes
+
+
+def _public_key_entry(entry: str) -> PublicKeyEntry:
+    key_id, separator, encoded = entry.strip().partition(":")
+    if not separator or not key_id or not encoded:
+        message = "a public key entry is kid:base64url"
+        raise ValueError(message)
+    padded = encoded + "=" * (-len(encoded) % 4)
+    try:
+        raw = base64.urlsafe_b64decode(padded.encode("ascii"))
+    except (binascii.Error, UnicodeEncodeError) as error:
+        message = f"public key {key_id} is not base64url"
+        raise ValueError(message) from error
+    if len(raw) != PUBLIC_KEY_BYTES:
+        message = f"public key {key_id} is not {PUBLIC_KEY_BYTES} bytes"
+        raise ValueError(message)
+    return PublicKeyEntry(key_id, raw)
+
+
+def parse_public_keys(text: str) -> list[PublicKeyEntry]:
+    """Parse `kid:base64url[,kid:base64url]` into one or two entries with distinct ids."""
+    entries = [_public_key_entry(entry) for entry in text.split(",") if entry.strip()]
+    if not MIN_KEYS <= len(entries) <= MAX_KEYS:
+        message = f"expected {MIN_KEYS}..{MAX_KEYS} public keys, got {len(entries)}"
+        raise ValueError(message)
+    if len({entry.key_id for entry in entries}) != len(entries):
+        message = "public key ids must be distinct"
+        raise ValueError(message)
+    return entries
 
 
 class Environment(StrEnum):
@@ -60,11 +103,20 @@ class Settings(BaseSettings):
     environment: Annotated[
         Environment, Field(description="PUBLIC · The deployment the process runs in")
     ]
-    service_tokens: Annotated[
-        list[SecretStr],
-        NoDecode,
-        Field(description="RESTRICTED · The bearer tokens the backend presents; two at most"),
+    auth_public_keys: Annotated[
+        str,
+        Field(
+            description="INTERNAL · The backend's Ed25519 public keys, kid:base64url, two at most"
+        ),
     ]
+    auth_clock_skew_seconds: Annotated[
+        int,
+        Field(ge=0, le=MAX_SKEW_S, description="PUBLIC · Tolerated drift between the two clocks"),
+    ] = 5
+    auth_max_ttl_seconds: Annotated[
+        int,
+        Field(gt=0, le=MAX_TTL_S, description="PUBLIC · A request envelope may live this long"),
+    ] = 60
     database_url: Annotated[
         SecretStr,
         Field(description="RESTRICTED · The service's own database; the application role"),
@@ -163,22 +215,10 @@ class Settings(BaseSettings):
         CapabilitySettings, Field(description="PUBLIC · translate: enabled, cache TTL, timeout")
     ] = CapabilitySettings()
 
-    @field_validator("service_tokens", mode="before")
+    @field_validator("auth_public_keys")
     @classmethod
-    def _split_tokens(cls, value: object) -> object:
-        if isinstance(value, str):
-            return value.split(",")
-        return value
-
-    @field_validator("service_tokens")
-    @classmethod
-    def _bounded_tokens(cls, value: list[SecretStr]) -> list[SecretStr]:
-        if not MIN_TOKENS <= len(value) <= MAX_TOKENS:
-            message = f"expected {MIN_TOKENS}..{MAX_TOKENS} service tokens, got {len(value)}"
-            raise ValueError(message)
-        if any(not token.get_secret_value() for token in value):
-            message = "a service token must not be empty"
-            raise ValueError(message)
+    def _well_formed_keys(cls, value: str) -> str:
+        parse_public_keys(value)
         return value
 
     @field_validator("database_url")

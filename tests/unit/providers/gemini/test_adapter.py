@@ -30,6 +30,7 @@ from catalyst_ai.providers.port import (
     Segment,
     StreamFrame,
 )
+from tools import origin
 
 OK_BODY: dict[str, object] = {
     "candidates": [{"content": {"parts": [{"text": '{"a": 1}'}]}, "finishReason": "STOP"}],
@@ -49,7 +50,7 @@ class FrozenClock:
 def _settings() -> Settings:
     return Settings(
         environment=Environment.DEVELOPMENT,
-        service_tokens=[SecretStr("t")],
+        auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr("postgresql://u:p@h/d"),
         provider_gemini_api_key=SecretStr("key"),
     )

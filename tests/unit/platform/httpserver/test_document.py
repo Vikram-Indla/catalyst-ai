@@ -53,4 +53,4 @@ def test_every_error_status_references_the_envelope() -> None:
 
 def test_operation_without_codes_keeps_platform_statuses_only() -> None:
     responses = with_error_responses(_document([]))["paths"]["/v1/x"]["post"]["responses"]
-    assert set(responses) == {"200", "400", "401", "404", "500", "default"}
+    assert set(responses) == {"200", "400", "401", "404", "500", "503", "default"}

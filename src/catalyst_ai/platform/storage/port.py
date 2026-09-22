@@ -75,3 +75,7 @@ class Storage(Protocol):
     async def expired_documents(self, cut: RetentionCut) -> list[str]:
         """Return keys not seen since the cut."""
         ...
+
+    async def remember_nonce(self, nonce: str, expires_at: int, now: int) -> bool:
+        """Record a proof's nonce until it expires; False when it was seen before (a replay)."""
+        ...

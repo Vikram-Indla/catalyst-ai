@@ -22,7 +22,7 @@ sampled model call, and returns a schema-valid result with provenance.
 
 ```
  web app ─┐                                      ┌─ provider A (first: the previous system's)
- mobile ──┼─▶ Go backend ──(OpenAPI, service token)──▶ catalyst-ai ─┼─ provider B (through the same port)
+ mobile ──┼─▶ Go backend ──(OpenAPI, signed envelope)──▶ catalyst-ai ─┼─ provider B (through the same port)
  integr. ─┘        │                                   │            └─ …
                    │                                   ▼
              product database                  the service's own database
@@ -53,7 +53,7 @@ sampled model call, and returns a schema-valid result with provenance.
 | --- | --- |
 | Process | `uvicorn` running the FastAPI app; one process per replica; horizontally scaled behind the platform ingress |
 | Ports | the contract on the API port; `/healthz`, `/readyz`, metrics on the ops port |
-| Authentication | a service token from configuration in `Authorization: Bearer`; verified by middleware before any route; no user identity is trusted from the request — the backend has already decided the user may do this |
+| Authentication | a signed envelope from the backend in `Authorization: Catalyst-Envelope`; verified by middleware before any route; no user identity is trusted from the request — the backend has already decided the user may do this |
 | Tenancy | `organization_id` on every request; every storage query and every cache key carries it (`ARCH-002 §2`) |
 | Short work | synchronous operations with `Idempotency-Key`; per-capability timeout from the budget (`ADR-007`) |
 | Long work | `POST …:jobs` returns `202` with a job id; the backend polls `GET /v1/jobs/{id}`; results expire (`ADR-007`) |

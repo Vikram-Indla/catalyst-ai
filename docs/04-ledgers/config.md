@@ -8,7 +8,9 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | Variable | Type | Required | Default | Validation | Data class | Description |
 | --- | --- | --- | --- | --- | --- | --- |
 | `ENVIRONMENT` | enum | yes | — | `development` \| `staging` \| `production` | PUBLIC | The deployment the process runs in |
-| `SERVICE_TOKENS` | list of secrets | yes | — | one or two non-empty values (rotation) | RESTRICTED | The bearer tokens the backend presents; constant-time compared; never logged |
+| `AUTH_PUBLIC_KEYS` | text | yes | — | one or two `kid:base64url` entries of 32 raw Ed25519 bytes, ids distinct (rotation) | INTERNAL | The backend's public keys the service verifies every envelope with; `catalyst-ai check` refuses to start without one |
+| `AUTH_CLOCK_SKEW_SECONDS` | int | no | `5` | 0..60 | PUBLIC | Drift tolerated between the backend's clock and the service's when the window is checked |
+| `AUTH_MAX_TTL_SECONDS` | int | no | `60` | 1..300 | PUBLIC | A request envelope's `exp - iat` at most; a nonce is remembered until `exp` plus the skew |
 | `DATABASE_URL` | URL | yes | — | `postgres://` or `postgresql://` with a host | RESTRICTED | The service's own database; the application role |
 | `HTTP_ADDR` | host:port | no | `:8090` | `host:port` | PUBLIC | The contract listen address |
 | `OPS_ADDR` | host:port | no | `:9091` | differs from `HTTP_ADDR` | PUBLIC | `/healthz`, `/readyz`, metrics |

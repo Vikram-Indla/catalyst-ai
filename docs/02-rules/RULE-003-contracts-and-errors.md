@@ -2,7 +2,7 @@
 id: RULE-003
 title: Contracts, errors, the port and configuration
 status: Binding
-version: 1.0.0
+version: 1.0.1
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -41,8 +41,9 @@ Elaborates `ARCH-004`.
   `unsupported`), `ai.provider` (`unavailable`, `timeout`, `rejected`, `quota`), `ai.output`
   (`invalid`, `unsafe`), `ai.budget` (`exceeded`), `ai.capability` (`disabled`, `unknown`),
   `ai.contract` (`version_mismatch`), `ai.index` (`unavailable`, `rebuilding`), `ai.job`
-  (`not_found`, `expired`, `failed`), `auth.token` (`invalid`), `validation.invalid_input`,
-  `internal.error`. `docs/04-ledgers/errors.md` is generated from the module.
+  (`not_found`, `expired`, `failed`), `auth.origin` (`invalid`, `unverifiable`),
+  `validation.invalid_input`, `internal.error`. `docs/04-ledgers/errors.md` is generated from
+  the module.
 - The envelope is `{ error: { code, message, details[] }, request_id }` everywhere including
   `401`, `404`, `429` and `500`. `500` carries `internal.error` and nothing else — the detail is
   in the log under the request id. A provider's raw message never reaches the caller.

@@ -7,12 +7,13 @@ from catalyst_ai.config import Environment, Settings
 from catalyst_ai.providers.gemini.aliases import UnknownModelError, resolve
 from catalyst_ai.providers.gemini.models import FLASH, FLASH_LITE
 from catalyst_ai.providers.port import ModelAlias
+from tools import origin
 
 
 def _settings(override: str | None = None) -> Settings:
     return Settings(
         environment=Environment.DEVELOPMENT,
-        service_tokens=[SecretStr("t")],
+        auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr("postgresql://u:p@h/d"),
         model_text_default=override,
     )

@@ -7,7 +7,7 @@ has no `Reviewed` threat model is a finding.
 
 | ID | Family | Status |
 | --- | --- | --- |
-| THREAT-001 | platform — token, storage, jobs, retention | with the scaffold |
+| THREAT-001 | platform — the proof of origin, the replay store, the job gate, the keys | Draft — `THREAT-001-platform.md`, with the origin middleware |
 | THREAT-002 | rewrite | Draft — `THREAT-002-rewrite.md`, with `improve-story` v1 |
 | THREAT-003 | structured generation | Draft — `THREAT-003-structured-generation.md`, with `generate-children` v1 |
 | THREAT-004 | summaries and translation | Draft — `THREAT-004-summaries.md`, with `summarize` and `translate` v1 |

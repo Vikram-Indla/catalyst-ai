@@ -4,11 +4,11 @@ import json
 from typing import Any
 
 import httpx
-from pydantic import SecretStr
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings, Settings
 from catalyst_ai.contract.assistant import TurnResponse
+from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.runtime import RuntimeContext
 from tests.unit.capabilities.assistant.conftest import (
     ITEM_REPLY,
@@ -24,6 +24,7 @@ from tests.unit.capabilities.improve_story.conftest import (
     make_runtime,
     make_settings,
 )
+from tools.origin import SigningAuth
 
 STREAM = "/v1/assistant/turn:stream"
 WHOLE = "/v1/assistant/turn"
@@ -36,13 +37,13 @@ def _client(runtime: RuntimeContext, settings: Settings) -> httpx.AsyncClient:
         transport=transport,
         base_url="http://testserver",
         timeout=30.0,
-        headers={"Authorization": "Bearer test-token"},
+        auth=SigningAuth(capability_of(app), runtime.clock),
     )
 
 
 def _scripted(texts: list[str], **overrides: object) -> tuple[httpx.AsyncClient, ScriptedProvider]:
     provider = ScriptedProvider(texts)
-    settings = make_settings(service_tokens=[SecretStr("test-token")], **overrides)
+    settings = make_settings(**overrides)
     return _client(make_runtime(provider, settings), settings), provider
 
 
@@ -55,7 +56,7 @@ def _events(body: str) -> list[tuple[str, dict[str, Any]]]:
 
 
 async def test_assistant_turn_streams_deltas_citations_usage_and_done() -> None:
-    settings = make_settings(service_tokens=[SecretStr("test-token")])
+    settings = make_settings()
     runtime = await grounded_runtime([ROLLBACK_REPLY])
     client = _client(runtime, settings)
     async with client.stream("POST", STREAM, json=grounded_request().model_dump(mode="json")) as r:

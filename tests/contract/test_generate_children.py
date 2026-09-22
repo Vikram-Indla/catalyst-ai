@@ -4,11 +4,11 @@ from collections.abc import AsyncIterator
 
 import httpx
 import pytest
-from pydantic import SecretStr
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings, Settings
 from catalyst_ai.contract.generate_children import GenerateChildrenResponse
+from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.providers.faults import Fault, FaultTransport
@@ -26,6 +26,7 @@ from tests.unit.capabilities.improve_story.conftest import (
     make_settings,
 )
 from tools import evalkit
+from tools.origin import SigningAuth
 
 FIXTURES = REPO_ROOT / "tests" / "fixtures" / "providers" / "gemini" / "generate-children"
 ORG = "11111111-1111-7111-8111-111111111111"
@@ -51,17 +52,19 @@ def _body(**overrides: object) -> dict[str, object]:
 async def _client(runtime: RuntimeContext, settings: Settings) -> httpx.AsyncClient:
     app = create_app(settings, runtime)
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
-    return httpx.AsyncClient(transport=transport, base_url="http://testserver", timeout=5.0)
+    return httpx.AsyncClient(
+        transport=transport,
+        base_url="http://testserver",
+        timeout=5.0,
+        auth=SigningAuth(capability_of(app), runtime.clock),
+    )
 
 
 @pytest.fixture
-async def recorded(auth: dict[str, str]) -> AsyncIterator[httpx.AsyncClient]:
-    settings = evalkit.inert_settings(cache_ttl_seconds=3600).model_copy(
-        update={"service_tokens": [SecretStr("test-token")]}
-    )
+async def recorded() -> AsyncIterator[httpx.AsyncClient]:
+    settings = evalkit.inert_settings(cache_ttl_seconds=3600)
     runtime = evalkit.runtime_over(RecordedTransport(FIXTURES), settings)
     client = await _client(runtime, settings)
-    client.headers.update(auth)
     yield client
     await client.aclose()
 
@@ -70,7 +73,7 @@ def _scripted(
     texts: list[str], **settings_overrides: object
 ) -> tuple[RuntimeContext, Settings, ScriptedProvider]:
     provider = ScriptedProvider(texts)
-    settings = make_settings(service_tokens=[SecretStr("test-token")], **settings_overrides)
+    settings = make_settings(**settings_overrides)
     return make_runtime(provider, settings), settings, provider
 
 
@@ -122,34 +125,32 @@ async def test_generate_children_run_hierarchy_violation_in_the_request(
     assert big.json()["error"]["code"] == "ai.input.too_large"
 
 
-async def test_generate_children_run_wrong_level_output_is_output_invalid(
-    auth: dict[str, str],
-) -> None:
+async def test_generate_children_run_wrong_level_output_is_output_invalid() -> None:
     runtime, settings, _ = _scripted([candidates_text("a", level="task")])
     client = await _client(runtime, settings)
-    response = await client.post(PATH, json=_body(), headers=auth)
+    response = await client.post(PATH, json=_body())
     assert response.status_code == 502
     assert response.json()["error"]["code"] == "ai.output.invalid"
     assert response.json()["error"]["details"][0]["code"] == "hierarchy_violation"
     runtime, settings, _ = _scripted([candidates_text("See OTHER-9")])
     client = await _client(runtime, settings)
-    unsafe = await client.post(PATH, json=_body(), headers=auth)
+    unsafe = await client.post(PATH, json=_body())
     assert unsafe.json()["error"]["code"] == "ai.output.unsafe"
 
 
-async def test_generate_children_run_switch_version_and_budget(auth: dict[str, str]) -> None:
+async def test_generate_children_run_switch_version_and_budget() -> None:
     runtime, settings, provider = _scripted(
         [candidates_text("a")], capability_generate_children=CapabilitySettings(enabled=False)
     )
     client = await _client(runtime, settings)
-    off = await client.post(PATH, json=_body(), headers=auth)
+    off = await client.post(PATH, json=_body())
     assert off.json()["error"]["code"] == "ai.capability.disabled"
     assert provider.calls == []
     runtime, settings, _ = _scripted([candidates_text("a")], tenant_budget_default_micros_per_day=1)
     client = await _client(runtime, settings)
-    capped = await client.post(PATH, json=_body(), headers=auth)
+    capped = await client.post(PATH, json=_body())
     assert capped.json()["error"]["code"] == "ai.budget.exceeded"
-    version = await client.post(PATH, json=_body(capability_version="2.0.0"), headers=auth)
+    version = await client.post(PATH, json=_body(capability_version="2.0.0"))
     assert version.json()["error"]["code"] == "ai.contract.version_mismatch"
 
 
@@ -163,12 +164,8 @@ async def test_generate_children_run_switch_version_and_budget(auth: dict[str, s
     ],
     ids=["unavailable", "timeout", "quota", "rejected"],
 )
-async def test_generate_children_run_provider_failures(
-    fault: Fault, code: str, auth: dict[str, str]
-) -> None:
-    settings = evalkit.inert_settings().model_copy(
-        update={"service_tokens": [SecretStr("test-token")]}
-    )
+async def test_generate_children_run_provider_failures(fault: Fault, code: str) -> None:
+    settings = evalkit.inert_settings()
     base = evalkit.runtime_over(FaultTransport([fault]), settings)
     client_http = httpx.AsyncClient(transport=FaultTransport([fault]), timeout=1.0)
     provider = GeminiProvider(
@@ -183,7 +180,7 @@ async def test_generate_children_run_provider_failures(
         storage=base.storage,
     )
     client = await _client(runtime, settings)
-    response = await client.post(PATH, json=_body(), headers=auth)
+    response = await client.post(PATH, json=_body())
     assert response.json()["error"]["code"] == code
     assert HIERARCHY[3] == "story"
     assert PARENT.startswith("Members")

@@ -1,4 +1,4 @@
-"""Shared test wiring: inert settings, the app, and an in-process client; no socket ever."""
+"""Shared test wiring: inert settings, the app, a signing in-process client; no socket ever."""
 
 import tempfile
 from collections.abc import AsyncIterator
@@ -13,14 +13,15 @@ from pydantic import SecretStr
 
 from catalyst_ai.app import create_app, default_runtime
 from catalyst_ai.config import Environment, Settings
+from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.storage import MemoryStorage
+from tools import origin
+from tools.origin import SigningAuth
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 set_hypothesis_home_dir(Path(tempfile.gettempdir()) / "catalyst-ai-hypothesis")
 hypothesis_settings.register_profile("repository", database=None)
 hypothesis_settings.load_profile("repository")
-TEST_BEARER = "test-token"
-SECOND_BEARER = "second-token"
 TEST_DATABASE = "postgresql://test:test@localhost:5433/test"
 
 
@@ -28,7 +29,7 @@ TEST_DATABASE = "postgresql://test:test@localhost:5433/test"
 def settings() -> Settings:
     return Settings(
         environment=Environment.DEVELOPMENT,
-        service_tokens=[SecretStr(TEST_BEARER), SecretStr(SECOND_BEARER)],
+        auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr(TEST_DATABASE),
     )
 
@@ -39,11 +40,9 @@ async def client(settings: Settings) -> AsyncIterator[httpx.AsyncClient]:
     app = create_app(settings, replace(runtime, storage=MemoryStorage(runtime.clock)))
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
     async with httpx.AsyncClient(
-        transport=transport, base_url="http://testserver", timeout=5.0
+        transport=transport,
+        base_url="http://testserver",
+        timeout=5.0,
+        auth=SigningAuth(capability_of(app)),
     ) as c:
         yield c
-
-
-@pytest.fixture
-def auth() -> dict[str, str]:
-    return {"Authorization": f"Bearer {TEST_BEARER}"}

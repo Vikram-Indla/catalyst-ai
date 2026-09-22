@@ -26,6 +26,7 @@ from catalyst_ai.providers.port import (
     ModelAlias,
     StreamFrame,
 )
+from tools import origin
 
 ORG = UUID("11111111-1111-7111-8111-111111111111")
 OTHER_ORG = UUID("22222222-2222-7222-8222-222222222222")
@@ -107,7 +108,7 @@ class ScriptedProvider:
 def make_settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
         "environment": Environment.DEVELOPMENT,
-        "service_tokens": [SecretStr("t")],
+        "auth_public_keys": origin.PUBLIC_KEYS,
         "database_url": SecretStr("postgresql://u:p@h/d"),
         "capability_improve_story": CapabilitySettings(),
     }

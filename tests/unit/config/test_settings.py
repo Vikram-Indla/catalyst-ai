@@ -3,8 +3,9 @@
 import pytest
 from pydantic import SecretStr, ValidationError
 
-from catalyst_ai.config import Environment, Settings, load_settings
-from catalyst_ai.config.settings import ENV_PREFIX, LogLevel
+from catalyst_ai.config import Environment, Settings, load_settings, parse_public_keys
+from catalyst_ai.config.settings import ENV_PREFIX, PUBLIC_KEY_BYTES, LogLevel
+from tools import origin
 
 DB = "postgresql://u:p@h/d"
 
@@ -12,7 +13,7 @@ DB = "postgresql://u:p@h/d"
 def _settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
         "environment": Environment.DEVELOPMENT,
-        "service_tokens": [SecretStr("t")],
+        "auth_public_keys": origin.PUBLIC_KEYS,
         "database_url": SecretStr(DB),
     }
     values.update(overrides)
@@ -27,15 +28,37 @@ def test_defaults() -> None:
     assert settings.tenant_concurrency_max == 8
 
 
-def test_tokens_split_from_a_comma_string() -> None:
-    settings = _settings(service_tokens="a,b")
-    assert [t.get_secret_value() for t in settings.service_tokens] == ["a", "b"]
+def test_public_keys_parse_to_bounded_entries() -> None:
+    entries = parse_public_keys(origin.BOTH_PUBLIC_KEYS)
+    assert [entry.key_id for entry in entries] == [origin.KEY_ID, origin.SECOND_KEY_ID]
+    assert all(len(entry.raw) == PUBLIC_KEY_BYTES for entry in entries)
+    assert _settings(auth_public_keys=origin.BOTH_PUBLIC_KEYS).auth_max_ttl_seconds == 60
 
 
-@pytest.mark.parametrize("tokens", ["", "a,b,c", "a,,b"], ids=["none", "three", "empty"])
-def test_tokens_bounded_and_non_empty(tokens: str) -> None:
+@pytest.mark.parametrize(
+    "keys",
+    [
+        "",
+        origin.PUBLIC_KEYS + "," + origin.PUBLIC_KEYS,
+        ",".join([origin.PUBLIC_KEYS, origin.SECOND_SIGNER.public_entry, "k3:" + "A" * 43]),
+        "nocolon",
+        "k1:not*base64",
+        "k1:c2hvcnQ",
+    ],
+    ids=["none", "duplicate id", "three", "no colon", "not base64url", "not 32 bytes"],
+)
+def test_public_keys_refused_when_malformed(keys: str) -> None:
     with pytest.raises(ValidationError):
-        _settings(service_tokens=tokens)
+        _settings(auth_public_keys=keys)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("auth_clock_skew_seconds", 61), ("auth_max_ttl_seconds", 0), ("auth_max_ttl_seconds", 301)],
+)
+def test_origin_tolerances_are_bounded(field: str, value: int) -> None:
+    with pytest.raises(ValidationError):
+        _settings(**{field: value})
 
 
 @pytest.mark.parametrize("url", ["mysql://u:p@h/d", "postgresql://h/d"], ids=["scheme", "no host"])
@@ -76,6 +99,6 @@ def test_extra_variables_refused() -> None:
 
 def test_load_settings_reads_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(f"{ENV_PREFIX}ENVIRONMENT", "staging")
-    monkeypatch.setenv(f"{ENV_PREFIX}SERVICE_TOKENS", "x")
+    monkeypatch.setenv(f"{ENV_PREFIX}AUTH_PUBLIC_KEYS", origin.PUBLIC_KEYS)
     monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_URL", DB)
     assert load_settings().environment is Environment.STAGING

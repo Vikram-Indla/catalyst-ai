@@ -33,7 +33,7 @@ every column; `RESTRICTED` includes names, emails and IPs.
 
 ## Decision
 
-The service is called only by the backend, through the contract, with a service token. It has
+The service is called only by the backend, through the contract, with a signed proof of origin. It has
 no connection to the product database and no copy of its schema. Every request carries
 `organization_id` and every field's data class; `RESTRICTED` has no field in the contract and
 is refused at the door by the scanner. A rule the capability needs (a type list, allowed

@@ -2,11 +2,11 @@
 
 import httpx
 import pytest
-from pydantic import SecretStr
 
 from catalyst_ai.app import create_app
 from catalyst_ai.config import CapabilitySettings, Settings
 from catalyst_ai.contract.search import IndexUpsertResponse, SearchResponse
+from catalyst_ai.platform.auth import capability_of
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import MemoryStorage, StorageUnavailableError
@@ -20,6 +20,7 @@ from tests.unit.capabilities.improve_story.conftest import (
 )
 from tests.unit.capabilities.search.conftest import content_hash
 from tools import evalkit
+from tools.origin import SigningAuth
 
 ORG = "11111111-1111-7111-8111-111111111111"
 OTHER = "22222222-2222-7222-8222-222222222222"
@@ -84,13 +85,13 @@ def _client(runtime: RuntimeContext, settings: Settings) -> httpx.AsyncClient:
         transport=transport,
         base_url="http://testserver",
         timeout=5.0,
-        headers={"Authorization": "Bearer test-token"},
+        auth=SigningAuth(capability_of(app), runtime.clock),
     )
 
 
 def _scripted(**settings_overrides: object) -> tuple[httpx.AsyncClient, ScriptedProvider]:
     provider = ScriptedProvider(["{}"])
-    settings = make_settings(service_tokens=[SecretStr("test-token")], **settings_overrides)
+    settings = make_settings(**settings_overrides)
     return _client(make_runtime(provider, settings), settings), provider
 
 
@@ -195,7 +196,7 @@ class _BrokenStorage(MemoryStorage):
 
 async def test_search_run_reports_an_unavailable_index() -> None:
     provider = ScriptedProvider(["{}"])
-    settings = make_settings(service_tokens=[SecretStr("test-token")])
+    settings = make_settings()
     runtime = make_runtime(provider, settings, _BrokenStorage(FrozenClock()))
     client = _client(runtime, settings)
     response = await client.post(SEARCH, json=_search())
@@ -217,9 +218,7 @@ async def test_search_run_reports_an_unavailable_index() -> None:
     ids=["unavailable", "timeout", "quota", "rejected"],
 )
 async def test_search_run_provider_failures_on_upsert(fault: Fault, code: str) -> None:
-    settings = evalkit.inert_settings().model_copy(
-        update={"service_tokens": [SecretStr("test-token")]}
-    )
+    settings = evalkit.inert_settings()
     base = evalkit.runtime_over(FaultTransport([fault]), settings)
     client_http = httpx.AsyncClient(transport=FaultTransport([fault]), timeout=1.0)
     provider = GeminiProvider(

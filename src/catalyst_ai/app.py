@@ -3,6 +3,7 @@
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from types import MappingProxyType
 from typing import Any
 
 import httpx
@@ -24,7 +25,14 @@ from catalyst_ai.capabilities.unfurl import router as unfurl_router
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.health import LiveResponse, ReadyResponse
-from catalyst_ai.platform.auth import ServiceTokenMiddleware
+from catalyst_ai.platform.auth import (
+    EXEMPT_PATHS,
+    Bounds,
+    KeyRegistry,
+    OriginMiddleware,
+    Verifier,
+    capability_of,
+)
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
 from catalyst_ai.platform.clock import SystemClock
@@ -33,6 +41,7 @@ from catalyst_ai.platform.httpserver import (
     install_error_handlers,
     with_error_responses,
 )
+from catalyst_ai.platform.observability import SecurityCounters
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
@@ -41,12 +50,28 @@ CONTRACT_VERSION = "0.1.0"
 TITLE = "Catalyst One AI service"
 PLATFORM_CAPABILITY = "platform"
 PLATFORM_ERROR_CODES = (
-    ErrorCode.AUTH_INVALID.value,
+    ErrorCode.AUTH_ORIGIN_INVALID.value,
+    ErrorCode.AUTH_ORIGIN_UNVERIFIABLE.value,
     ErrorCode.VALIDATION_INVALID_INPUT.value,
     ErrorCode.INTERNAL_ERROR.value,
 )
 
 STORAGE_COMMAND_TIMEOUT_S = 15.0
+SECURITY_SCHEME = "CatalystEnvelope"
+EXTENSIBLE_ENUM = "x-extensible-enum"
+SECURITY = MappingProxyType(
+    {
+        "type": "http",
+        "scheme": "Catalyst-Envelope",
+        "description": (
+            "Proof of origin, signed by the backend: `<claims>.<signature>` where claims is the "
+            "base64url of a JSON object {iss: backend, aud: catalyst-ai, org, cap, sub, iat, exp "
+            "(at most 60 s after iat), jti, kid, bh (hex SHA-256 of the request body), job_exp?} "
+            "and signature is the base64url of the Ed25519 signature over the ASCII bytes of the "
+            "claims segment, by the private key `kid` names. The service holds public keys only."
+        ),
+    }
+)
 log = logging.getLogger(__name__)
 health = APIRouter(tags=["health"])
 
@@ -103,7 +128,25 @@ def render_openapi(app: FastAPI) -> dict[str, Any]:
         routes=app.routes,
         description="One contract for the Go backend; see ENGINEERING.md.",
     )
-    return with_error_responses(_with_examples(document))
+    return _with_open_catalog(with_error_responses(_with_security(_with_examples(document))))
+
+
+def _with_open_catalog(document: dict[str, Any]) -> dict[str, Any]:
+    """Declare the error catalog as an enum that grows: a new code is additive, never breaking."""
+    schema = document["components"]["schemas"][ErrorCode.__name__]
+    schema[EXTENSIBLE_ENUM] = schema.pop("enum")
+    return document
+
+
+def _with_security(document: dict[str, Any]) -> dict[str, Any]:
+    """Declare the proof of origin every operation needs; the health routes declare none."""
+    document.setdefault("components", {})["securitySchemes"] = {SECURITY_SCHEME: dict(SECURITY)}
+    document["security"] = [{SECURITY_SCHEME: []}]
+    for path, item in document["paths"].items():
+        for operation in item.values():
+            if path in EXEMPT_PATHS:
+                operation["security"] = []
+    return document
 
 
 PROVIDER_CLIENT_TIMEOUT_S = 30.0
@@ -146,12 +189,25 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> FastAPI:
-    """Assemble the app: request ids, the service token, the handlers, the routers, the runtime."""
+    """Assemble the app: request ids, proof of origin, the handlers, the routers, the runtime."""
     app = FastAPI(
         title=TITLE, version=CONTRACT_VERSION, docs_url=None, redoc_url=None, lifespan=_lifespan
     )
-    app.state.runtime = runtime or default_runtime(settings)
-    app.add_middleware(ServiceTokenMiddleware, tokens=settings.service_tokens)
+    context = runtime or default_runtime(settings)
+    app.state.runtime = context
+    app.state.security = SecurityCounters()
+    verifier = Verifier(
+        KeyRegistry.from_config(settings.auth_public_keys),
+        context.storage,
+        Bounds(settings.auth_clock_skew_seconds, settings.auth_max_ttl_seconds),
+    )
+    app.add_middleware(
+        OriginMiddleware,
+        verifier=verifier,
+        counters=app.state.security,
+        clock=context.clock,
+        lookup=capability_of(app),
+    )
     app.add_middleware(RequestIdMiddleware)
     install_error_handlers(app)
     app.include_router(health)

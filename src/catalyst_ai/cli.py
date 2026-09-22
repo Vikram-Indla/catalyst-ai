@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from catalyst_ai.app import create_app, default_runtime, health
 from catalyst_ai.config import Settings, load_settings
+from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
 from catalyst_ai.platform.logging import configure_logging
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
@@ -72,11 +73,12 @@ def check(root: Path, *, load: bool) -> int:
         return EXIT_FAIL
     if load:
         try:
-            load_settings()
-        except ValidationError as error:
+            settings = load_settings()
+            KeyRegistry.from_config(settings.auth_public_keys)
+        except (ValidationError, PublicKeyConfigError) as error:
             print(f"check: settings invalid\n{error}")
             return EXIT_FAIL
-        print("check: settings valid")
+        print("check: settings valid; the backend's public keys load")
     return EXIT_OK
 
 

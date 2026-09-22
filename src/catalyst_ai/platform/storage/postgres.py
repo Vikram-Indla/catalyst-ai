@@ -275,6 +275,18 @@ class PostgresStorage:
             )
         return [str(row["external_id"]) for row in rows]
 
+    async def remember_nonce(self, nonce: str, expires_at: int, now: int) -> bool:
+        """Platform state, no tenant: forget the expired, insert once, refuse the second time."""
+        if self._pool is None:
+            raise StorageUnavailableError(NOT_CONNECTED)
+        try:
+            async with self._pool.acquire() as connection, connection.transaction():
+                await connection.execute(sql("nonce_forget"), now)
+                inserted = await connection.fetchval(sql("nonce_remember"), nonce, expires_at)
+        except (OSError, asyncpg.PostgresError) as error:
+            raise StorageUnavailableError(str(type(error).__name__)) from error
+        return inserted is not None
+
 
 def _hits(rows: Sequence[asyncpg.Record]) -> list[StoredHit]:
     return [

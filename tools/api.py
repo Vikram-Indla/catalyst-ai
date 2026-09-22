@@ -9,9 +9,8 @@ from pydantic import SecretStr
 
 from catalyst_ai.app import create_app, render_openapi
 from catalyst_ai.config import Environment, Settings
-from tools import rules
+from tools import origin, rules
 
-RENDER_BEARER = "render-only"
 RENDER_DATABASE = "postgresql://render:render@localhost/render"
 
 
@@ -19,7 +18,7 @@ def render() -> dict[str, Any]:
     """Build the app with inert settings and render its document."""
     settings = Settings(
         environment=Environment.DEVELOPMENT,
-        service_tokens=[SecretStr(RENDER_BEARER)],
+        auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr(RENDER_DATABASE),
     )
     return render_openapi(create_app(settings))

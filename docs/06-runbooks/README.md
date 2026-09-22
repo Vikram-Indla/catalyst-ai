@@ -12,4 +12,6 @@ line to the capability runbook; a `built` capability without one is a finding (`
 | `index-rebuild.md` | re-embedding a corpus after a model or chunking change; convergence by the retrieval eval | `work_items` (present) |
 | `job-backlog.md` | queue age, stuck jobs, expiry; the per-organisation concurrency dial | the worker |
 | `retention.md` | the retention job, organisation deletion, the zero-rows proof, the database roles | the storage package (present) |
+| `key-rotation.md` | rotating the backend's signing key with two public keys active; the emergency sequence; what to watch | the origin middleware (present) |
+| `quarantine.md` | a job row that failed its proof; a rise in refused origins — reasons, the first three commands, when to page | the origin middleware (present); the worker when the table lands |
 | `capabilities.md` | one line per capability: what to check when quality drops, the switch, what the backend shows | `improve-story` (present) |

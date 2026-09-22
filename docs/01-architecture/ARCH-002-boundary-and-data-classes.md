@@ -14,7 +14,7 @@ The boundary is the product. Everything in this page is an invariant with a fitn
 
 ## 1. One caller, one contract
 
-- The backend is the only caller. Every request carries the service token; there is no user
+- The backend is the only caller. Every request carries its signed proof of origin (`ARCH-009 §1`); there is no user
   session, no cookie, no per-user credential. The backend has already authenticated the user,
   checked the permission, and decided that this capability may run on this input.
 - The contract is `api/openapi.yaml`, generated from the pydantic models in `contract/` and
