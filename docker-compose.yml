@@ -1,6 +1,9 @@
+# `docker compose up` migrates before it serves: `migrate` is a one-shot run of the same image
+# against the same database, and `ai` starts only once it has exited 0. A failed migration keeps
+# the service down rather than serving an empty schema.
 services:
   db:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
     environment:
       POSTGRES_USER: catalyst_ai
       POSTGRES_PASSWORD: catalyst_ai
@@ -14,8 +17,19 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  migrate:
+    build: .
+    image: catalyst-ai:local
+    command: ["migrate"]
+    env_file: .env
+    environment:
+      CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
+    depends_on:
+      db:
+        condition: service_healthy
   ai:
     build: .
+    image: catalyst-ai:local
     env_file: .env
     environment:
       CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
@@ -25,5 +39,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 volumes:
   db: {}
