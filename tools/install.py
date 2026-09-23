@@ -1,10 +1,15 @@
-"""`make tools`: the pinned binaries the gate needs, downloaded once into .tools/bin/<os>-<arch>."""
+"""`make tools`: the pinned binaries the gate needs, from archives whose SHA-256 is pinned.
 
+A binary reaches .tools/bin/<os>-<arch> only by extraction from an archive whose digest matches
+its line in tools/checksums.sha256 (the vendor's own checksum lines, copied when a version moves).
+Nothing on PATH and nothing already in .tools/bin is trusted: the archive is verified and the
+binary extracted again on every run; the verified archive is kept in .tools/archives.
+"""
+
+import hashlib
 import io
 import platform
-import shutil
 import stat
-import subprocess
 import sys
 import tarfile
 import urllib.request
@@ -13,6 +18,8 @@ from pathlib import Path
 
 TOOL_VERSIONS = Path(".tool-versions")
 TOOLS_DIR = Path(".tools") / "bin"
+ARCHIVES = Path(".tools") / "archives"
+CHECKSUMS = Path("tools") / "checksums.sha256"
 GITHUB = "https://github.com"
 RELEASES = {
     "gitleaks": "{g}/gitleaks/gitleaks/releases/download/v{v}/gitleaks_{v}_{os}_{arch}.{ext}",
@@ -69,25 +76,43 @@ def _extract(archive: bytes, name: str, destination: Path) -> None:
     destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
 
 
-def install(tool: str, version: str) -> Path:
-    """Download one pinned release unless the binary already exists."""
-    destination = target_dir() / binary_name(tool)
-    if destination.exists():
-        return destination
-    existing = shutil.which(tool)
-    if existing and version in _version_of(existing):
-        return Path(existing)
-    destination.parent.mkdir(parents=True, exist_ok=True)
+def pinned_digests() -> dict[str, str]:
+    """Return archive name -> SHA-256 from the pin file."""
+    pairs = (
+        line.split() for line in CHECKSUMS.read_text(encoding="utf-8").splitlines() if line.strip()
+    )
+    return {name: digest for digest, name in pairs}
+
+
+def _verified_archive(tool: str, version: str) -> bytes:
     url = _url(tool, version)
+    name = url.rsplit("/", 1)[1]
+    expected = pinned_digests().get(name)
+    if expected is None:
+        message = f"{name} has no pinned checksum in {CHECKSUMS}; add the vendor's line first"
+        raise RuntimeError(message)
+    cached = ARCHIVES / name
+    if cached.exists() and hashlib.sha256(cached.read_bytes()).hexdigest() == expected:
+        return cached.read_bytes()
     print(f"downloading {url}")
     with urllib.request.urlopen(url, timeout=120) as response:  # noqa: S310 — pinned GitHub release URL
-        _extract(response.read(), binary_name(tool), destination)
+        archive: bytes = response.read()
+    actual = hashlib.sha256(archive).hexdigest()
+    if actual != expected:
+        message = f"{name}: sha256 {actual} does not match the pinned {expected}; refused"
+        raise RuntimeError(message)
+    cached.parent.mkdir(parents=True, exist_ok=True)
+    cached.write_bytes(archive)
+    return archive
+
+
+def install(tool: str, version: str) -> Path:
+    """Extract one pinned binary from its verified archive, replacing whatever was there."""
+    archive = _verified_archive(tool, version)
+    destination = target_dir() / binary_name(tool)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    _extract(archive, binary_name(tool), destination)
     return destination
-
-
-def _version_of(executable: str) -> str:
-    completed = subprocess.run([executable, "version"], capture_output=True, text=True, check=False)
-    return completed.stdout + completed.stderr
 
 
 def main() -> int:
