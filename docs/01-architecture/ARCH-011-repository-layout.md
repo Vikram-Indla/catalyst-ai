@@ -2,7 +2,7 @@
 id: ARCH-011
 title: Repository layout
 status: Locked
-version: 1.0.1
+version: 1.0.2
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -46,7 +46,7 @@ catalyst-ai/
 ├── docs/                         00-START-HERE · 01-architecture · 02-rules · 03-adr · 04-ledgers · 05-threat-models · 06-runbooks · 07-GLOSSARY
 ├── brain/                        01-STATUS · 02-DECISIONS · 03-FINDINGS · 04-OPEN-QUESTIONS · sessions/
 ├── .githooks/                    pre-commit (fast gate) · commit-msg (conventional) · pre-push (full gate + make ci)
-├── .github/workflows/ci.yml      checkout · setup · make tools · make hooks · make verify — nothing else
+├── .github/workflows/ci.yml      the only workflow: checkout · setup · make tools · make hooks · make verify; one pinned database service
 ├── Makefile  pyproject.toml  uv.lock  ruff.toml  mypy.ini  pytest.ini  .coveragerc  .importlinter
 ├── Dockerfile  docker-compose.yml  .env.example  .tool-versions
 └── ENGINEERING.md  README.md

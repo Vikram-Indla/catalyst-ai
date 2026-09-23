@@ -1,6 +1,6 @@
 # Invariants registry
 
-The machine vocabulary of the architecture. Every ADR, impact matrix, finding and pull request
+The machine vocabulary of the architecture. Every ADR, impact matrix, finding and commit proposal
 names the invariants it touches by ID instead of describing them; every row names the check that
 keeps it true. `tools/checks/invariants` fails CI when a row's enforcement names a test or check
 that does not exist, and when a test in `tests/architecture/` is not claimed by a row.
@@ -71,3 +71,6 @@ Criticality: **Critical** = a breach is a security, tenancy or data-integrity in
 | INV-058 | Every objective has a metric and an alert, every alert a runbook that exists, and every runbook an alert that points at it (the kill switch excepted, which is a decision and not a failure) | docs | `tools/checks/alerts` (red on its plant) | High | ARCH-010 §5 |
 | INV-059 | Configuration names an alias and never a model id: the register resolves every alias, an alias outside the vocabulary fails at settings load, and no environment can reach a model the register has not priced | config, providers | `tools/checks/models` (no id outside the register), the alias tests (an id or an unknown alias is refused at load) | High | ARCH-005 §2 | D-040 |
 | INV-060 | The ops port serves liveness, readiness and the scrape and nothing else: no proof of origin in front of it (a collector signs nothing), no capability behind it, and its own traffic is counted nowhere | platform/observability | the ops-app tests, including `/metrics` refused on the contract app | High | ARCH-010 §2 | D-039 |
+| INV-061 | A binary tool reaches the gate only by extraction from an archive whose SHA-256 is pinned in `tools/checksums.sha256`: a download that does not match is refused and lands nowhere, a version without a pinned line is refused before any download, and neither a binary on `PATH` nor one already in `.tools/bin` is trusted | build | the unit tests of `tools/install` (`tests/unit/tools`) | High | RULE-006 §3 |
+| INV-062 | A stamp proves only the tree the pipeline ran on: `make ci` notes the tree before the run, and the stamp is written only if the tree at the end is that one; a write with no noted start, or after an edit during the run, stamps nothing | build | the unit tests of `tools/stamp` (`tests/unit/tools`) | High | RULE-005 §1 |
+| INV-063 | The image is pinned by digest in `tools/rules.py`, and every reference names it exactly: the Dockerfile's `FROM` lines, the Makefile's `CI_IMAGE` and the workflow's `container.image`; a tag, or a reference that differs from the pin, is red | build | `tools/checks/images` and its unit tests | High | RULE-005 §1 |

@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.2.0
+version: 1.3.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -11,24 +11,46 @@ created: 2026-09-18
 
 ## §1 Branches, hooks and the push precondition
 
-- Trunk-based. `main` is always deployable. Work happens on a short-lived branch named
-  `<type>/AI-NNN-<slug>`, lives at most three days, and lands by pull request once a remote
-  exists; until then the lead commits to local `main` and the same rules apply. Nobody pushes
-  `main` directly from a working session; force-push, history rewriting of anything pushed, and
-  `--no-verify` are banned.
-- A pull request is one ticket, ≤ 400 changed hand-written lines (the lockfile, the rendered
-  document and recorded fixtures are committed separately and do not count), CI green, reviewed
-  by the lead.
+- Trunk-based, and **there is no pull-request flow** (`D-041`). `main` is always deployable and is
+  the only branch that is ever pushed; `.githooks/pre-push` refuses any other ref. A change reaches
+  `main` one way: a working session prepares it in a private working copy, `make verify` and
+  `make ci` are green on that tree and pasted in the record, and the lead commits it to `main` by
+  hand after an explicit yes (§2) and pushes `main`. The hosted workflow then runs the same job
+  on `main` after the fact: it is evidence that the pushed tree is what the local pipeline
+  proved, never the door a change goes through. A red hosted run is fixed forward on `main`
+  with its own commit. Force-push, history rewriting of anything pushed, and `--no-verify` are
+  banned.
+- A change is one ticket, ≤ 400 changed hand-written lines per commit (the lockfile, the
+  rendered document and recorded fixtures are committed separately and do not count), both
+  gates green, read by the lead before the yes.
 - Conventional Commits: `type(scope): imperative summary`, ≤ 80 characters, `scope` the
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,
   `gen` (rendered document, lockfile, fixtures only). `commit-msg` enforces it.
 - **A push is preceded by a green pipeline run of that tree; the stamp proves the tree.** `make ci`
-  runs the CI job verbatim inside the CI image and, green, writes a stamp keyed by the hash of
-  the working tree and the image digest (`tools/stamp`, in the common git directory). `pre-push`
+  notes the tree before the run (`tools/stamp begin`, in the worktree's own git directory), runs
+  the CI job verbatim inside the CI image and, green, writes a stamp keyed by the hash of the
+  working tree and the image digest (`tools/stamp`, in the common git directory) — only if the
+  tree is still the one noted at the start; a tree edited during the run is not stamped. `pre-push`
   skips the run when the stamp matches the tree being pushed, the image, and is younger than a
   day, printing it; otherwise it runs. The workflow file holds only checkout, setup, `make tools`,
   `make hooks`, `make verify` (`tools/checks/ci`).
+- **One workflow, one door to the database.** `.github/workflows/` holds `ci.yml` and nothing
+  else. Its trigger (a push to `main`), its container, its one service and its env equal what
+  `tools/rules.py` pins, and `tools/checks/ci` reads every file in the directory and all of
+  those keys. The tests reach PostgreSQL the same way in both runs: the pinned `pgvector` image
+  as a service named `postgres`, through `CATALYST_AI_EVAL_DATABASE_URL`. The hosted job declares
+  it under `services:`; `make ci` starts it from the same values on its own network
+  (`tools/ci_postgres`) and removes it afterwards, green or red. No Docker socket is mounted into
+  the pipeline, and a throwaway container is only a local convenience outside it.
+- **One image, pinned by digest, never by tag.** `tools/rules.py` holds the pin. The Dockerfile's
+  `FROM` lines, the Makefile's `CI_IMAGE` and the workflow's `container.image` name it exactly,
+  so the local pipeline and the hosted job run the same bytes and the stamp's image is the one
+  that ran (`tools/checks/images`). The pin moves only in a `build(ci)` commit that changes it and
+  every reference together. `Dockerfile.ci` builds the pipeline's own image on the same base, with
+  the tools the job otherwise installs on every run baked in. Until that image has a registry
+  (`Q-018`), the pipeline runs on the base image with its setup step, and `make ci-image` only
+  builds it locally.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast` (format, lint,
   the ⚡ checks, the eval sets a change can move, gitleaks on the staged tree — iteration, never
@@ -47,7 +69,7 @@ created: 2026-09-18
 
 A working session prepares a change; the lead decides it enters history.
 
-1. The session works on the ticket's branch, never on `main`.
+1. The session works in its own working copy, never in the checkout of `main`.
 2. Before proposing a commit it runs `make verify` and `make ci` and pastes both in the record;
    when a capability was touched, the eval numbers too.
 3. It lists the changed files (a plain list), proposes **one** Conventional Commit line, and
@@ -56,7 +78,7 @@ A working session prepares a change; the lead decides it enters history.
    files and commits with exactly the proposed line. Any other reply is a no.
 5. Generated artefacts — `uv.lock`, `api/openapi.yaml`, recorded fixtures, ledgers — are their
    own commit (`gen(...)`), never mixed with hand-written changes: two proposals, two yeses.
-6. Never pushes `main`, never opens or merges a pull request, never rewrites history.
+6. Never pushes anything and never rewrites history; pushing `main` is the lead's hand alone.
 
 A commit found in history without its green light in a session record is a `RULE-000 §3`
 rejection and is reverted.
@@ -84,14 +106,15 @@ and whether it was accepted, and the next action. A session without a record did
 | Questions | `brain/04-OPEN-QUESTIONS.md` | `Q-NNN` · question · why it blocks · options · the answer becomes a `D-NNN`. Every product question lands here |
 | Status | `brain/01-STATUS.md` | The living state: tickets, what is blocked, what is next. Rewritten, not appended |
 
-## §6 Pull-request risk classes
+## §6 Change risk classes
 
 | Class | Touches | Blast radius | Review requirement |
 | --- | --- | --- | --- |
-| `LOW` | one capability's internals, no contract, no prompt, no threshold | `LOCAL`, `CAPABILITY` | CI green; lead merges |
-| `MEDIUM` | a prompt version, a grader, a new eval case, a chunking parameter, an additive contract field | `CAPABILITY`, `CONTRACT` | CI green; lead reads the eval delta and the changelog |
+| `LOW` | one capability's internals, no contract, no prompt, no threshold | `LOCAL`, `CAPABILITY` | both gates green; lead commits |
+| `MEDIUM` | a prompt version, a grader, a new eval case, a chunking parameter, an additive contract field | `CAPABILITY`, `CONTRACT` | both gates green; lead reads the eval delta and the changelog |
 | `HIGH` | a new capability, a new operation, a model alias change, a platform package, a migration | `CONTRACT`, `PLATFORM` | lead reviews the impact matrix and the `INV-` list line by line; contract evidence pasted |
 | `CRITICAL` | the boundary, tenancy, data classes, the port, retention, a threshold lowered, a budget widened, anything in `RULE-000 §6` | `SYSTEM` | Level-3 process; deployed alone, behind the kill switch |
 
 `tools/checks/prclass` derives the minimum class from the changed paths and the `INV-` rows
-named in the impact matrix, and fails a request that claims a lower one.
+named in the impact matrix, and fails a session record that claims a lower one (the name is
+historical; there are no pull requests).

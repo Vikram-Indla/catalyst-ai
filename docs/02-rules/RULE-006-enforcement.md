@@ -2,7 +2,7 @@
 id: RULE-006
 title: Enforcement — every rule is a check
 status: Binding
-version: 1.3.0
+version: 1.4.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -82,11 +82,12 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Dependencies justified (RULE-001 §5) | every entry in `pyproject.toml` is a register row | `tools/checks/deps` | AI-002 |
 | Python version agrees across `.tool-versions`, `pyproject.toml`, the image (RULE-002 §1) | equal | `catalyst-ai check` | AI-002 |
 | Commit message format (RULE-005 §1) ⚡ | Conventional Commit, ≤ 80 chars | `.githooks/commit-msg` | AI-002 |
-| CI job equals the gate: the workflow holds only checkout, setup, `make tools`, `make hooks`, `make verify` (RULE-005 §1) | zero other steps | `tools/checks/ci` | AI-002 |
+| CI job equals the gate: one workflow file; it holds only checkout, setup, `make tools`, `make hooks`, `make verify`, and its trigger, container, service and env equal the pins `make ci` starts its database from (RULE-005 §1) | zero other files, steps or keys; every value equal | `tools/checks/ci` | AI-002, AI-017 |
+| One image, pinned by digest: the `FROM` lines of `Dockerfile` and `Dockerfile.ci` name `BASE_IMAGE`, the Makefile's `CI_IMAGE` and the workflow's `container.image` name `CI_IMAGE`, both in `tools/rules.py`; `Dockerfile.ci` bakes the `uv` of `.tool-versions` (RULE-005 §1) | every reference equal to the pin; a tag is red | `tools/checks/images` | AI-017 |
 | Push preceded by a green pipeline run of that tree; the stamp proves the tree (RULE-005 §1) | a stamp for this tree and image, younger than a day, else `make ci` green | `.githooks/pre-push` · `tools/stamp` | AI-002, AI-012 |
-| Generated artefacts committed separately (RULE-005 §2) | no commit mixes `uv.lock`, `api/`, fixtures with hand-written files | `tools/checks/commits` (CI, on the PR) | AI-002 |
-| Session record carries the impact matrix, the gate output and the eval numbers (RULE-007) | present for every session that changed code | `tools/checks/sessions` (CI, on the PR) | AI-002 |
-| PR risk class not understated (RULE-005 §6) | claimed ≥ derived | `tools/checks/prclass` | AI-002 |
+| Generated artefacts committed separately (RULE-005 §2) | no commit mixes `uv.lock`, `api/`, fixtures with hand-written files | `tools/checks/commits` (the gate, against `main`) | AI-002 |
+| Session record carries the impact matrix, the gate output and the eval numbers (RULE-007) | present for every session that changed code | `tools/checks/sessions` (the gate, against `main`) | AI-002 |
+| Change risk class not understated (RULE-005 §6) | claimed ≥ derived | `tools/checks/prclass` | AI-002 |
 | Kill switch per capability; deprecations carry replacement and sunset; nothing survives its sunset (RULE-009) | zero missing; zero overdue | `tools/checks/capabilities`, `tools/checks/deprecations` | AI-002 |
 | Invariants registry: every row names an existing check; every architecture test is claimed (RULE-000 §6) | zero orphans | `tools/checks/invariants` | AI-002 |
 | Every check fails on its planted violation (§1) | all plants red | `tools/checks/selftest` | AI-002 |
@@ -94,7 +95,8 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 ## §3 Commands
 
 ```
-make tools        uv sync --frozen (dev group) · gitleaks and oasdiff pinned in .tool-versions into .tools/bin
+make tools        uv sync --frozen (dev group) · gitleaks and oasdiff pinned in .tool-versions, each archive's
+                  SHA-256 in tools/checksums.sha256; verified on every run, extracted into .tools/bin
 make hooks        git config core.hooksPath .githooks
 make fmt          ruff format
 make lint         ruff format --check · ruff check · mypy --strict · import-linter · every tools/checks module but coverage
@@ -110,17 +112,24 @@ make evals-affected   the sets a change since main can move (tools/affected) —
 make security     pip-audit on the exported lock · gitleaks · licences
 make selftest     every check red on its plant, one line per check
 make verify       lint · api-check · ledgers-check · test · coverage-check · storage · evals · security · selftest   (= CI)
-make ci           the workflow's run steps verbatim, inside the CI image; green, it stamps the tree   (= pre-push)
+make ci           notes the tree · starts the pinned database as the workflow declares it · the workflow's run steps verbatim, inside the CI image · removes the database · green and the tree unchanged, it stamps it   (= pre-push)
 make ci-cold      the same with the image's cache volumes dropped first (the cold number of the record)
 make stamp-check  whether this tree, in this image, has a green run younger than a day (what pre-push asks)
+make ci-image     build Dockerfile.ci (the pinned base with make, git, curl and uv baked in) and print its local id;
+                  nothing is pushed, and the pipeline does not use it until the image has a registry (Q-018)
 make verify-fast  lint-fast · evals-affected · gitleaks on the staged tree                          (= pre-commit)
 make image        build the runtime image · make image-scan: trivy on it (release candidate)
 make check        catalyst-ai check: toolchain agreement and settings
 make record · make new-capability   built with the first adapter and the golden capability
 make serve · make worker · make migrate
+docker compose up the pinned database healthy → `migrate` (one-shot, the runtime image, which
+                  carries db/migrations) exits 0 → `ai` serves; a failed migration keeps `ai` down
 ```
 
 Toolchain versions are pinned in `.tool-versions` and `uv.lock`; upgrading one is its own change.
+A binary tool reaches the gate only from an archive whose SHA-256 matches its line in
+`tools/checksums.sha256` — the vendor's published checksum line, copied in the same change that
+moves the version; nothing found on `PATH` and nothing already in `.tools/bin` is trusted (INV-061).
 `make ci` keeps uv's cache, the project environment and the ruff, mypy and hypothesis caches in
 named volumes (`catalyst-ai-ci-*`), apart from the host's own caches so the two never share a
 file; pytest's cache stays off in the gate (`pytest.ini`) and on only in `make test-fast`.
