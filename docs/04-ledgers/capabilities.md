@@ -121,7 +121,7 @@ named. The `_shared/*` helpers are retired ideas, not functions, and sit in the 
 | Alias | Used by | First resolution (`providers.md`) |
 | --- | --- | --- |
 | `text-default` | every rewrite, generation, summary and grounded capability | the provider and model the previous system was tuned on |
-| `text-fast` | `translate` (built), `suggest-children`, `interpret-query` | the provider's lighter model of the same family |
-| `text-long` | nothing yet (`documents.generate`, `post-mortem` and the digest mode measured on `text-default` first; forty sources of 20 000 characters fit) | the same provider's long-context model |
+| `text-fast` | `translate` (built), `suggest-children`, `interpret-query` | the provider's lighter model of the same family; since 2026-09-23 the same model as `text-default`, because no lighter stable model answers this key |
+| `text-long` | nothing (`documents.generate`, `post-mortem` and the digest mode run on `text-default`; forty sources of 20 000 characters fit) | **unavailable** since 2026-09-23 (`D-043`): no stable long-context model is reachable |
 | `embed-default` | every corpus (`work_items` built: 768 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, unit length) | the first provider's embedding model — measured on the `search` set before the previous system's second-provider embeddings are considered |
 | `grader-default` | model-graded rubrics (`RULE-008 §4`) | `text-default` |

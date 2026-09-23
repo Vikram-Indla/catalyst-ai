@@ -21,3 +21,30 @@ falls between two rows without a `D-NNN` in the record column fails `tools/check
 | `unfurl` | 1 | 6 (1 / 0; 2 items, 2 pages, 1 title only, 1 injected) | 1 | `text-default` | schema_valid 1.0 · facts_carried 1.0 · status_kept 1.0 · no_forbidden_content 1.0 · overall 1.0 | 1.000 (authored fixtures — the first sentence and the lifted status, date and count: the carried-facts rule and the graders) | 4 | 30 | 2026-09-23 | `012-assistant` |
 | `search` | 1 | 146 (8 / 0; 6 tenancy, 8 paraphrase, 4 filter) | 0 (no prompt) | `embed-default` | recall_at_10 0.85 · mrr 0.70 · tenant_isolation 1.0 · provenance_present 1.0 · kinds_respected 1.0 · injection_inert 1.0 · overall 0.90 | recall@10 0.914 · MRR 0.787 · isolation, provenance, filters, inertness 1.000 · overall 0.950 (authored fixtures: a hashed bag of stems — the pipeline, the HNSW index under a tenant filter, the fusion, tenancy and the graders; not the live model; the misses are template-heavy story→bug pairs and paraphrases) | 67 (real PostgreSQL in a container) | 14 | 2026-09-20 | `brain/sessions/2026-09/005-retrieval.md` |
 | `generate-children` | 1 | 139 (12 / 6) | 1 | `text-default` | level_correct 1.0 · duplicates_marked 1.0 · no_duplicate_candidates 1.0 · criteria_present 0.95 · bounds_and_reason 0.95 · language_preserved 1.0 · identifiers_kept 1.0 · no_forbidden_content 1.0 · overall 0.97 | 1.000 on every grader (authored fixtures — the pipeline, the hierarchy validator, de-duplication, scanners and graders; not the live model) | 11 (pipeline overhead) | 1 395 | 2026-09-18 | `brain/sessions/2026-09/004-generate-children.md` |
+
+## 2026-09-23 — every text set re-run after the register moved (`023-the-register-moves`)
+
+`text-default` and `text-fast` now resolve to `gemini-3.6-flash` with thinking `minimal`. Every
+fixture is keyed by its request, and the request names the model and the thinking setting, so
+every text set's authored fixtures were re-generated before the run. The numbers measure the
+pipeline, the scanners, the graders and the new price against the authored stand-in, never the
+new model's judgement. The grader row had not moved (no set grades with a model), so nothing
+here is re-baselined. Floors and thresholds are unchanged.
+
+| Capability | Cases | Overall | p95 cost (µ$) at 750 / 3 750 | Budget (µ$) |
+| --- | --- | --- | --- | --- |
+| `assistant` | 83 | 1.000 | 415 | 6 000 |
+| `documents` (ask) | 92 | 1.000 | 654 | 8 000 |
+| `documents` (generate) | 42 | 1.000 | 2 057 | 8 000 |
+| `documents` (ingest) | 19 | 1.000 | 8 (embedding row, unchanged) | 8 000 |
+| `generate-children` | 139 | 1.000 | 2 180 | 6 000 |
+| `generate-tests` | 89 | 1.000 | 4 120 | 8 000 |
+| `improve-story` | 52 | 1.000 | 748 | 2 000 |
+| `post-mortem` | 45 | 1.000 | 2 733 | 8 000 |
+| `propose-workflow` | 46 | 1.000 | 2 208 | 6 000 |
+| `release-notes` | 90 | 1.000 | 2 893 | 6 000 |
+| `search` | 146 | 0.950 | 14 (embedding row, unchanged) | 400 |
+| `summarize` | 246 | 1.000 | 1 717 | 4 000 |
+| `translate` | 94 | 1.000 | 419 | 2 000 |
+| `unfurl` | 6 | 1.000 | 293 | 1 000 |
+

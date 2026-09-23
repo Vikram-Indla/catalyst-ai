@@ -10,19 +10,19 @@ this table fails `tools/checks/models`; a row without a retention setting fails 
 
 | Alias | Provider | Concrete model id | Context (tokens) | Price (input / output, µ$ per 1k) | Retention setting | Measured on | Date |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `text-default` | `gemini` | `gemini-2.5-flash` | 1 048 576 | 300 / 2 500 | paid tier of the Gemini API: prompts and completions are not used to train models; no per-call flag exists — the tier is the setting (`providers/gemini/models.py` `RETENTION`) | `improve-story` v1 (authored fixtures) | 2026-09-18 |
-| `text-fast` | `gemini` | `gemini-2.5-flash-lite` | 1 048 576 | 100 / 400 | same | — | — |
-| `text-long` | `gemini` | `gemini-2.5-pro` | 1 048 576 | 1 250 / 10 000 | same | — | — |
-| `embed-default` | `gemini` | `gemini-embedding-001` | 2 048 | 150 / 0 (tokens estimated by characters: the batch endpoint reports no usage) | same | `search` v1 (authored fixtures); 768 of the 3 072 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, vectors normalised by the adapter | 2026-09-20 |
-| `grader-default` | = `text-default` | `gemini-2.5-flash` | | | same | — | — |
+| `text-default` | `gemini` | `gemini-3.6-flash` (stable), thinking `minimal` | 1 048 576 in / 65 536 out | 750 / 3 750 until 2026-12-31; 1 500 / 7 500 from 2027-01-01 — [https://ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing), read twice on 2026-09-23; thinking tokens are billed as output | **free tier** of the Gemini API: the provider may use prompts and completions to improve its products, so only authored inputs reach this key; the paid tier does not (`providers/gemini/models.py` `RETENTION`) | every text set, authored fixtures re-generated for this row (`023-the-register-moves`) | 2026-09-23 |
+| `text-fast` | `gemini` | = `text-default` | | | same | — | 2026-09-23 |
+| `text-long` | — | **unavailable** (`D-043`): no stable long-context model is reachable from this key; the provider offers only a preview, and a preview is never a row. Selecting it fails at settings load | | | | — | 2026-09-23 |
+| `embed-default` | `gemini` | `gemini-embedding-001` | 2 048 | 150 / 0 (tokens estimated by characters: the batch endpoint reports no usage) | same | `search` v1 (authored fixtures); 768 of the 3 072 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, vectors normalised by the adapter. Unchanged by the 2026-09-23 move: it still answers, and every stored vector depends on it | 2026-09-20 |
+| `grader-default` | `gemini` | `gemini-2.5-flash` until its own change moves it; no set grades with a model today (every grader is code) | | | same | — | — |
+
+**Availability, 2026-09-23 (`F-034`, closed).** The 2.5 text rows refuse a key created now. Eight rounds of one-line calls (15:19–16:40 UTC) found one stable 3.x text model that answers: `gemini-3.6-flash`, 7 of 8. `gemini-3.1-flash-lite` and `gemini-3.5-flash-lite` answered `503` or timed out on every call, `gemini-3.7-flash` and `gemini-3.8-flash` `503` every time, and the only long-context model is a preview (`429`: no free tier). So both text rows resolve to `gemini-3.6-flash` and `text-long` is unavailable (`D-043`). The free tier caps this model at 20 requests a day for the project.
 
 ## Providers
 
 | Provider | Adapter | Transport | SDK row (`ADR-003 §3`) | No-retention option | Status |
 | --- | --- | --- | --- | --- | --- |
-| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent` and `:batchEmbedContents` (≤ 100 texts per call), key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; verified at the first live recording | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
-
-**Availability, 2026-09-26 (`F-034`).** A key created now is refused by all three text rows with `404 "no longer available to new users"`; the provider points at its 3.x generation. `gemini-embedding-001` still serves. The rows below are therefore what this service is *written and priced* against, not what a new key can reach: the first live recording waits on a project that predates the cutoff, or on a model migration with its own prices and re-measured budgets. Nothing here is edited on the strength of an error message.
+| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent` and `:batchEmbedContents` (≤ 100 texts per call), key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; this service's key is on the free tier, so only authored inputs reach it | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
 
 The previous system also used OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), two Anthropic
 models and Groq through its gateways. None is a row here; each would be a second adapter under
