@@ -48,6 +48,7 @@ CHECKS = (
     "deps",
     "licenses",
     "ci",
+    "images",
     "commits",
     "sessions",
     "prclass",

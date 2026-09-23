@@ -16,6 +16,7 @@ from tools.checks import (
     evals,
     flags,
     gate,
+    images,
     invariants,
     journeys,
     licenses,
@@ -55,6 +56,7 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     "deps": lambda: deps.check({"leftpad"}, set()),
     "licenses": lambda: licenses.check([("evil", "AGPL-3.0")]),
     "ci": lambda: ci.check("      - run: echo hi\n", "w"),
+    "images": lambda: images.check("FROM python:3.12\n", "CI_IMAGE := python:3.12\n", ""),
     "commits": lambda: commits.check(
         [Commit("abc123def456", "x", ("uv.lock", "src/catalyst_ai/x.py"))]
     ),

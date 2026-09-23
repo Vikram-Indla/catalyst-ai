@@ -202,6 +202,35 @@ COVERAGE_EXCLUDED = ("src/catalyst_ai/app.py", "src/catalyst_ai/cli.py")
 GENERATED_PATHS = ("uv.lock", "api/openapi.yaml", "tests/fixtures/providers/")
 GENERATED_LEDGERS = ("capabilities.md", "errors.md", "config.md", "providers.md", "eval-sets.md")
 
+DOCKERFILE = Path("Dockerfile")
+MAKEFILE = Path("Makefile")
+DOCKERFILE_CI = Path("Dockerfile.ci")
+BASE_IMAGE = (
+    "python:3.12.14-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9"
+)
+CI_IMAGE = BASE_IMAGE
+
+WORKFLOWS = WORKFLOW.parent
+CI_JOB = "verify"
+CI_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
+CI_DATABASE_IMAGE = (
+    "pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f"
+)
+CI_DATABASE_ALIAS = "postgres"
+CI_DATABASE_ENV = {
+    "POSTGRES_USER": "catalyst_ai",
+    "POSTGRES_PASSWORD": "catalyst_ai",
+    "POSTGRES_DB": "catalyst_ai",
+}
+CI_DATABASE_OPTIONS = (
+    '--health-cmd "pg_isready -U catalyst_ai" --health-interval 5s --health-timeout 5s'
+    " --health-retries 10"
+)
+CI_JOB_ENV = {
+    "CATALYST_AI_EVAL_DATABASE_URL": "postgresql://catalyst_ai:catalyst_ai@postgres:5432/catalyst_ai"
+}
+CI_NETWORK = "catalyst-ai-ci"
+
 CI_ALLOWED_USES = ("actions/checkout@v4",)
 CI_SETUP = (
     "apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates"
