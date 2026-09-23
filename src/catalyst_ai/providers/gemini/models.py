@@ -47,16 +47,13 @@ def billed_output_tokens(usage_meta: dict[str, object]) -> int:
 
 FLASH = ModelSpec("gemini-3.6-flash", 750, 3_750, 1_048_576, thinking_level="minimal")
 EMBEDDING = ModelSpec("gemini-embedding-001", 150, 0, 2_048)
-GRADER_BEFORE_MIGRATION = ModelSpec("gemini-2.5-flash", 300, 2_500, 1_048_576)
 
 REGISTER = MappingProxyType(
     {
         ModelAlias.TEXT_DEFAULT: FLASH,
         ModelAlias.TEXT_FAST: FLASH,
         ModelAlias.EMBED_DEFAULT: EMBEDDING,
-        ModelAlias.GRADER_DEFAULT: GRADER_BEFORE_MIGRATION,
+        ModelAlias.GRADER_DEFAULT: FLASH,
     }
 )
-KNOWN_IDS = MappingProxyType(
-    {spec.model_id: spec for spec in (FLASH, EMBEDDING, GRADER_BEFORE_MIGRATION)}
-)
+KNOWN_IDS = MappingProxyType({spec.model_id: spec for spec in (FLASH, EMBEDDING)})

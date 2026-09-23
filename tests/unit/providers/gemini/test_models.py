@@ -25,6 +25,10 @@ def test_both_text_rows_are_the_one_reachable_model_and_it_does_not_think() -> N
     assert FLASH.context_tokens == 1_048_576
 
 
+def test_the_grader_is_the_text_row_it_measures_against() -> None:
+    assert REGISTER[ModelAlias.GRADER_DEFAULT] is FLASH
+
+
 def test_the_index_keeps_its_model() -> None:
     assert REGISTER[ModelAlias.EMBED_DEFAULT] is EMBEDDING
     assert EMBEDDING.thinking_level is None
