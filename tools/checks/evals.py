@@ -1,4 +1,8 @@
-"""ADR-005, RULE-008 §3: sets carry injection cases; a threshold never falls without a decision."""
+"""ADR-005, RULE-008 §3: sets carry injection cases; a threshold never loosens without a decision.
+
+A score is a floor, so loosening it is a fall. A latency or cost budget is a ceiling, so
+loosening it is a rise, and tightening it (a lower number) needs no decision.
+"""
 
 import json
 import re
@@ -11,6 +15,7 @@ from tools.checks.gitinfo import MAIN, git_output
 THRESHOLD = re.compile(r"^(?P<key>[a-z0-9_]+):\s*(?P<value>[0-9.]+)\s*$", re.M)
 DECISION = re.compile(r"\bD-\d{3}\b")
 INJECTION_TAG = "injection"
+CEILINGS = frozenset({"p95_latency_ms", "p95_cost_micros"})
 
 
 def thresholds(text: str) -> dict[str, float]:
@@ -18,11 +23,15 @@ def thresholds(text: str) -> dict[str, float]:
     return {m.group("key"): float(m.group("value")) for m in THRESHOLD.finditer(text)}
 
 
-def lowered(previous: dict[str, float], current: dict[str, float], current_text: str) -> list[str]:
-    """Keys whose floor fell without a D-NNN reference in the file."""
+def loosened(previous: dict[str, float], current: dict[str, float], current_text: str) -> list[str]:
+    """Keys whose floor fell or whose ceiling rose, without a D-NNN reference in the file."""
     if DECISION.search(current_text):
         return []
-    return [key for key, value in current.items() if key in previous and value < previous[key]]
+    return [
+        key
+        for key, value in current.items()
+        if key in previous and (value > previous[key] if key in CEILINGS else value < previous[key])
+    ]
 
 
 def _tagged(case: dict[str, object]) -> bool:
@@ -57,12 +66,12 @@ def run(root: Path) -> list[Violation]:
             previous_text = (
                 git_output(root, "show", f"{MAIN}:{relative(threshold_file, root)}") or ""
             )
-            for key in lowered(thresholds(previous_text), thresholds(current_text), current_text):
+            for key in loosened(thresholds(previous_text), thresholds(current_text), current_text):
                 violations.append(
                     Violation(
                         relative(threshold_file, root),
                         1,
-                        f"threshold {key} lowered without a D-NNN",
+                        f"threshold {key} loosened without a D-NNN",
                     )
                 )
     return violations

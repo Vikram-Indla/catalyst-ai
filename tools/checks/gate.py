@@ -26,6 +26,7 @@ CHECKS = (
     "origin",
     "vocabulary",
     "alerts",
+    "latency",
     "classification",
     "routes",
     "contract",

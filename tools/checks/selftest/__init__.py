@@ -19,6 +19,7 @@ from tools.checks import (
     images,
     invariants,
     journeys,
+    latency,
     licenses,
     openapi,
     prclass,
@@ -45,6 +46,20 @@ BAD_ALERTS = {
         }
     ]
 }
+BAD_LATENCY = {
+    "groups": [
+        {
+            "rules": [
+                {
+                    "alert": "OneForAll",
+                    "expr": "histogram_quantile(0.95, rate("
+                    + latency.REQUEST_SERIES
+                    + '{operation=~".*"}[1h])) > 8',
+                }
+            ]
+        }
+    ]
+}
 BAD_REGISTRY = "| INV-001 | x | o | `tools/checks/nope` | C | S |"
 
 VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
@@ -66,7 +81,7 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     ),
     "invariants": lambda: invariants.check(BAD_REGISTRY, set(), set(), "w"),
     "evals": lambda: (
-        [Violation("w", 1, k) for k in evals.lowered({"a": 0.8}, {"a": 0.7}, "a: 0.7")]
+        [Violation("w", 1, k) for k in evals.loosened({"a": 0.8}, {"a": 0.7}, "a: 0.7")]
         + evals.set_violations([], "w")
     ),
     "budgets": lambda: budgets.check({"p95_latency_ms": 100}, {"p95_latency_ms": 200.0}, "w"),
@@ -79,6 +94,13 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     "alerts": lambda: (
         alerts.alert_violations(BAD_ALERTS, {"capabilities.md"}, "w")
         + alerts.coverage_violations(BAD_ALERTS, "", {"orphan.md"})
+        + alerts.about_violations(BAD_ALERTS, {"nope.md": "# A page about something else"})
+    ),
+    "latency": lambda: latency.check(
+        {"improve_story.run": 4000},
+        latency.latency_rules(BAD_LATENCY, latency.REQUEST_SERIES, "operation"),
+        {8.0},
+        "w",
     ),
     "vocabulary": lambda: vocabulary.check_lines(
         ["decided under " + "CA" + "T-0" + "07" + " by " + "il" + "ya-go"], "w"

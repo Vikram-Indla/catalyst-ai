@@ -67,3 +67,13 @@ async def test_a_database_that_does_not_answer_leaves_the_gauges_out() -> None:
         response = await client.get("/metrics")
     assert response.status_code == 200
     assert "catalyst_ai_jobs" not in response.text
+
+
+async def test_a_depth_read_before_an_outage_does_not_survive_the_failed_read() -> None:
+    metrics = Metrics()
+    store = MemoryJobStore()
+    await store.create_job(_row())
+    await read_gauges(metrics, store)
+    assert 'catalyst_ai_jobs{state="queued"} 1' in metrics.render()
+    await read_gauges(metrics, _DownStore())
+    assert "catalyst_ai_jobs" not in metrics.render()

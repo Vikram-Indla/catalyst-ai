@@ -1,7 +1,8 @@
 # Alerting rules over the metrics the ops port exposes (docs/04-ledgers/slos.md).
 # Prometheus rule format: the one an OpenTelemetry collector, Prometheus, Mimir or Grafana Cloud
 # all read without translation. Every rule names its runbook; tools/checks/alerts refuses a rule
-# whose runbook does not exist and a runbook no rule names.
+# whose runbook does not exist or carries no heading naming the alert, and tools/checks/latency
+# refuses a latency rule whose threshold is not the declared budget of what it selects.
 groups:
   - name: catalyst-ai-capabilities
     interval: 30s
@@ -21,21 +22,91 @@ groups:
           histogram_quantile(
             0.95,
             sum by (operation, le) (
-              rate(catalyst_ai_http_request_duration_seconds_bucket{operation!~"search.*|jobs.*"}[1h])
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(improve_story|unfurl)[.].*"}[1h])
+            )
+          ) > 4
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 4 s budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"translate[.].*"}[1h])
+            )
+          ) > 6
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 6 s budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(generate_children|summarize)[.].*"}[1h])
             )
           ) > 8
         for: 15m
         labels:
           severity: ticket
         annotations:
-          summary: "{{ $labels.operation }} p95 is over its 8 s generation budget"
+          summary: "{{ $labels.operation }} p95 is over its 8 s budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(propose_workflow|release_notes)[.].*"}[1h])
+            )
+          ) > 10
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 10 s budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(assistant|generate_tests|post_mortem)[.].*"}[1h])
+            )
+          ) > 12
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 12 s budget"
+          runbook: docs/06-runbooks/capabilities.md
+      - alert: CapabilityLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (operation, le) (
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"documents[.](ask|generate|ingest)"}[1h])
+            )
+          ) > 15
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.operation }} p95 is over its 15 s budget"
           runbook: docs/06-runbooks/capabilities.md
       - alert: RetrievalLatencyHigh
         expr: |
           histogram_quantile(
             0.95,
             sum by (operation, le) (
-              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"search.*"}[1h])
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(search|index)[.].*"}[1h])
             )
           ) > 0.8
         for: 15m
@@ -85,28 +156,111 @@ groups:
           histogram_quantile(
             0.95,
             sum by (capability, le) (
-              rate(catalyst_ai_provider_call_duration_seconds_bucket[1h])
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"improve-story|unfurl"}[1h])
+            )
+          ) > 4
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 4 s budget"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"translate"}[1h])
+            )
+          ) > 6
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 6 s budget"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"generate-children|summarize"}[1h])
             )
           ) > 8
         for: 15m
         labels:
           severity: ticket
         annotations:
-          summary: "{{ $labels.capability }} waits too long on the provider"
+          summary: "{{ $labels.capability }} waits on the provider past its 8 s budget"
           runbook: docs/06-runbooks/provider-outage.md
-
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"propose-workflow|release-notes"}[1h])
+            )
+          ) > 10
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 10 s budget"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"assistant|generate-tests|post-mortem"}[1h])
+            )
+          ) > 12
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 12 s budget"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"documents"}[1h])
+            )
+          ) > 15
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 15 s budget"
+          runbook: docs/06-runbooks/provider-outage.md
+      - alert: ProviderLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (capability, le) (
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"search"}[1h])
+            )
+          ) > 0.8
+        for: 15m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $labels.capability }} waits on the provider past its 800 ms budget"
+          runbook: docs/06-runbooks/provider-outage.md
   - name: catalyst-ai-tenants
     interval: 1m
     rules:
       - alert: TenantBudgetExhausted
-        expr: sum(rate(catalyst_ai_errors_total{code="ai.budget.exceeded"}[1h])) > 0.01
+        expr: sum by (organization, capability) (rate(catalyst_ai_budget_refused_total[1h])) > 0.01
         for: 15m
         labels:
           severity: ticket
         annotations:
           summary: >-
-            budget refusals are steady; the tenant is not in this series — read
-            sum by (organization) (increase(catalyst_ai_provider_cost_micros_total[1d]))
+            organisation {{ $labels.organization }} is refused on its daily budget
+            for {{ $labels.capability }}
           runbook: docs/06-runbooks/budget-exhaustion.md
 
   - name: catalyst-ai-jobs
@@ -159,7 +313,7 @@ groups:
           severity: page
         annotations:
           summary: "the retrieval index is not answering"
-          runbook: docs/06-runbooks/index-rebuild.md
+          runbook: docs/06-runbooks/index-unavailable.md
       - alert: OriginUnverifiable
         expr: sum(rate(catalyst_ai_errors_total{code="auth.origin.unverifiable"}[15m])) > 0
         for: 5m

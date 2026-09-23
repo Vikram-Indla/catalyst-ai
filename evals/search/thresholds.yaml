@@ -5,5 +5,5 @@ provenance_present: 1.0
 kinds_respected: 1.0
 injection_inert: 1.0
 overall: 0.90
-p95_latency_ms: 2000
+p95_latency_ms: 800
 p95_cost_micros: 400

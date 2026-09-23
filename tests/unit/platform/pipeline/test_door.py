@@ -64,3 +64,20 @@ def test_admit_refuses_over_the_cap() -> None:
     with pytest.raises(Error) as caught:
         admit(_door(), runtime)
     assert caught.value.code is ErrorCode.BUDGET_EXCEEDED
+
+
+def test_a_refusal_on_the_cap_is_counted_under_the_organisation_and_the_capability() -> None:
+    runtime = make_runtime(
+        ScriptedProvider([GOOD_TEXT]), make_settings(tenant_budget_default_micros_per_day=1)
+    )
+    door = _door()
+    with pytest.raises(Error):
+        admit(door, runtime)
+    series = f'capability="x",organization="{door.organization_id.hex}"'
+    assert f"catalyst_ai_budget_refused_total{{{series}}} 1" in runtime.metrics.render()
+
+
+def test_an_admitted_call_counts_no_refusal() -> None:
+    runtime = make_runtime(ScriptedProvider([GOOD_TEXT]))
+    admit(_door(), runtime)
+    assert "budget_refused" not in runtime.metrics.render()

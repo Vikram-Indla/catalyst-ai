@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 import uvicorn
+from fastapi import FastAPI
 from pydantic import ValidationError
 
 from catalyst_ai.app import create_app, create_ops_app, default_runtime, job_runners
@@ -18,6 +19,7 @@ from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
 from catalyst_ai.platform.jobs import Worker
 from catalyst_ai.platform.logging import configure_logging
 from catalyst_ai.platform.observability import SecurityCounters
+from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
@@ -141,6 +143,20 @@ def _install_stop(stop: asyncio.Event) -> None:
             signal.signal(number, lambda *_: stop.set())
 
 
+def assemble_worker(settings: Settings, runtime: RuntimeContext) -> tuple[FastAPI, Worker]:
+    """Build the worker and the ops port on one registry, so what it counts a scrape shows."""
+    ops = create_ops_app(settings, runtime)
+    worker = Worker(
+        runtime,
+        runtime.jobs,
+        job_runners(),
+        KeyRegistry.from_config(settings.auth_public_keys),
+        SecurityCounters(ops.state.metrics),
+    )
+    ops.state.worker = worker
+    return ops, worker
+
+
 async def _worker(settings: Settings) -> int:
     """Run the worker: claim, verify the stored proof, execute; drain on SIGTERM."""
     runtime = default_runtime(settings)
@@ -148,15 +164,7 @@ async def _worker(settings: Settings) -> int:
     if not isinstance(storage, PostgresStorage):
         return EXIT_FAIL
     await storage.connect()
-    ops = create_ops_app(settings, runtime)
-    worker = Worker(
-        runtime,
-        runtime.jobs,
-        job_runners(),
-        KeyRegistry.from_config(settings.auth_public_keys),
-        SecurityCounters(runtime.metrics),
-    )
-    ops.state.worker = worker
+    ops, worker = assemble_worker(settings, runtime)
     host, port = _split_addr(settings.ops_addr)
     server = uvicorn.Server(
         uvicorn.Config(ops, host=host, port=port, log_config=None, access_log=False)

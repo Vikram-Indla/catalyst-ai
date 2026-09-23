@@ -5,9 +5,9 @@ it — in the Prometheus text exposition format on the
 the format every collector scrapes, so the collector stays the only exporter
 (`ARCH-010 §2`). A label value is a capability, a model, an outcome, a reason or an
 organisation id; a prompt, a completion or any member's text never reaches this module.
-The bucket bounds carry an edge at every latency objective the SLO ledger states (0.8 s for
-retrieval, 8 s for generation), because a quantile interpolated across the threshold it is
-judged by measures nothing.
+The bucket bounds carry an edge at every latency budget a capability declares (0.8 s for
+retrieval, 4 to 15 s for the rest; `tools/checks/latency` holds the alerts to them), because a
+quantile interpolated across the threshold it is judged by measures nothing.
 """
 
 from collections.abc import Iterable, Mapping
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from threading import Lock
 
 PREFIX = "catalyst_ai_"
-BUCKETS_S = (0.05, 0.1, 0.25, 0.5, 0.8, 1.0, 2.5, 5.0, 8.0, 10.0, 30.0, 60.0)
+BUCKETS_S = (0.05, 0.1, 0.25, 0.5, 0.8, 1.0, 2.5, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 30.0, 60.0)
 REQUESTS = "http_requests"
 REQUEST_SECONDS = "http_request_duration_seconds"
 PROVIDER_CALLS = "provider_calls"
@@ -24,6 +24,7 @@ PROVIDER_COST_MICROS = "provider_cost_micros"
 PROVIDER_SECONDS = "provider_call_duration_seconds"
 CACHE_LOOKUPS = "cache_lookups"
 ERRORS = "errors"
+BUDGET_REFUSED = "budget_refused"
 BREAKER_OPEN = "provider_breaker_open"
 JOBS = "jobs"
 JOB_SECONDS = "job_duration_seconds"

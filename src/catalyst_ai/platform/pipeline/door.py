@@ -1,4 +1,8 @@
-"""Stage 2 for every capability: the switch, the contract version, the scanner, the tenant cap."""
+"""Stage 2 for every capability: the switch, the contract version, the scanner, the tenant cap.
+
+A refusal on the cap is counted under the organisation and the capability, the two labels the
+budget alert names; the error the caller receives carries neither.
+"""
 
 from dataclasses import dataclass
 from uuid import UUID
@@ -7,6 +11,7 @@ from catalyst_ai.config import CapabilitySettings
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.platform.cache import cache_key, idempotency_key
 from catalyst_ai.platform.errors import Error
+from catalyst_ai.platform.observability.metrics import BUDGET_REFUSED
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.safety import refuse_if_needed
 from catalyst_ai.providers.port import ModelAlias
@@ -43,7 +48,12 @@ def admit(door: Door, runtime: RuntimeContext) -> str:
     estimate = (
         runtime.provider.count_tokens(ModelAlias(door.alias), joined) + ESTIMATE_OUTPUT_TOKENS
     )
-    runtime.budgets.reserve(door.organization_id, estimate)
+    try:
+        runtime.budgets.reserve(door.organization_id, estimate)
+    except Error:
+        refused = {"capability": door.name, "organization": door.organization_id.hex}
+        runtime.metrics.count(BUDGET_REFUSED, refused)
+        raise
     if door.idempotency:
         return idempotency_key(door.organization_id, door.name, door.idempotency)
     versions = (door.version, door.prompt_version, door.alias)

@@ -7,7 +7,8 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from catalyst_ai.app import create_app, create_ops_app, job_runners
+from catalyst_ai.app import create_app, job_runners
+from catalyst_ai.cli import assemble_worker
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.documents import IngestResponse
 from catalyst_ai.contract.jobs import JobAccepted, JobStatus
@@ -209,7 +210,7 @@ async def test_the_attackers_rows_are_quarantined_on_the_running_loop() -> None:
 
 
 async def test_a_quarantined_row_reaches_the_ops_port_the_worker_shares() -> None:
-    """The worker counts into the process's registry, so the scrape can see a quarantine."""
+    """The worker as the command assembles it counts into the registry its ops port renders."""
     runtime = _runtime()
     store = runtime.jobs
     assert isinstance(store, MemoryJobStore)
@@ -219,16 +220,9 @@ async def test_a_quarantined_row_reaches_the_ops_port_the_worker_shares() -> Non
     legitimate = await store.read_job(origin.ORG, accepted.job_id)
     assert legitimate is not None
     store.plant(replace(legitimate, id=new_id(), request_hash="planted", envelope=""))
-    worker = Worker(
-        runtime,
-        store,
-        job_runners(),
-        KeyRegistry.from_config(origin.PUBLIC_KEYS),
-        SecurityCounters(runtime.metrics),
-    )
+    ops, worker = assemble_worker(runtime.settings, runtime)
     while await worker.run_once():
         pass
-    ops = create_ops_app(runtime.settings, runtime)
     transport = httpx.ASGITransport(app=ops, raise_app_exceptions=False)
     async with httpx.AsyncClient(transport=transport, base_url="http://ops") as scraper:
         scrape = await scraper.get("/metrics")
