@@ -1,6 +1,7 @@
 """The adapter over a scripted transport: body shape, retries, breaker, cost, every error mapping."""
 
 import json
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
@@ -92,7 +93,7 @@ def _adapter(
 
 
 def test_body_shape_drops_schema_titles() -> None:
-    body = build_body(_request())
+    body = build_body(_request(), FLASH)
     assert body["systemInstruction"] == {"parts": [{"text": "sys"}]}
     assert body["contents"][0]["parts"][0]["text"] == "dev\n\nusr"
     schema = body["generationConfig"]["responseSchema"]
@@ -261,3 +262,23 @@ async def test_embed_failures_map_to_the_catalog() -> None:
 def test_model_id_resolves_the_alias_through_the_register() -> None:
     adapter, _, _ = _adapter([Fault()])
     assert adapter.model_id(ModelAlias.EMBED_DEFAULT) == EMBEDDING.model_id
+
+
+THINKING_BODY: dict[str, object] = {
+    **OK_BODY,
+    "usageMetadata": {"promptTokenCount": 7, "candidatesTokenCount": 1, "thoughtsTokenCount": 57},
+}
+
+
+async def test_thinking_tokens_are_billed_as_output() -> None:
+    adapter, _, _ = _adapter([Fault(body=THINKING_BODY)])
+    result = await adapter.generate(_request())
+    assert result.usage.output_tokens == 58
+    assert result.usage.cost_micros == FLASH.cost_micros(7, 58)
+
+
+def test_a_row_with_a_thinking_level_sends_it_and_a_row_without_sends_none() -> None:
+    thinking = replace(FLASH, thinking_level="minimal")
+    config = build_body(_request(), thinking)["generationConfig"]
+    assert config["thinkingConfig"] == {"thinkingLevel": "minimal"}
+    assert "thinkingConfig" not in build_body(_request(), FLASH)["generationConfig"]

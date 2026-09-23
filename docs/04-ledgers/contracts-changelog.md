@@ -17,6 +17,11 @@ Entry template:
 
 ---
 
+## 2026-09-23 · AI-019 · providers — output tokens include the model's thinking
+**Kind:** FIX (`Usage.output_tokens` and `Usage.cost_micros`)
+**What:** a response's `usage.output_tokens` now counts the tokens the model spent thinking as well as the answer, because the provider bills both as output; `cost_micros` follows. No field is added or removed. On today's register rows nothing moves: they do not think.
+**Backend must:** nothing. If it sums `output_tokens`, the sum is now the billed one.
+
 ## 2026-09-23 · AI-018 · search, platform — the declared retrieval budget, and alerts that name what they are about
 **Kind:** FIX (the `search` descriptor's `p95_latency_ms` 2 000 → 800 ms, the `ARCH-008 §1` retrieval figure it had loosened without a decision; the eval set's threshold with it)
 **What:** `search.run`, `index.upsert` and `index.delete` are judged at 800 ms p95, by the eval gate and by `RetrievalLatencyHigh`. The timeout (10 s), every shape and every code are unchanged; the recorded set measures 40 ms.

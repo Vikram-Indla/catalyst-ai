@@ -49,3 +49,11 @@ async def test_a_blocked_chunk_raises_the_catalog_error() -> None:
     with pytest.raises(Error) as caught:
         _ = [f async for f in frames_of(blocked, FLASH, "rid", lambda: 0.0)]
     assert caught.value.code is ErrorCode.PROVIDER_REJECTED
+
+
+def test_a_chunk_bills_its_thinking_tokens_as_output() -> None:
+    meta = {"promptTokenCount": 10, "candidatesTokenCount": 4, "thoughtsTokenCount": 30}
+    usage = chunk_usage({"usageMetadata": meta}, FLASH, 5)
+    assert usage is not None
+    assert usage.output_tokens == 34
+    assert usage.cost_micros == FLASH.cost_micros(10, 34)

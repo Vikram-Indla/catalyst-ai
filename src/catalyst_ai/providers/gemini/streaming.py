@@ -6,7 +6,7 @@ from typing import Any
 
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.providers.gemini import errors
-from catalyst_ai.providers.gemini.models import ModelSpec
+from catalyst_ai.providers.gemini.models import ModelSpec, billed_output_tokens
 from catalyst_ai.providers.port import StreamFrame
 
 STREAM_METHOD = "streamGenerateContent"
@@ -30,7 +30,7 @@ def chunk_usage(payload: dict[str, Any], spec: ModelSpec, latency_ms: int) -> Us
     if not meta:
         return None
     input_tokens = int(meta.get("promptTokenCount", 0))
-    output_tokens = int(meta.get("candidatesTokenCount", 0))
+    output_tokens = billed_output_tokens(meta)
     return Usage(
         input_tokens=input_tokens,
         output_tokens=output_tokens,

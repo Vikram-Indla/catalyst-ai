@@ -1,4 +1,9 @@
-"""The register's Gemini rows: alias → concrete id, prices, context and the retention setting."""
+"""The register's Gemini rows: alias → concrete id, prices, context and the retention setting.
+
+A row may name a thinking level. The 3.x models think by default and bill the thinking as
+output, so a row that leaves it unset would spend tokens nobody asked for and could fill the
+output allowance before the answer is written.
+"""
 
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -17,12 +22,20 @@ class ModelSpec:
     input_micros_per_1k: int
     output_micros_per_1k: int
     context_tokens: int
+    thinking_level: str | None = None
 
     def cost_micros(self, input_tokens: int, output_tokens: int) -> int:
         """Cost of one call from the provider's usage counts, rounded up to a micro-dollar."""
         input_cost = input_tokens * self.input_micros_per_1k
         output_cost = output_tokens * self.output_micros_per_1k
         return -(-(input_cost + output_cost) // 1000)
+
+
+def billed_output_tokens(usage_meta: dict[str, object]) -> int:
+    """Output as the provider bills it: the answer's tokens plus any thinking tokens."""
+    answer = int(str(usage_meta.get("candidatesTokenCount", 0)))
+    thinking = int(str(usage_meta.get("thoughtsTokenCount", 0)))
+    return answer + thinking
 
 
 FLASH = ModelSpec("gemini-2.5-flash", 300, 2_500, 1_048_576)

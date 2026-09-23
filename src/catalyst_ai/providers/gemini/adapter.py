@@ -12,7 +12,7 @@ from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.platform.clock import Clock
 from catalyst_ai.platform.resilience import Breaker, BreakerOpenError, RetryPolicy, retry_async
 from catalyst_ai.providers.gemini import aliases, errors, streaming
-from catalyst_ai.providers.gemini.models import ModelSpec
+from catalyst_ai.providers.gemini.models import ModelSpec, billed_output_tokens
 from catalyst_ai.providers.port import (
     EmbedRequest,
     EmbedResult,
@@ -75,7 +75,7 @@ def normalise(vector: list[float]) -> list[float]:
     return [value / norm for value in vector] if norm else vector
 
 
-def build_body(request: GenerateRequest) -> dict[str, Any]:
+def build_body(request: GenerateRequest, spec: ModelSpec) -> dict[str, Any]:
     """Build the REST body: system segments as the instruction, the rest as one user turn."""
     system = "\n\n".join(s.text for s in request.segments if s.role == "system")
     turn = "\n\n".join(s.text for s in request.segments if s.role != "system")
@@ -83,6 +83,8 @@ def build_body(request: GenerateRequest) -> dict[str, Any]:
         "temperature": request.temperature,
         "maxOutputTokens": request.max_output_tokens,
     }
+    if spec.thinking_level is not None:
+        config["thinkingConfig"] = {"thinkingLevel": spec.thinking_level}
     if request.output_schema is not None:
         config["responseMimeType"] = "application/json"
         config["responseSchema"] = _schema_for_provider(request.output_schema)
@@ -162,7 +164,11 @@ class GeminiProvider:
         started = self._clock.now()
         try:
             response = await self._call_with_guards(
-                spec, self._url(spec), build_body(request), request.timeout_ms, request.request_id
+                spec,
+                self._url(spec),
+                build_body(request, spec),
+                request.timeout_ms,
+                request.request_id,
             )
         except BreakerOpenError as error:
             raise errors.from_transport(error, request.request_id) from error
@@ -184,7 +190,7 @@ class GeminiProvider:
             async with self._client.stream(
                 "POST",
                 url,
-                json=build_body(request),
+                json=build_body(request, spec),
                 headers=self._headers(),
                 timeout=request.timeout_ms / MS_PER_SECOND,
             ) as response:
@@ -250,7 +256,7 @@ def _parse_generate(
     text = "".join(str(part.get("text", "")) for part in parts)
     usage_meta = payload.get("usageMetadata") or {}
     input_tokens = int(usage_meta.get("promptTokenCount", 0))
-    output_tokens = int(usage_meta.get("candidatesTokenCount", 0))
+    output_tokens = billed_output_tokens(usage_meta)
     usage = Usage(
         input_tokens=input_tokens,
         output_tokens=output_tokens,
