@@ -1,9 +1,11 @@
 """`make tools`: a binary reaches .tools/bin only from an archive whose SHA-256 is pinned."""
 
+import gzip
 import hashlib
 import io
 import platform
 import tarfile
+import time
 import urllib.request
 from pathlib import Path
 
@@ -18,11 +20,11 @@ GENUINE = b"genuine binary"
 
 def _archive(payload: bytes) -> bytes:
     buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w:gz") as bundle:
+    with tarfile.open(fileobj=buffer, mode="w") as bundle:
         info = tarfile.TarInfo(install.binary_name(TOOL))
         info.size = len(payload)
         bundle.addfile(info, io.BytesIO(payload))
-    return buffer.getvalue()
+    return gzip.compress(buffer.getvalue(), mtime=0)
 
 
 def _archive_name() -> str:
@@ -118,3 +120,12 @@ def test_a_verified_archive_is_downloaded_once_and_a_corrupted_cache_is_fetched_
     (workdir / ".tools" / "archives" / _archive_name()).write_bytes(b"corrupted")
     assert install.install(TOOL, VERSION).read_bytes() == GENUINE
     assert release.downloads == 2
+
+
+def test_the_served_archive_is_the_pinned_one_whichever_second_it_is_built_in(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The pin is computed once and the archive built again; a clock tick must not tell them apart."""
+    first = _archive(GENUINE)
+    monkeypatch.setattr(time, "time", lambda: 4_102_444_800.0)
+    assert _archive(GENUINE) == first
