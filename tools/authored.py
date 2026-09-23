@@ -93,7 +93,12 @@ def _shorten(text: str) -> str:
 
 
 def answer(body: dict[str, Any]) -> dict[str, Any]:
-    """Build a provider-shaped response for the request body, deterministic and well-behaved."""
+    """Build a provider-shaped response for the request body, deterministic and well-behaved.
+
+    The first marker found in `DISPATCH` wins, so a marker another capability also sends comes
+    after that capability's own: improve-story sends `title` and `description` too, and
+    generate-children sends `focus_hint`.
+    """
     turn = "".join(p.get("text", "") for p in body["contents"][0]["parts"])
     for marker, builder in DISPATCH:
         if marker in turn:
@@ -268,8 +273,9 @@ def answer_embed(body: dict[str, Any]) -> dict[str, Any]:
 
 DISPATCH = (
     ("<<<sources>>>", answer_turn),
-    ("<<<title>>>", answer_unfurl),
     ("<<<child_level>>>", answer_children),
+    ("<<<focus_hint>>>", answer_rewrite),
+    ("<<<title>>>", answer_unfurl),
     ("<<<thread>>>", answer_summary),
     ("<<<description>>>", answer_workflow),
     ("<<<changes>>>", answer_release),
