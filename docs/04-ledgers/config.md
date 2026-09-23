@@ -86,5 +86,7 @@ Rows that arrive with later packages, declared here so the design is visible: `T
 (20 s, `ADR-007`) is a constant in `platform/jobs`, not a variable.
 
 Tooling only, never read by the service: `CATALYST_AI_EVAL_DATABASE_URL` names a PostgreSQL with pgvector
-for `make storage` and the retrieval eval; absent, a throwaway container is started (the CI workflow
-names its service container this way, since a container job has no Docker of its own).
+for `make storage` and the retrieval eval. The pipeline always sets it: the hosted job names its
+service container this way, and `make ci` starts the same pinned service and passes the same value
+(`tools/ci_postgres`), so both runs reach the database the same way. Outside the pipeline, when it
+is absent, a throwaway container of the same pinned image is started.
