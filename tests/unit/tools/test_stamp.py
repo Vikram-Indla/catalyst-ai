@@ -65,7 +65,9 @@ def test_the_tree_hash_does_not_move_when_a_change_is_committed(repo: Path) -> N
 
 def test_a_green_run_is_honoured_until_the_tree_the_image_or_the_day_moves(repo: Path) -> None:
     assert stamp.reason_to_run(IMAGE) is not None
+    stamp.begin()
     written = stamp.write(IMAGE)
+    assert written is not None
     assert stamp.stamp_path().resolve() == (repo / ".git" / stamp.STAMP_NAME).resolve()
     assert json.loads(stamp.stamp_path().read_text(encoding="utf-8"))["tree"] == written["tree"]
     assert stamp.reason_to_run(IMAGE) is None
@@ -83,6 +85,7 @@ def test_the_command_line_writes_checks_and_prints(
     repo: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     assert stamp.main(["check", "--image", IMAGE]) == 1
+    assert stamp.main(["begin"]) == 0
     assert stamp.main(["write", "--image", IMAGE]) == 0
     assert stamp.main(["check", "--image", IMAGE]) == 0
     assert stamp.main(["tree"]) == 0
@@ -90,3 +93,28 @@ def test_the_command_line_writes_checks_and_prints(
     assert "no green run" in out
     assert "-- green" in out
     assert out.rstrip().endswith(stamp.tree_hash())
+
+
+def test_a_file_edited_while_the_pipeline_ran_is_not_stamped(
+    repo: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    assert stamp.main(["begin"]) == 0
+    (repo / "a.py").write_text("print('edited mid-run')\n", encoding="utf-8")
+    assert stamp.main(["write", "--image", IMAGE]) == 0
+    assert "changed while the pipeline ran" in capsys.readouterr().out
+    assert stamp.reason_to_run(IMAGE) is not None
+    assert not stamp.begin_path().exists()
+
+
+def test_a_write_with_no_noted_start_stamps_nothing(repo: Path) -> None:
+    (repo / "a.py").write_text("print('edited mid-run')\n", encoding="utf-8")
+    stamp.main(["write", "--image", IMAGE])
+    assert stamp.reason_to_run(IMAGE) is not None, "the edited tree was stamped as proven"
+
+
+def test_the_start_is_noted_per_worktree_and_a_matching_end_is_stamped(repo: Path) -> None:
+    assert stamp.main(["begin"]) == 0
+    assert stamp.begin_path().resolve().parent == (repo / ".git").resolve()
+    assert stamp.main(["write", "--image", IMAGE]) == 0
+    assert stamp.reason_to_run(IMAGE) is None
+    assert not stamp.begin_path().exists()

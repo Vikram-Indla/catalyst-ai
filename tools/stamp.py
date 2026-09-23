@@ -4,6 +4,10 @@ The stamp lives in the common git directory (shared by every worktree of the rep
 keyed by the hash of every tracked and untracked-but-not-ignored file as it is on disk, plus the
 digest of the image the pipeline ran in. Same tree, same image, younger than a day → the push
 needs no second run. Anything else → the pipeline runs.
+
+`begin` notes the tree a run is about to prove, in the worktree's own git directory; `write` stamps
+only that tree, and only if the tree is still that one when the run ends. A tree edited while the
+pipeline ran was not proved: the run stays green, and no stamp is written for it.
 """
 
 import argparse
@@ -16,6 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 STAMP_NAME = "ci-green"
+BEGIN_NAME = "ci-begin"
 MAX_AGE_S = 24 * 60 * 60
 
 
@@ -65,10 +70,28 @@ def stamp_path() -> Path:
     return Path(_git("rev-parse", "--git-common-dir").strip()) / STAMP_NAME
 
 
-def write(image: str) -> dict[str, object]:
-    """Record a green run of the current tree in the given image."""
+def begin_path() -> Path:
+    """Return where a run notes its tree: this worktree's own git directory, never shared."""
+    return Path(_git("rev-parse", "--git-dir").strip()) / BEGIN_NAME
+
+
+def begin() -> str:
+    """Note the tree the run is about to prove."""
+    tree = tree_hash()
+    begin_path().write_text(tree + "\n", encoding="utf-8")
+    return tree
+
+
+def write(image: str) -> dict[str, object] | None:
+    """Record a green run in the given image, if the tree is still the one noted at `begin`."""
+    noted = begin_path()
+    started = noted.read_text(encoding="utf-8").strip() if noted.exists() else None
+    noted.unlink(missing_ok=True)
+    tree = tree_hash()
+    if started != tree:
+        return None
     stamp: dict[str, object] = {
-        "tree": tree_hash(),
+        "tree": tree,
         "image": image,
         "digest": image_digest(image),
         "at": int(time.time()),
@@ -122,18 +145,24 @@ def _check(image: str) -> int:
 
 def _write(image: str) -> int:
     stamp = write(image)
+    if stamp is None:
+        print(
+            "stamp: the tree changed while the pipeline ran (or no start was noted); "
+            "no stamp written — run make ci again on the tree you mean to push"
+        )
+        return 0
     print(f"stamp: tree {str(stamp['tree'])[:12]} in {image} at {stamp['when']} -- green")
     return 0
 
 
 def main(argv: list[str] | None = None) -> int:
-    """`write --image X` after a green run; `check --image X` before a push; `tree` prints it."""
+    """`begin` before a run, `write --image X` after a green one, `check --image X` at a push."""
     parser = argparse.ArgumentParser(prog="stamp")
-    parser.add_argument("command", choices=("write", "check", "tree"))
+    parser.add_argument("command", choices=("begin", "write", "check", "tree"))
     parser.add_argument("--image", default="")
     args = parser.parse_args(argv)
-    if args.command == "tree":
-        print(tree_hash())
+    if args.command in {"begin", "tree"}:
+        print(begin() if args.command == "begin" else tree_hash())
         return 0
     return _write(args.image) if args.command == "write" else _check(args.image)
 
