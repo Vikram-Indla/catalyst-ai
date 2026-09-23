@@ -11,9 +11,8 @@ from testcontainers.postgres import PostgresContainer
 from catalyst_ai.platform.storage import PostgresStorage, migrate
 from tests.conftest import REPO_ROOT
 from tests.unit.capabilities.improve_story.conftest import FrozenClock
-from tools.evalkit import DATABASE_VARIABLE, container_dsn
+from tools.evalkit import DATABASE_IMAGE, DATABASE_VARIABLE, container_dsn
 
-IMAGE = "pgvector/pgvector:pg17"
 MIGRATIONS = REPO_ROOT / "db" / "migrations"
 COMMAND_TIMEOUT_S = 10.0
 MIGRATED: set[str] = set()
@@ -26,7 +25,7 @@ def database_url() -> Iterator[str]:
     if provided:
         yield provided
         return
-    with PostgresContainer(IMAGE, driver=None) as container:
+    with PostgresContainer(DATABASE_IMAGE, driver=None) as container:
         yield container_dsn(container)
 
 
