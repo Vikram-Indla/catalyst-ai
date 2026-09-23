@@ -28,6 +28,14 @@ meet its budget on the recorded set is not done.
 A descriptor may tighten these; loosening is the `D-NNN` above. The timeout is the adapter's
 per-call deadline (`ARCH-005 §2`) and the job model's decision boundary (`ADR-007 §1`).
 
+**Priced again on 2026-09-23 (`D-043`).** The figures above were set against `gemini-2.5-flash`
+(300 / 2 500 µ$ per 1k). The text rows now resolve to `gemini-3.6-flash`: 750 / 3 750 until
+2026-12-31 (input × 2.5, output × 1.5), then 1 500 / 7 500 (× 5, × 3). Each capability's p95
+cost was re-computed from its own fixtures' token counts at both prices: every one holds its
+descriptor today, and every one but `generate-tests` holds it at the 2027 price (8 240 µ$
+against 8 000). No figure moves: the arithmetic is in `023-the-register-moves`, and the
+2027 overrun is re-measured on recorded fixtures before that price applies.
+
 ## 2. Per-tenant budgets, enforced here
 
 `tenant_budgets` counts spend per organisation and per capability in a rolling window; stage 2

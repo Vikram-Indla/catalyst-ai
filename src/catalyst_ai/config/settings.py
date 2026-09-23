@@ -6,10 +6,18 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from catalyst_ai.contract.models import TextAlias
+from catalyst_ai.contract.models import TextAlias, available
 
 ENV_PREFIX = "CATALYST_AI_"
 MIN_KEYS = 1
@@ -90,7 +98,7 @@ class CapabilitySettings(BaseModel):
 
     enabled: Annotated[bool, Field(description="PUBLIC · The kill switch")] = True
     model_alias: Annotated[
-        TextAlias | None,
+        Annotated[TextAlias, AfterValidator(available)] | None,
         Field(description="PUBLIC · This capability's alias, over the environment's default"),
     ] = None
     cache_ttl_seconds: Annotated[
@@ -188,6 +196,7 @@ class Settings(BaseSettings):
     ] = "https://generativelanguage.googleapis.com"
     model_text_alias: Annotated[
         TextAlias,
+        AfterValidator(available),
         Field(
             description=(
                 "PUBLIC · The alias a capability asking for text gets in this environment; "

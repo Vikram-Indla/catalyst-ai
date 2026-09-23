@@ -3,6 +3,10 @@
 A row may name a thinking level. The 3.x models think by default and bill the thinking as
 output, so a row that leaves it unset would spend tokens nobody asked for and could fill the
 output allowance before the answer is written.
+
+Prices are the published list prices (https://ai.google.dev/gemini-api/docs/pricing), read
+twice on 2026-09-23. The flash row's price doubles on 2027-01-01 (1 500 / 7 500 µ$ per 1k);
+the providers ledger carries the date.
 """
 
 from dataclasses import dataclass
@@ -11,7 +15,10 @@ from types import MappingProxyType
 from catalyst_ai.providers.port import ModelAlias
 
 PROVIDER = "gemini"
-RETENTION = "paid tier of the Gemini API: prompts and completions are not used to train models"
+RETENTION = (
+    "free tier of the Gemini API: the provider may use prompts and completions to improve its "
+    "products, so only authored inputs reach this key; the paid tier does not"
+)
 
 
 @dataclass(frozen=True)
@@ -38,18 +45,18 @@ def billed_output_tokens(usage_meta: dict[str, object]) -> int:
     return answer + thinking
 
 
-FLASH = ModelSpec("gemini-2.5-flash", 300, 2_500, 1_048_576)
-FLASH_LITE = ModelSpec("gemini-2.5-flash-lite", 100, 400, 1_048_576)
-PRO = ModelSpec("gemini-2.5-pro", 1_250, 10_000, 1_048_576)
+FLASH = ModelSpec("gemini-3.6-flash", 750, 3_750, 1_048_576, thinking_level="minimal")
 EMBEDDING = ModelSpec("gemini-embedding-001", 150, 0, 2_048)
+GRADER_BEFORE_MIGRATION = ModelSpec("gemini-2.5-flash", 300, 2_500, 1_048_576)
 
 REGISTER = MappingProxyType(
     {
         ModelAlias.TEXT_DEFAULT: FLASH,
-        ModelAlias.TEXT_FAST: FLASH_LITE,
-        ModelAlias.TEXT_LONG: PRO,
+        ModelAlias.TEXT_FAST: FLASH,
         ModelAlias.EMBED_DEFAULT: EMBEDDING,
-        ModelAlias.GRADER_DEFAULT: FLASH,
+        ModelAlias.GRADER_DEFAULT: GRADER_BEFORE_MIGRATION,
     }
 )
-KNOWN_IDS = MappingProxyType({spec.model_id: spec for spec in (FLASH, FLASH_LITE, PRO, EMBEDDING)})
+KNOWN_IDS = MappingProxyType(
+    {spec.model_id: spec for spec in (FLASH, EMBEDDING, GRADER_BEFORE_MIGRATION)}
+)

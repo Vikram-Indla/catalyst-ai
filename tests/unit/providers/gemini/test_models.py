@@ -1,6 +1,7 @@
-"""Register rows: cost from usage counts rounds up; every alias resolves to a known id."""
+"""Register rows: cost from usage counts rounds up; every available alias resolves to a known id."""
 
-from catalyst_ai.providers.gemini.models import FLASH, KNOWN_IDS, REGISTER, ModelSpec
+from catalyst_ai.contract.models import UNAVAILABLE
+from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH, KNOWN_IDS, REGISTER, ModelSpec
 from catalyst_ai.providers.port import ModelAlias
 
 
@@ -11,7 +12,19 @@ def test_cost_rounds_up_to_a_micro_dollar() -> None:
     assert spec.cost_micros(0, 0) == 0
 
 
-def test_every_alias_has_a_known_row() -> None:
-    assert set(REGISTER) == set(ModelAlias)
+def test_every_available_alias_has_a_known_row_and_an_unavailable_one_has_none() -> None:
+    assert set(REGISTER) == set(ModelAlias) - {ModelAlias(alias.value) for alias in UNAVAILABLE}
+    assert ModelAlias.TEXT_LONG not in REGISTER
     assert all(spec.model_id in KNOWN_IDS for spec in REGISTER.values())
-    assert REGISTER[ModelAlias.GRADER_DEFAULT] is FLASH
+
+
+def test_both_text_rows_are_the_one_reachable_model_and_it_does_not_think() -> None:
+    assert REGISTER[ModelAlias.TEXT_DEFAULT] is FLASH
+    assert REGISTER[ModelAlias.TEXT_FAST] is FLASH
+    assert FLASH.thinking_level == "minimal"
+    assert FLASH.context_tokens == 1_048_576
+
+
+def test_the_index_keeps_its_model() -> None:
+    assert REGISTER[ModelAlias.EMBED_DEFAULT] is EMBEDDING
+    assert EMBEDDING.thinking_level is None

@@ -5,7 +5,9 @@ because both the settings (which select one) and the port (which resolves one) n
 vocabulary shared by two layers belongs under both (`ARCH-005 §2`, `ARCH-012 §1`).
 """
 
+from collections.abc import Mapping
 from enum import StrEnum
+from types import MappingProxyType
 
 
 class ModelAlias(StrEnum):
@@ -28,3 +30,21 @@ class TextAlias(StrEnum):
     TEXT_DEFAULT = "text-default"
     TEXT_FAST = "text-fast"
     TEXT_LONG = "text-long"
+
+
+UNAVAILABLE: Mapping[TextAlias, str] = MappingProxyType(
+    {
+        TextAlias.TEXT_LONG: (
+            "no stable long-context model is reachable from this service's key; the provider "
+            "offers only a preview, and a preview is never a register row (D-043)"
+        ),
+    }
+)
+
+
+def available(alias: TextAlias) -> TextAlias:
+    """Refuse an alias the register has no row for, when the settings load, with its reason."""
+    if alias in UNAVAILABLE:
+        message = f"{alias.value} is unavailable: {UNAVAILABLE[alias]}"
+        raise ValueError(message)
+    return alias

@@ -17,6 +17,11 @@ Entry template:
 
 ---
 
+## 2026-09-23 · AI-019 · providers, configuration — the text rows move; `text-long` unavailable
+**Kind:** CHANGE (configuration: `MODEL_TEXT_ALIAS` and `CAPABILITY_<NAME>_MODEL_ALIAS` refuse `text-long` at load)
+**What:** `text-default` and `text-fast` resolve to `gemini-3.6-flash`, the one stable model this key reaches, with thinking `minimal`; `text-long` is unavailable and a configuration that selects it fails at boot with the reason. No operation, shape, code or timeout changes; `usage.cost_micros` follows the new published price.
+**Backend must:** nothing. The costs it reads are higher per token than before; the budgets it relies on are unchanged.
+
 ## 2026-09-23 · AI-019 · providers — output tokens include the model's thinking
 **Kind:** FIX (`Usage.output_tokens` and `Usage.cost_micros`)
 **What:** a response's `usage.output_tokens` now counts the tokens the model spent thinking as well as the answer, because the provider bills both as output; `cost_micros` follows. No field is added or removed. On today's register rows nothing moves: they do not think.

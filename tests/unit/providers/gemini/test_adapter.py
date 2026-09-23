@@ -278,7 +278,7 @@ async def test_thinking_tokens_are_billed_as_output() -> None:
 
 
 def test_a_row_with_a_thinking_level_sends_it_and_a_row_without_sends_none() -> None:
-    thinking = replace(FLASH, thinking_level="minimal")
-    config = build_body(_request(), thinking)["generationConfig"]
-    assert config["thinkingConfig"] == {"thinkingLevel": "minimal"}
-    assert "thinkingConfig" not in build_body(_request(), FLASH)["generationConfig"]
+    silent = replace(FLASH, thinking_level=None)
+    config = build_body(_request(), replace(FLASH, thinking_level="low"))["generationConfig"]
+    assert config["thinkingConfig"] == {"thinkingLevel": "low"}
+    assert "thinkingConfig" not in build_body(_request(), silent)["generationConfig"]

@@ -6,7 +6,7 @@ from pydantic import SecretStr, ValidationError
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.models import ModelAlias, TextAlias
 from catalyst_ai.providers.gemini.aliases import resolve, selected
-from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH, FLASH_LITE, PRO
+from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH
 from tools import origin
 
 
@@ -25,32 +25,39 @@ def test_the_environment_selects_the_alias_and_the_default_is_what_was_measured(
     assert settings.model_text_alias is TextAlias.TEXT_DEFAULT
     assert resolve(ModelAlias.TEXT_DEFAULT, settings) == FLASH
     assert selected(settings) is TextAlias.TEXT_DEFAULT
-    cheaper = _settings(model_text_alias=TextAlias.TEXT_FAST)
-    assert resolve(ModelAlias.TEXT_DEFAULT, cheaper) == FLASH_LITE
-    assert selected(cheaper) is TextAlias.TEXT_FAST
+    fast = _settings(model_text_alias=TextAlias.TEXT_FAST)
+    assert resolve(ModelAlias.TEXT_DEFAULT, fast) == FLASH
+    assert selected(fast) is TextAlias.TEXT_FAST
 
 
-def test_a_capability_may_be_lifted_above_the_environment_default() -> None:
+def test_a_capability_may_select_its_own_alias_over_the_environment() -> None:
     settings = _settings(
-        model_text_alias=TextAlias.TEXT_FAST,
-        capability_post_mortem=CapabilitySettings(model_alias=TextAlias.TEXT_LONG),
+        model_text_alias=TextAlias.TEXT_DEFAULT,
+        capability_translate=CapabilitySettings(model_alias=TextAlias.TEXT_FAST),
     )
-    assert resolve(ModelAlias.TEXT_DEFAULT, settings, "post-mortem") == PRO
-    assert resolve(ModelAlias.TEXT_DEFAULT, settings, "summarize") == FLASH_LITE
-    assert resolve(ModelAlias.TEXT_DEFAULT, settings, "nobody") == FLASH_LITE
+    assert selected(settings, "translate") is TextAlias.TEXT_FAST
+    assert selected(settings, "summarize") is TextAlias.TEXT_DEFAULT
+    assert resolve(ModelAlias.TEXT_DEFAULT, settings, "translate") == FLASH
 
 
 def test_the_index_and_the_grader_are_not_selectable() -> None:
-    settings = _settings(model_text_alias=TextAlias.TEXT_LONG)
+    settings = _settings(model_text_alias=TextAlias.TEXT_FAST)
     assert resolve(ModelAlias.EMBED_DEFAULT, settings) == EMBEDDING
-    assert resolve(ModelAlias.GRADER_DEFAULT, settings) == FLASH
-    assert resolve(ModelAlias.TEXT_FAST, settings) == FLASH_LITE
+    assert resolve(ModelAlias.TEXT_FAST, settings) == FLASH
+
+
+def test_an_unavailable_alias_fails_at_settings_load() -> None:
+    """No stable long-context model is reachable: selecting one fails now, not at the first call."""
+    with pytest.raises(ValidationError, match="unavailable"):
+        _settings(model_text_alias=TextAlias.TEXT_LONG)
+    with pytest.raises(ValidationError, match="unavailable"):
+        _settings(capability_post_mortem=CapabilitySettings(model_alias=TextAlias.TEXT_LONG))
 
 
 def test_an_alias_outside_the_vocabulary_fails_at_settings_load() -> None:
     """A model id is not an alias: the register owns ids, and configuration may not say one."""
     with pytest.raises(ValidationError):
-        _settings(model_text_alias=FLASH_LITE.model_id)
+        _settings(model_text_alias=FLASH.model_id)
     with pytest.raises(ValidationError):
         _settings(model_text_alias="embed-default")
     with pytest.raises(ValidationError):

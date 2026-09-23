@@ -127,12 +127,14 @@ BACKEND_CALL_MARKERS = ("callback_url", "webhook_url", "BACKEND_TOKEN")
 
 MODEL_ID_PATTERNS = (
     r"gemini-\d",
+    r"gemini-[a-z-]*latest",
     r"gpt-\d",
     r"claude-\d",
     r"text-embedding-",
     r"llama",
     r"mistral-",
 )
+UNSTABLE_MODEL_ID = r"-latest\b|-preview\b|-exp\b"
 PROMPT_MARKERS = ("You are ", "Rewrite ", "Return JSON", "Respond ", "Summarize ", "Translate ")
 PROMPT_MIN_LENGTH = 40
 PROMPT_HEADER_KEYS = ("capability", "version", "model_alias", "tuned_on", "eval_set", "score")
