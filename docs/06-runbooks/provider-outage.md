@@ -1,4 +1,4 @@
-# Provider outage — the breaker is open, calls time out, or the quota is spent
+# Provider outage — `ProviderFailing`: the breaker is open, calls time out, or the quota is spent
 
 **Alerts:** `ProviderFailing`, `ProviderLatencyHigh`.
 
@@ -31,6 +31,17 @@ When the provider is up but one capability's calls are failing (`rejected` on mo
 model that was swapped under us): disable that capability with its kill switch
 (`docs/06-runbooks/kill-switch.md`) so the backend gets a clean `ai.capability.disabled` instead
 of a slow refusal, and say so in the incident.
+
+## `ProviderLatencyHigh` — the provider answers, past the capability's budget
+
+Each capability's provider calls are judged at the p95 its descriptor declares (`ARCH-008 §1`;
+`tools/checks/latency` keeps the rule and the descriptor equal): 800 ms for the search
+embedding, 4 s for `improve-story`, 15 s for `documents`. A ticket, not a page — the calls
+still succeed. Read it beside `CapabilityLatencyHigh`: both firing for the same capability is
+the provider; `CapabilityLatencyHigh` alone is time spent inside the service (retrieval, a
+parser child, the cache). Command 2 above by `model` says whether one model is slow or all are.
+If one model stays slow for a day, that is the register's question (a `D-` row and an eval run),
+never a hot edit of the alias.
 
 ## When to page
 

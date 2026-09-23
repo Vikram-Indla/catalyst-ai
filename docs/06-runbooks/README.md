@@ -1,6 +1,7 @@
 # Runbooks
 
-One page per failure domain, written with the feature that needs it. Every capability adds its
+One page per failure domain, written with the feature that needs it. Every alert in
+`ops/alerts.yaml` points at a page with a heading that names it (`tools/checks/alerts`). Every capability adds its
 line to the capability runbook; a `built` capability without one is a finding (`ARCH-010 §5`).
 
 | Page | Domain | Lands with |
@@ -13,7 +14,8 @@ line to the capability runbook; a `built` capability without one is a finding (`
 | `job-backlog.md` | queue age, stuck jobs, expiry; the per-organisation concurrency dial; drain | the worker (present) |
 | `retention.md` | the retention job, organisation deletion, the zero-rows proof, the database roles | the storage package (present) |
 | `key-rotation.md` | rotating the backend's signing key with two public keys active; the emergency sequence; what to watch | the origin middleware (present) |
-| `job-quarantine.md` | a job row that failed its proof; a rise in refused origins — reasons, the first three commands, when to page | the origin middleware (present); the worker when the table lands |
+| `job-quarantine.md` | `JobQuarantined`: a job row that failed its proof — reasons, the first three commands, when to page | the origin middleware (present); the worker when the table lands |
 | `capabilities.md` | one line per capability: what to check when quality drops, the switch, what the backend shows | `improve-story` (present) |
 | `origin-refusals.md` | the door is turning callers away: the reason table, what each one means, when to page | the origin middleware (present) |
 | `replay-store-down.md` | the replay store cannot answer and the door fails closed; every capability is down | the origin middleware (present) |
+| `index-unavailable.md` | `IndexUnavailable`: the index does not answer; what stops, what keeps answering, why a rebuild never helps | the observability review (present) |

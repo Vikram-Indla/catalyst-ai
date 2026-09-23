@@ -1,4 +1,4 @@
-# The replay store cannot answer — the door is failing closed
+# `OriginUnverifiable` — the replay store cannot answer, and the door is failing closed
 
 **Alert:** `OriginUnverifiable` (page).
 

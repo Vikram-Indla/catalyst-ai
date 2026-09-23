@@ -1,4 +1,4 @@
-# Job backlog — queue age, stuck jobs, expiry, the concurrency dials, drain
+# Job backlog — `JobQueueBacklog`: queue age, stuck jobs, expiry, the concurrency dials, drain
 
 The worker (`catalyst-ai worker`) claims the oldest queued row whose organisation runs fewer
 than `WORKER_CONCURRENCY_PER_ORGANIZATION` jobs, at most `WORKER_CONCURRENCY` at once per process,

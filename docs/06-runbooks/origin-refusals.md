@@ -1,4 +1,4 @@
-# Refused origins — the door is turning callers away
+# Refused origins — `OriginRefusalsHigh`, `OriginForged`: the door is turning callers away
 
 **Alerts:** `OriginRefusalsHigh` (a steady rate), `OriginForged` (a signature that is not the
 backend's — page immediately).

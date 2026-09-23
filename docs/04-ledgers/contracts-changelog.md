@@ -17,6 +17,12 @@ Entry template:
 
 ---
 
+## 2026-09-23 · AI-018 · search, platform — the declared retrieval budget, and alerts that name what they are about
+**Kind:** FIX (the `search` descriptor's `p95_latency_ms` 2 000 → 800 ms, the `ARCH-008 §1` retrieval figure it had loosened without a decision; the eval set's threshold with it)
+**What:** `search.run`, `index.upsert` and `index.delete` are judged at 800 ms p95, by the eval gate and by `RetrievalLatencyHigh`. The timeout (10 s), every shape and every code are unchanged; the recorded set measures 40 ms.
+**Backend must:** nothing.
+**Also (no contract surface):** every latency alert fires at its capability's declared budget instead of 8 s for all; `catalyst_ai_budget_refused_total{organization, capability}` lets `TenantBudgetExhausted` name the tenant; `IndexUnavailable` has its own runbook.
+
 ## 2026-09-26 · AI-014 (follow-up) · platform — the model an environment runs, and the observability fixes
 **Kind:** CHANGE (configuration: `MODEL_TEXT_DEFAULT` — a register id — becomes `MODEL_TEXT_ALIAS`, an alias; `CAPABILITY_<NAME>_MODEL_ALIAS` added); FIX (the worker's metrics, the scrape's reachability, two alert expressions)
 **What:** an environment now selects **which row of the register** text work runs on, by alias (`text-default` | `text-fast` | `text-long`), globally or for one capability; the model ids stay in the register, so a typo fails at settings load instead of at the first call. The default is `text-default` — the row every eval floor and recorded fixture was measured on; a deployment that selects `text-fast` is running a cheaper model than the numbers in the ledger describe, which the config ledger and `.env.example` both say. Nothing on the wire changes: no request, response, header or error moves.

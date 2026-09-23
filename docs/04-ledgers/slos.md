@@ -10,20 +10,23 @@ Written by hand. `tools/checks/alerts` fails an alert that names a runbook which
 and an alert this page never names; a runbook that no alert points at is a report, because a
 procedure (a rotation, a rebuild, a kill switch) may exist without anything firing.
 
-The histogram's bucket bounds carry an edge at 0.8 s and at 8 s — the two latency objectives —
-so the quantiles those rules judge are read at the boundary rather than interpolated across it.
+Every latency rule fires at its capability's declared budget, and `tools/checks/latency` fails
+the gate when a rule and a descriptor disagree, when an operation is judged by no rule or by
+two, or when a threshold is not a bucket edge. The histogram's bounds carry an edge at every
+budget (0.8, 4, 6, 8, 10, 12 and 15 s), so the quantile a rule judges is read at its threshold
+rather than interpolated across it.
 
 ## Service level objectives
 
 | SLO | Objective | Metric | Window | Alert |
 | --- | --- | --- | --- | --- |
 | Availability of a synchronous capability | 99.0 % of calls answer without `5xx` | `catalyst_ai_http_requests_total{status}` per `operation` | 30 days | `CapabilityErrorBudgetBurn` |
-| Latency of a generation capability | p95 within the capability's budget (`ARCH-008 §1`: 8 s) | `catalyst_ai_http_request_duration_seconds` per `operation` | 1 hour | `CapabilityLatencyHigh` |
-| Latency of retrieval | p95 within 800 ms (`ARCH-008 §1`); its own threshold, because one number cannot serve two budgets | `catalyst_ai_http_request_duration_seconds{operation=~"search.*"}` | 1 hour | `RetrievalLatencyHigh` |
-| Latency of the provider | p95 provider call within the same budget; a slow provider is not a slow capability twice | `catalyst_ai_provider_call_duration_seconds` per `capability`, `model` | 1 hour | `ProviderLatencyHigh` |
+| Latency of a capability | p95 within the `p95_latency_ms` its descriptor declares (`ARCH-008 §1`): 4 s `improve-story`, `unfurl`; 6 s `translate`; 8 s `generate-children`, `summarize`; 10 s `propose-workflow`, `release-notes`; 12 s the assistant, `generate-tests`, `post-mortem`; 15 s `documents` | `catalyst_ai_http_request_duration_seconds` per `operation` | 1 hour | `CapabilityLatencyHigh` (one rule per budget) |
+| Latency of retrieval | p95 within 800 ms (`ARCH-008 §1`) for `search.run` and the index operations | `catalyst_ai_http_request_duration_seconds{operation=~"(search\|index)[.].*"}` | 1 hour | `RetrievalLatencyHigh` |
+| Latency of the provider | p95 provider call within the same capability's budget; a slow provider is not a slow capability twice | `catalyst_ai_provider_call_duration_seconds` per `capability` | 1 hour | `ProviderLatencyHigh` (one rule per budget) |
 | Provider availability | fewer than 5 % of provider calls end in `ai.provider.unavailable`, `timeout` or `quota` | `catalyst_ai_provider_calls_total{outcome}` | 1 hour | `ProviderFailing` |
 | Grounding refusals | fewer than 1 % of answers are refused as `ai.output.invalid` — above that the prompt or the model moved | `catalyst_ai_errors_total{code}` | 6 hours | `OutputRefusalsHigh` |
-| Tenant budget | an organisation's daily spend stays under its cap; a tenant at the cap is refused, never served slowly | `catalyst_ai_provider_cost_micros_total{organization}` and `catalyst_ai_errors_total{code="ai.budget.exceeded"}` | 1 day | `TenantBudgetExhausted` |
+| Tenant budget | an organisation's daily spend stays under its cap; a tenant at the cap is refused, never served slowly | `catalyst_ai_provider_cost_micros_total{organization}` and `catalyst_ai_budget_refused_total{organization, capability}` — the alert names both | 1 day | `TenantBudgetExhausted` |
 | Cache | at least 20 % of eligible calls are served from the cache; a collapse means the key moved | `catalyst_ai_cache_lookups_total{result}` | 6 hours | `CacheHitRateLow` |
 | Job queue | a job starts within its window; fewer than 1 % expire unstarted | `catalyst_ai_jobs{state="queued"}`, `catalyst_ai_jobs{state="running"}` | 1 hour | `JobQueueBacklog` |
 | Proof of origin | every refusal is a caller defect, never a forged envelope: `bad_signature` at zero | `catalyst_ai_origin_refused_total{reason}` | 1 hour | `OriginForged`, `OriginRefusalsHigh` |
@@ -45,8 +48,10 @@ objective above and raises no alert of its own: the calls it would have served a
 - **Quality.** Eval scores are not metrics: they are the gate's floors, measured per change on
   authored or recorded sets, not per minute in production. A model that gets worse shows here as
   refusals (`ai.output.invalid`) and in the next eval run — that is the design (`ADR-005`).
-- **Per-organisation latency.** Cardinality: the organisation label is carried only on cost,
-  where the budget needs it. A tenant's latency is read from its capability's series.
+- **Per-organisation latency.** Cardinality: the organisation label is carried only on cost and
+  on budget refusals, the two series the budget needs. A refusal series exists only for an
+  organisation that reached its cap, so it never outgrows the cost series beside it. The error
+  counter stays on `code` alone. A tenant's latency is read from its capability's series.
 
 ## Reading a burn
 

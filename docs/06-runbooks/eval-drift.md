@@ -1,4 +1,4 @@
-# Eval drift — refusals rise, or a score falls below its floor
+# Eval drift — `OutputRefusalsHigh`: refusals rise, or a score falls below its floor
 
 **Alert:** `OutputRefusalsHigh` (production); the gate's eval step (a change).
 

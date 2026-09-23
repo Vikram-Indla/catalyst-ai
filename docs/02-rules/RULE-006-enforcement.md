@@ -48,7 +48,8 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | A read-only capability imports no client, socket, writer or ingest path (ARCH-002 §1; the assistant's rule, INV-050) | zero violations in the packages `rules.READ_ONLY_CAPABILITIES` names | `tools/checks/readonly` | AI-010 |
 | The service verifies and never signs: no signing primitive, no key generation, no cryptography import outside the key registry, no bearer or service token in the source (ARCH-009 §1, §5; INV-053) | zero violations under `src/` | `tools/checks/origin` | AI-015 |
 | No id of the lead's private planning, no name of its files and no name of its people anywhere in the repository (RULE-005 §1) | zero lines carrying the shapes, in every text file | `tools/checks/vocabulary` | AI-015 |
-| Every alert names a runbook that exists, every runbook is named, every objective has its alert (`docs/04-ledgers/slos.md`) | zero disagreements between the alerts, the runbooks and the SLO ledger | `tools/checks/alerts`| `tools/checks/vocabulary` | AI-015 |
+| Every alert names a runbook that exists and carries a heading naming the alert; every objective has its alert (`docs/04-ledgers/slos.md`) | zero disagreements between the alerts, the runbooks and the SLO ledger | `tools/checks/alerts` | AI-015, AI-018 |
+| Every latency rule fires at the `p95_latency_ms` its capability declares: each served operation and each capability judged by exactly one rule, every threshold a bucket edge (`ARCH-008 §1`) | zero disagreements between `ops/alerts.yaml`, the descriptors and the histogram's bounds | `tools/checks/latency` | AI-018 |
 | Routes thin: ≤ 6 statements, no branch on content (RULE-001 §2) | zero violations | `tools/checks/routes` | AI-002 |
 | Typed boundary: no `dict[str, Any]`, `Any` or raw JSON in routes, pipeline surfaces or the port (RULE-003 §1, §3) | zero violations | `tools/checks/contract` + `tools/checks/ports` | AI-002 |
 | Rendered document equals the committed one; every operation carries `x-capability`, versions, `x-error-codes`, an example (RULE-003 §1) | zero drift; zero missing | `tools/checks/openapi` (`make api && git diff --exit-code api/`) | AI-002 |
@@ -75,7 +76,7 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Coverage floors by layer: 100 / 95 / 90 / 80 / 90 overall (RULE-004 §1) | per-module floors by path class | `tools/checks/coverage` | AI-002 |
 | Contract test per operation; every listed error code asserted; stream terminal frame (RULE-004 §3) | every operation has a contract test; every code asserted | `tools/checks/journeys` | AI-002 |
 | Property test per parser and chunker (RULE-004 §2) | every module tagged `parser` has a `hypothesis` test | `tools/checks/fuzz` | AI-002 |
-| Eval gate: every grader above its floor; thresholds never lowered without a `D-NNN`; `injection` tag non-empty (ARCH-007, RULE-008 §3) | green | `make evals` + `tools/checks/evals` | AI-002 |
+| Eval gate: every grader above its floor; no threshold loosened without a `D-NNN` — a floor lowered or a latency or cost budget raised; `injection` tag non-empty (ARCH-007, RULE-008 §3) | green | `make evals` + `tools/checks/evals` | AI-002, AI-018 |
 | Budgets: p95 latency and cost under the descriptor; budgets never widened without a `D-NNN` (ARCH-008 §1) | green | `tools/checks/budgets` | AI-002 |
 | Security: `pip-audit` on the exported lock, `gitleaks`, licences (ARCH-009 §5) ⚡ (gitleaks) | zero known vulnerabilities; zero secrets; allowlist only | `pip-audit`, `gitleaks`, `tools/checks/licenses` | AI-002 |
 | Image scan: zero fixable HIGH/CRITICAL in the runtime image (ARCH-009 §5) | `make image-scan` green on the release candidate | `trivy` (`--ignore-unfixed`) | AI-002 |

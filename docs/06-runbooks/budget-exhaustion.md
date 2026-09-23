@@ -1,6 +1,7 @@
-# Budget exhaustion — an organisation hits its daily cap
+# Budget exhaustion — `TenantBudgetExhausted`: an organisation hits its daily cap
 
-**Alert:** `TenantBudgetExhausted`.
+**Alert:** `TenantBudgetExhausted`, one per organisation and capability: the alert's labels are
+the tenant and the capability it is being refused on.
 
 ## What it means
 
@@ -12,12 +13,14 @@ quality dial.
 
 ## The first three commands
 
-1. `sum by (organization) (increase(catalyst_ai_provider_cost_micros_total[1d]))` — who is
-   spending, and whether it is one organisation or the whole fleet.
-2. `sum by (capability) (increase(catalyst_ai_provider_tokens_total[1d]))` — which capability is
-   the spend. A digest or an ingest of a large corpus is the usual answer.
-3. `sum(increase(catalyst_ai_errors_total{code="ai.budget.exceeded"}[1d]))` — how many calls the
-   tenant is actually losing; a handful at the end of the day is the cap working.
+1. `sum by (organization, capability) (increase(catalyst_ai_budget_refused_total[1d]))` — how
+   many calls each tenant is losing, and on what; a handful at the end of the day is the cap
+   working. Several organisations at once is the fleet, not a tenant.
+2. `sum by (capability) (increase(catalyst_ai_provider_cost_micros_total{organization="<id>"}[1d]))`
+   with the alert's organisation — where its spend went. A digest or an ingest of a large corpus
+   is the usual answer.
+3. `sum by (organization) (increase(catalyst_ai_provider_cost_micros_total[1d]))` — whether the
+   tenant is an outlier or the default cap is simply too low for normal use.
 
 ## What to do
 

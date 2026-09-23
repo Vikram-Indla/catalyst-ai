@@ -1,7 +1,7 @@
-# Quarantine — a job row that failed its proof, and a rise in refused origins
+# `JobQuarantined` — a job row failed its stored proof
 
-Two alerts share this page because they share a cause: something presented work to the service
-that the backend did not sign for it.
+Something presented work to the service that the backend did not sign for it, through the table
+instead of the door.
 
 ## `job_quarantined` (the worker refused to run a row)
 
@@ -34,25 +34,8 @@ failing row to `quarantined` with the reason (`catalyst-ai worker`, `platform/jo
 A quarantined row is never re-queued by the service; the backend resubmits under a fresh
 envelope once the cause is known. Rows are kept for the audit and expire with the job result TTL.
 
-## `origin_refused` (the door refused N requests in a window)
+## A rise in refused requests
 
-Every refused request is one security event with a reason and one increment of
-`origin_refused{reason}`; the caller sees `401 auth.origin.invalid` and nothing else.
-
-| Reason | Most likely cause | Do |
-| --- | --- | --- |
-| `missing`, `malformed` | something that is not the backend is calling: a scanner, an old client with a bearer | find the source address in the ingress log; the service is unaffected |
-| `unknown_key` | a rotation out of order | `key-rotation.md` |
-| `bad_signature` | a forged envelope or a corrupted one | intrusion until shown otherwise; rotate |
-| `expired`, `not_yet_valid`, `too_long_lived` | clock drift on one side, or the backend signing at enqueue time instead of send time | compare the two clocks; the tolerance is `AUTH_CLOCK_SKEW_SECONDS` |
-| `replayed` | a retry that re-sent the same envelope (a backend defect), or a real replay | the backend must sign every attempt afresh; if it does, treat as an attack |
-| `body_mismatch` | a proxy that rewrites bodies, or the backend hashing a different serialisation than it sends | compare the bytes; `bh` is over the bytes exactly as sent |
-| `organization_mismatch`, `capability_mismatch` | the backend signed for one thing and sent another | a backend defect; its own log by request id |
-| `unverifiable` | the replay store did not answer | the database: `ready`, the pool, `retention.md`'s roles; the backend retries after `Retry-After` |
-
-**When to page.** Any `bad_signature`; `replayed` or `body_mismatch` that the backend cannot
-explain within the hour; a sustained rate of any reason from a source that is not the backend.
-
-**When to disable a capability.** Never for this alert — the door is before every capability
-and refusing is the correct behaviour. The kill switch is for a capability that misbehaves after
-the door.
+The door's refusals are `OriginRefusalsHigh` and `OriginForged`, and their page is
+`origin-refusals.md`. A quarantine and a forged request in the same hour are one incident:
+start from `bad_signature` there.

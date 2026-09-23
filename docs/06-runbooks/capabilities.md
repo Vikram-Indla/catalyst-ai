@@ -1,6 +1,40 @@
 # Capabilities — one line each
 
 What to check when quality drops, how to disable without a deploy, what the backend receives.
+Three alerts are about a capability as a whole and land here; the table below is per capability.
+
+## `CapabilityErrorBudgetBurn` — an operation answers `5xx` to more than one call in a hundred
+
+1. `sum by (operation, status) (rate(catalyst_ai_http_requests_total[15m]))` — which operation.
+2. `sum by (code) (rate(catalyst_ai_errors_total[15m]))` — the code says whose page it is:
+   `ai.provider.*` is `provider-outage.md`, `ai.index.unavailable` is `index-unavailable.md`,
+   `auth.origin.unverifiable` is `replay-store-down.md`, `ai.budget.exceeded` is not a `5xx`.
+3. The capability's row below for its own checks and its switch. Page severity: a burn that
+   continues misses the month's objective.
+
+## `CapabilityLatencyHigh`, `RetrievalLatencyHigh` — an operation's p95 is over its declared budget
+
+Each operation is judged at its capability's `p95_latency_ms` (the rules carry the number as
+seconds; `tools/checks/latency` fails the gate when a rule and a descriptor disagree): search
+and the index operations 800 ms, `improve-story` and `unfurl` 4 s, `translate` 6 s, generation
+and summaries 8 s, `propose-workflow` and `release-notes` 10 s, the assistant, `generate-tests`
+and `post-mortem` 12 s, `documents` 15 s. A ticket, not a page.
+
+1. `ProviderLatencyHigh` for the same capability: if it fires too, the provider is the cause
+   (`provider-outage.md`).
+2. If not, the time is inside the service: for retrieval, the pool (`DATABASE_POOL_MAX` against
+   concurrent calls) and the chunk count per organisation; for `documents.ingest`, the parser
+   child (`CAPABILITY_DOCUMENTS__TIMEOUT_MS`).
+3. The cache: a hit rate that fell (`CacheHitRateLow`) sends every call to the provider.
+
+## `CacheHitRateLow` — the cache serves almost nothing
+
+A collapse means the key moved: a prompt version, a model alias or a capability version changed
+the key for every entry, or `cache_ttl_seconds` was lowered. Compare the fall's time with the
+last deploy; the rate recovers by itself as the new keys fill. A fall with no deploy means the
+backend changed what it sends (a field that varies per call reaching the canonical input).
+
+## Per capability
 
 | Capability | Quality drops: check | Disable | The backend receives when off |
 | --- | --- | --- | --- |
