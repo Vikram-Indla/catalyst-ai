@@ -91,15 +91,29 @@ stamp: tree 0d99d2f9eee6 in python:3.12.14-slim@sha256:2f17fc044b579bab302c2e805
 exit=0 elapsed=3063s (the package step ran at about 20 kB/s; the gate itself was the usual length)
 ```
 
+## The push was refused, by a test that waited for time
+The pre-push hook re-ran the pipeline (the record changed after the stamp), and it went red:
+```
+FAILED tests/storage/test_jobs.py::test_the_attackers_rows_inserted_into_the_database_are_quarantined_on_the_real_loop - AssertionError: forged_key
+E  assert 'queued' == 'quarantined'
+(four `job_quarantined` lines captured: the loop decided four of five rows in its two seconds)
+error: failed to push some refs
+```
+Nothing reached the remote. The test slept a fixed two seconds and then stopped the worker, and a
+slow container decides five rows more slowly than that (`F-040`). It now polls until every row has
+left `queued` and `running`, bounded at 30 s. Five runs in a row against a real database, all green.
+Both gates were run again on the tree with the fix (below).
+
 ## Eval and budget numbers
 Unchanged: no row thinks yet, so every request, fixture and number is the same.
 
 ## Decisions and questions
-- `F-039` found and closed.
+- `F-039` found and closed; `F-040` (a timing-dependent storage test) found at the push and closed.
 
 ## Commit
 1. `fix(providers): bill thinking tokens as output; a row names its thinking level` — src/catalyst_ai/providers/gemini/models.py, src/catalyst_ai/providers/gemini/adapter.py, src/catalyst_ai/providers/gemini/streaming.py, tests/unit/providers/gemini/test_adapter.py, tests/unit/providers/gemini/test_streaming.py, docs/04-ledgers/contracts-changelog.md, brain/03-FINDINGS.md, this record
-Green light: yes, given in this session, on a green `make ci`
+Green light: yes, given in this session, on a green `make ci` (commit 1, made; its push was refused by F-040)
+2. `test(storage): wait for the worker to decide every row, not for two seconds` — tests/storage/test_jobs.py, brain/03-FINDINGS.md, this record
 
 ## Next
 The register rows, once the product owner's question on the fast and long classes is answered.

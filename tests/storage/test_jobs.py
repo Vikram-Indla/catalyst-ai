@@ -32,6 +32,9 @@ RAW_INSERT = (
 )
 RAW_STATE = "SELECT state, result FROM jobs WHERE id = $1"
 ATTACK = b"attack"
+SETTLE_TIMEOUT_S = 30
+SETTLE_POLL_S = 0.1
+UNSETTLED = frozenset({"queued", "running"})
 
 
 class Echo(BaseModel):
@@ -101,6 +104,17 @@ async def _raw_insert(database_url: str, row: JobRow) -> None:
         )
     finally:
         await connection.close()
+
+
+async def _until_settled(database_url: str, job_ids: list[UUID]) -> None:
+    """Wait until the loop has decided every row: a fixed sleep failed on a slow machine."""
+    deadline = asyncio.get_running_loop().time() + SETTLE_TIMEOUT_S
+    while asyncio.get_running_loop().time() < deadline:
+        states = [(await _raw_state(database_url, job_id))[0] for job_id in job_ids]
+        if not any(state in UNSETTLED for state in states):
+            return
+        await asyncio.sleep(SETTLE_POLL_S)
+    pytest.fail(f"the worker left rows undecided after {SETTLE_TIMEOUT_S} s: {states}")
 
 
 async def _raw_state(database_url: str, job_id: UUID) -> tuple[str, str | None]:
@@ -184,7 +198,7 @@ async def test_the_attackers_rows_inserted_into_the_database_are_quarantined_on_
     worker, counters = _worker(runtime, store)
     stop = asyncio.Event()
     serving = asyncio.create_task(worker.serve(stop))
-    await asyncio.sleep(2)
+    await _until_settled(database_url, [legitimate.id, *(row.id for row in rows.values())])
     stop.set()
     await asyncio.wait_for(serving, timeout=10)
     for name, row in rows.items():
