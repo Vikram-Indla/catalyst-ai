@@ -81,7 +81,7 @@ async def test_improve_story_run_returns_a_schema_valid_proposal_from_the_record
     proposal = ImproveStoryResponse.model_validate(response.json())
     assert proposal.changed is True
     assert "8 hours" in proposal.improved_description
-    assert proposal.capability_version == "1.1.0"
+    assert proposal.capability_version == "1.2.0"
     assert proposal.usage.cost_micros > 0
 
 

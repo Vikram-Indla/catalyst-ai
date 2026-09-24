@@ -7,6 +7,9 @@ rationale_present: 0.95
 mode_shape: 0.95
 markup_kept: 1.0
 no_new_facts: 1.0
+record_facts_kept: 1.0
+glossary_exact: 1.0
+latin_digits: 1.0
 overall: 0.95
 p95_latency_ms: 4000
 p95_cost_micros: 2000

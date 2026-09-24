@@ -8,6 +8,7 @@ import re
 from collections.abc import Callable
 
 from catalyst_ai.capabilities.improve_story.comments import TOKEN_MENTION, markup_problem, mentions
+from catalyst_ai.capabilities.improve_story.governed import facts, known_text
 from catalyst_ai.capabilities.improve_story.postprocess import source_text
 from catalyst_ai.capabilities.improve_story.quality import (
     dominant_script,
@@ -21,6 +22,7 @@ from catalyst_ai.contract.improve_story import (
     ImproveStoryRequest,
     ImproveStoryResponse,
 )
+from catalyst_ai.platform.language import latin
 from catalyst_ai.platform.safety import scan_output
 from catalyst_ai.platform.safety.delimit import MARKER_PATTERN
 
@@ -84,8 +86,8 @@ def identifiers_kept(
         return 1.0
     result = response.improved_description + "\n" + (response.acceptance_criteria or "")
     forbidden = set(_terms(expected))
-    required = identifiers(source_text(request)) - forbidden
-    return _score(required <= identifiers(result))
+    required = identifiers(latin(source_text(request))) - forbidden
+    return _score(required <= identifiers(latin(result)))
 
 
 def no_forbidden_content(
@@ -177,6 +179,39 @@ def no_new_facts(
     return _score(identifiers(_unmentioned(response.improved_description)) <= known)
 
 
+def record_facts_kept(
+    request: ImproveStoryRequest, response: ImproveStoryResponse, _e: dict[str, object]
+) -> float:
+    """A governed record's rewrite states no fact its inputs lack and keeps every one it rewrites."""
+    if request.record is None:
+        return 1.0
+    result = response.improved_description + "\n" + (response.acceptance_criteria or "")
+    added = facts(result) - facts(known_text(request, request.record))
+    kept = request.mode is ImproveStoryMode.REPLY or facts(source_text(request)) <= facts(result)
+    return _score(not added and kept)
+
+
+def glossary_exact(
+    request: ImproveStoryRequest, response: ImproveStoryResponse, _e: dict[str, object]
+) -> float:
+    """Every glossary term the source uses is in the rewrite exactly as the glossary writes it."""
+    if request.record is None or request.mode is ImproveStoryMode.REPLY:
+        return 1.0
+    source = source_text(request)
+    used = [term for term in request.record.glossary if term in source]
+    return _score(all(term in response.improved_description for term in used))
+
+
+def latin_digits(
+    request: ImproveStoryRequest, response: ImproveStoryResponse, _e: dict[str, object]
+) -> float:
+    """A governed record's rewrite writes every digit as a Latin one."""
+    if request.record is None:
+        return 1.0
+    result = response.improved_description + "\n" + (response.acceptance_criteria or "")
+    return _score(latin(result) == result)
+
+
 def _unmentioned(*texts: str) -> str:
     """Join the texts without their participant tokens: people are graded apart, not as facts."""
     return TOKEN_MENTION.sub(" ", "\n".join(texts))
@@ -192,4 +227,7 @@ GRADERS: dict[str, Grader] = {
     "mode_shape": mode_shape,
     "markup_kept": markup_kept,
     "no_new_facts": no_new_facts,
+    "record_facts_kept": record_facts_kept,
+    "glossary_exact": glossary_exact,
+    "latin_digits": latin_digits,
 }
