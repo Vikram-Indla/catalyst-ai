@@ -22,8 +22,27 @@ from tools.origin import SigningAuth
 REPO_ROOT = Path(__file__).resolve().parent.parent
 set_hypothesis_home_dir(Path(tempfile.gettempdir()) / "catalyst-ai-hypothesis")
 hypothesis_settings.register_profile("repository", database=None)
+hypothesis_settings.register_profile(
+    "nightly",
+    parent=hypothesis_settings.get_profile("repository"),
+    max_examples=2000,
+    deadline=None,
+)
 hypothesis_settings.load_profile("repository")
 TEST_DATABASE = "postgresql://test:test@localhost:5433/test"
+NIGHTLY_FACTOR = 20
+
+
+def examples(base: int) -> int:
+    """Return a property test's own example count, twenty times over under the nightly profile.
+
+    A test pins its count because a slow parser cannot take the default; the nightly profile
+    (`--hypothesis-profile=nightly`) raises every count in proportion instead of flattening them.
+    """
+    current = hypothesis_settings.default
+    nightly = hypothesis_settings.get_profile("nightly").max_examples
+    in_nightly = current is not None and current.max_examples == nightly
+    return base * NIGHTLY_FACTOR if in_nightly else base
 
 
 @pytest.fixture
@@ -32,6 +51,7 @@ def settings() -> Settings:
         environment=Environment.DEVELOPMENT,
         auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr(TEST_DATABASE),
+        provider_access_token=SecretStr("developer-token"),
     )
 
 

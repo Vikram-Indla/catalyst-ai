@@ -1,0 +1,37 @@
+name: nightly
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.12.14-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.1-pg17@sha256:3e8b3adfd27b5707128f60956f62a793c3c9326ea8cfaf0eab7adccb5d700b21
+        env:
+          POSTGRES_USER: catalyst_ai
+          POSTGRES_PASSWORD: catalyst_ai
+          POSTGRES_DB: catalyst_ai
+        options: >-
+          --health-cmd "pg_isready -U catalyst_ai"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CATALYST_AI_EVAL_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@postgres:5432/catalyst_ai
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates && pip install uv==0.12.16 && git config --global --add safe.directory '*'
+      - uses: actions/checkout@v4
+      - run: make tools
+      - run: make nightly
+  image-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install uv==0.12.16
+      - run: make tools
+      - run: make scan-tools
+      - run: make image-scan

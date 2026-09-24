@@ -5,6 +5,7 @@ from hypothesis import strategies as st
 
 from catalyst_ai.retrieval.parsers.pdf import parse_pdf
 from catalyst_ai.retrieval.parsers.port import Parsed, ParserError
+from tests.conftest import examples
 
 SLOW = [HealthCheck.too_slow]
 
@@ -21,7 +22,7 @@ pdfish = st.one_of(
 )
 
 
-@settings(max_examples=60, suppress_health_check=SLOW, deadline=None)
+@settings(max_examples=examples(60), suppress_health_check=SLOW, deadline=None)
 @given(pdfish)
 def test_arbitrary_bytes_never_crash(payload: bytes) -> None:
     outcome = _outcome(payload)

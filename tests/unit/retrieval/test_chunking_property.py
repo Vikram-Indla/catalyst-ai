@@ -8,6 +8,7 @@ from hypothesis import strategies as st
 
 from catalyst_ai.retrieval import WORK_ITEMS
 from catalyst_ai.retrieval.chunking import chunk
+from tests.conftest import examples
 
 SPEC = dataclasses.replace(WORK_ITEMS, chunk_chars=60, overlap_chars=10)
 WORD = re.compile(r"\S+")
@@ -24,7 +25,7 @@ unique_texts = st.lists(words, min_size=0, max_size=24, unique=True).map(_join)
 SLOW = [HealthCheck.too_slow]
 
 
-@settings(max_examples=150, suppress_health_check=SLOW, deadline=None)
+@settings(max_examples=examples(150), suppress_health_check=SLOW, deadline=None)
 @given(texts)
 def test_windows_are_bounded_non_empty_and_cover_every_word(text: str) -> None:
     windows = chunk(text, SPEC)
@@ -33,7 +34,7 @@ def test_windows_are_bounded_non_empty_and_cover_every_word(text: str) -> None:
     assert chunk(text, SPEC) == windows
 
 
-@settings(max_examples=100, suppress_health_check=SLOW, deadline=None)
+@settings(max_examples=examples(100), suppress_health_check=SLOW, deadline=None)
 @given(unique_texts)
 def test_windows_keep_the_order_of_the_text(text: str) -> None:
     order = {word: i for i, word in enumerate(WORD.findall(text))}

@@ -9,6 +9,7 @@ from hypothesis import strategies as st
 
 from catalyst_ai.retrieval.parsers.office import parse_docx, parse_pptx
 from catalyst_ai.retrieval.parsers.port import Parsed, ParserError
+from tests.conftest import examples
 
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 SLOW = [HealthCheck.too_slow]
@@ -32,7 +33,7 @@ def _docx(paragraphs: list[str]) -> bytes:
     return buffer.getvalue()
 
 
-@settings(max_examples=60, suppress_health_check=SLOW, deadline=None)
+@settings(max_examples=examples(60), suppress_health_check=SLOW, deadline=None)
 @given(st.binary(max_size=400))
 def test_arbitrary_bytes_never_crash(payload: bytes) -> None:
     for parser in (parse_docx, parse_pptx):
@@ -43,7 +44,7 @@ def test_arbitrary_bytes_never_crash(payload: bytes) -> None:
             assert outcome == "refused"
 
 
-@settings(max_examples=60, suppress_health_check=SLOW, deadline=None)
+@settings(max_examples=examples(60), suppress_health_check=SLOW, deadline=None)
 @given(st.lists(words, max_size=8))
 def test_well_formed_paragraphs_come_back_in_order(paragraphs: list[str]) -> None:
     parsed = parse_docx(_docx(paragraphs))
