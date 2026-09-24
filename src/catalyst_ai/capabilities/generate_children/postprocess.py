@@ -1,6 +1,7 @@
 """Stages 6 and 7: the hierarchy check, sibling de-duplication, bounding, confidence, response."""
 
 from catalyst_ai.capabilities.generate_children import descriptor
+from catalyst_ai.capabilities.generate_children.drafts import as_drafts
 from catalyst_ai.capabilities.generate_children.schema import ModelCandidate, ModelOutput
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.contract.generate_children import (
@@ -132,7 +133,8 @@ def to_response(
     check_hierarchy(output, request)
     level = expected_child_level(request)
     pool = [s.title for s in request.siblings] + [t for t in indexed or () if t]
-    marked = bound(mark_duplicates(output.candidates, pool), request.max_items)
+    drafts, withheld = as_drafts(output.candidates, request)
+    marked = bound(mark_duplicates(drafts, pool), request.max_items)
     candidates = [
         Candidate(
             type=c.type,
@@ -141,6 +143,7 @@ def to_response(
             acceptance_criteria=c.acceptance_criteria,
             confidence=candidate_confidence(c, request, level),
             duplicate_of=c.duplicate_of,
+            draft=request.draft_only,
         )
         for c in marked
     ]
@@ -157,6 +160,7 @@ def to_response(
         empty_reason=output.empty_reason if not new_ones else None,
         confidence=round(sum(new_ones) / len(new_ones), 2) if new_ones else None,
         index_consulted=indexed is not None,
+        withheld=withheld,
     )
 
 

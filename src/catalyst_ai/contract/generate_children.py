@@ -1,4 +1,9 @@
-"""The generate-children operation: typed candidate children of a parent, never created here."""
+"""The generate-children operation: typed candidate children of a parent, never created here.
+
+With `draft_only`, a candidate is wording and nothing more: no acceptance criteria, and no number,
+date or link the parent's text and the sources do not already carry — a target, a weight or a
+measure is the member's to add. A candidate that carries one is withheld and counted, not returned.
+"""
 
 from enum import StrEnum
 from typing import Annotated, Literal
@@ -21,6 +26,7 @@ MAX_LANGUAGE = 16
 MAX_KEY = 64
 MAX_CRITERIA = 20
 MAX_CRITERION = 1_000
+MAX_FOCUS = 2_000
 
 EmptyReason = Literal["parent_too_vague", "siblings_cover_it", "nothing_at_this_level"]
 
@@ -140,6 +146,23 @@ class GenerateChildrenRequest(RequestEnvelope):
             ),
         ),
     ] = None
+    child_focus: Annotated[
+        str | None,
+        Field(
+            max_length=MAX_FOCUS,
+            json_schema_extra=classified(
+                "INTERNAL", "How a child of this kind reads, as the product words it"
+            ),
+        ),
+    ] = None
+    draft_only: Annotated[
+        bool,
+        Field(
+            json_schema_extra=classified(
+                "PUBLIC", "Wording only: no criteria, and no number, date or link the inputs lack"
+            ),
+        ),
+    ] = False
 
 
 class Candidate(BaseModel):
@@ -153,6 +176,7 @@ class Candidate(BaseModel):
     acceptance_criteria: list[str] = Field(default_factory=list, max_length=MAX_CRITERIA)
     confidence: float = Field(ge=0.0, le=1.0)
     duplicate_of: str | None = Field(default=None, max_length=MAX_TITLE)
+    draft: bool = False
 
 
 class GenerateChildrenResponse(ResponseEnvelope):
@@ -164,3 +188,4 @@ class GenerateChildrenResponse(ResponseEnvelope):
     empty_reason: EmptyReason | None
     confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     index_consulted: bool = False
+    withheld: int = Field(default=0, ge=0)

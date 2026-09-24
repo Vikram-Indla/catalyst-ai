@@ -6,6 +6,7 @@ bounds_and_reason: 0.95
 language_preserved: 1.0
 identifiers_kept: 1.0
 no_forbidden_content: 1.0
+drafts_only: 1.0
 overall: 0.97
 p95_latency_ms: 8000
 p95_cost_micros: 6000

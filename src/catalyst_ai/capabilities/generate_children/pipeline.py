@@ -49,6 +49,8 @@ def parse(request: GenerateChildrenRequest, request_id: str, idempotency: str | 
         else None,
         "focus_hint": request.focus_hint,
     }
+    if request.child_focus:
+        texts["child_focus"] = request.child_focus
     return Parsed(request, request_id, idempotency, texts)
 
 
@@ -108,6 +110,8 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
         Segment(role="system", name="system", text=prompt.section("system")),
         Segment(role="developer", name="developer", text=developer),
     ]
+    if request.draft_only:
+        segments.append(Segment(role="developer", name="drafts", text=prompt.section("drafts")))
     for name, text in parsed.user_texts.items():
         segments.append(Segment(role="user", name=name, text=fence(name, text or ABSENT)))
     timeout = runtime.settings.capability_generate_children.timeout_ms or descriptor.timeout_ms

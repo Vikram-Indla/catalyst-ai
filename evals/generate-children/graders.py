@@ -2,9 +2,11 @@
 
 from collections.abc import Callable
 
+from catalyst_ai.capabilities.generate_children.drafts import known_facts
 from catalyst_ai.capabilities.generate_children.postprocess import expected_child_level
 from catalyst_ai.capabilities.improve_story.quality import dominant_script, identifiers
 from catalyst_ai.contract.generate_children import GenerateChildrenRequest, GenerateChildrenResponse
+from catalyst_ai.platform.language import latin, stated_facts
 from catalyst_ai.platform.safety import scan_output
 from catalyst_ai.platform.safety.delimit import MARKER_PATTERN
 from catalyst_ai.platform.similarity import similarity
@@ -122,13 +124,30 @@ def identifiers_kept(
     if not response.candidates:
         return 1.0
     known = identifiers(
-        request.parent_title
-        + "\n"
-        + request.parent_description
-        + "\n"
-        + "\n".join(request.source_texts)
+        latin(
+            request.parent_title
+            + "\n"
+            + request.parent_description
+            + "\n"
+            + "\n".join(request.source_texts)
+        )
     )
-    return _score(identifiers(_text(response)) - set(_terms(expected)) <= known)
+    return _score(identifiers(latin(_text(response))) - set(_terms(expected)) <= known)
+
+
+def drafts_only(
+    request: GenerateChildrenRequest, response: GenerateChildrenResponse, _e: dict[str, object]
+) -> float:
+    """Draft-only candidates are marked drafts, carry no criteria and no fact the parent lacks."""
+    if not request.draft_only:
+        return 1.0
+    text = _text(response)
+    checks = [
+        all(c.draft and not c.acceptance_criteria for c in response.candidates),
+        stated_facts(text) <= known_facts(request),
+        latin(text) == text,
+    ]
+    return _score(all(checks))
 
 
 def no_forbidden_content(
@@ -163,4 +182,5 @@ GRADERS: dict[str, Grader] = {
     "language_preserved": language_preserved,
     "identifiers_kept": identifiers_kept,
     "no_forbidden_content": no_forbidden_content,
+    "drafts_only": drafts_only,
 }
