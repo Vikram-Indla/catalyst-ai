@@ -12,7 +12,7 @@ if make --no-print-directory stamp-check; then
   exit 0
 fi
 if docker info >/dev/null 2>&1; then
-  make ci
+  make ci-aware
 else
   echo "pre-push: Docker unavailable — running make verify; parity with the CI image is not proven" >&2
   make verify

@@ -8,6 +8,10 @@ needs no second run. Anything else → the pipeline runs.
 `begin` notes the tree a run is about to prove, in the worktree's own git directory; `write` stamps
 only that tree, and only if the tree is still that one when the run ends. A tree edited while the
 pipeline ran was not proved: the run stays green, and no stamp is written for it.
+
+A full run also writes its stamp as the **base**, beside it: the tree a change-aware run compares
+with. A scoped run writes the push stamp only, so it proves its own tree for its own push and is
+never the base of the next one; the base is always a full run, inside the day, in the same image.
 """
 
 import argparse
@@ -21,6 +25,8 @@ from pathlib import Path
 
 STAMP_NAME = "ci-green"
 BEGIN_NAME = "ci-begin"
+BASE_NAME = "ci-base"
+FULL = "full"
 MAX_AGE_S = 24 * 60 * 60
 
 
@@ -31,14 +37,8 @@ def _git(*args: str) -> str:
     return completed.stdout
 
 
-def tree_hash() -> str:
-    """Return a hash of the working tree: every tracked or unignored file's content, by path.
-
-    Only the files that exist (a tracked file deleted but not yet committed counts as absent,
-    exactly as it will after its commit, so committing never moves the hash), each as git would
-    store it — line endings normalised — so a worktree and the main checkout of the same tree
-    hash alike whatever their endings on disk.
-    """
+def tree_manifest() -> dict[str, str]:
+    """Return every tracked or unignored file present on disk, by path, as the blob git stores."""
     listed = _git("ls-files", "-z", "--cached", "--others", "--exclude-standard")
     present = sorted({p for p in listed.split("\0") if p and Path(p).is_file()})
     hashed = subprocess.run(
@@ -48,8 +48,19 @@ def tree_hash() -> str:
         check=True,
         encoding="utf-8",
     ).stdout.split()
+    return dict(zip(present, hashed, strict=True))
+
+
+def tree_hash(manifest: dict[str, str] | None = None) -> str:
+    """Return a hash of the working tree: every tracked or unignored file's content, by path.
+
+    Only the files that exist (a tracked file deleted but not yet committed counts as absent,
+    exactly as it will after its commit, so committing never moves the hash), each as git would
+    store it — line endings normalised — so a worktree and the main checkout of the same tree
+    hash alike whatever their endings on disk.
+    """
     digest = hashlib.sha256()
-    for path, blob in zip(present, hashed, strict=True):
+    for path, blob in sorted((manifest if manifest is not None else tree_manifest()).items()):
         digest.update(f"{path}\0{blob}\n".encode())
     return digest.hexdigest()
 
@@ -70,6 +81,11 @@ def stamp_path() -> Path:
     return Path(_git("rev-parse", "--git-common-dir").strip()) / STAMP_NAME
 
 
+def base_path() -> Path:
+    """Return where the last full green run is kept, beside the stamp."""
+    return stamp_path().with_name(BASE_NAME)
+
+
 def begin_path() -> Path:
     """Return where a run notes its tree: this worktree's own git directory, never shared."""
     return Path(_git("rev-parse", "--git-dir").strip()) / BEGIN_NAME
@@ -82,27 +98,44 @@ def begin() -> str:
     return tree
 
 
-def write(image: str) -> dict[str, object] | None:
-    """Record a green run in the given image, if the tree is still the one noted at `begin`."""
+def write(image: str, scope: str = FULL) -> dict[str, object] | None:
+    """Record a green run in the given image, if the tree is still the one noted at `begin`.
+
+    The stamp keeps the tree's manifest, so the next change-aware run can name exactly the files
+    that differ from this proven tree, and the scope that proved it (`full`, or the classes a
+    change-aware run ran for).
+    """
     noted = begin_path()
     started = noted.read_text(encoding="utf-8").strip() if noted.exists() else None
     noted.unlink(missing_ok=True)
-    tree = tree_hash()
+    manifest = tree_manifest()
+    tree = tree_hash(manifest)
     if started != tree:
         return None
     stamp: dict[str, object] = {
         "tree": tree,
+        "scope": scope,
+        "manifest": manifest,
         "image": image,
         "digest": image_digest(image),
         "at": int(time.time()),
         "when": datetime.now(UTC).isoformat(timespec="seconds"),
     }
-    stamp_path().write_text(json.dumps(stamp, indent=2) + "\n", encoding="utf-8")
+    text = json.dumps(stamp, indent=2) + "\n"
+    stamp_path().write_text(text, encoding="utf-8")
+    if scope == FULL:
+        base_path().write_text(text, encoding="utf-8")
     return stamp
 
 
-def _read_stamp() -> dict[str, object] | None:
-    path = stamp_path()
+def read_base() -> dict[str, object] | None:
+    """Return the last full green run, the only base a change-aware run compares with."""
+    return read_stamp(base_path())
+
+
+def read_stamp(path: Path | None = None) -> dict[str, object] | None:
+    """Return the last green stamp (or the stamp at `path`), or None when it cannot be read."""
+    path = path or stamp_path()
     if not path.exists():
         return None
     try:
@@ -127,7 +160,7 @@ def _staleness(stamp: dict[str, object], image: str, now: float) -> str | None:
 
 def reason_to_run(image: str, now: float | None = None) -> str | None:
     """Return why the pipeline must run again, or None when the stamp proves this tree."""
-    stamp = _read_stamp()
+    stamp = read_stamp()
     if stamp is None:
         return "no readable stamp: this tree has no green run on record"
     return _staleness(stamp, image, now if now is not None else time.time())
@@ -136,15 +169,15 @@ def reason_to_run(image: str, now: float | None = None) -> str | None:
 def _check(image: str) -> int:
     reason = reason_to_run(image)
     if reason is None:
-        stamp = _read_stamp() or {}
+        stamp = read_stamp() or {}
         print(f"stamp: tree {str(stamp.get('tree'))[:12]} green in {image} at {stamp.get('when')}")
         return 0
     print(f"stamp: {reason}")
     return 1
 
 
-def _write(image: str) -> int:
-    stamp = write(image)
+def _write(image: str, scope: str) -> int:
+    stamp = write(image, scope)
     if stamp is None:
         print(
             "stamp: the tree changed while the pipeline ran (or no start was noted); "
@@ -160,11 +193,12 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="stamp")
     parser.add_argument("command", choices=("begin", "write", "check", "tree"))
     parser.add_argument("--image", default="")
+    parser.add_argument("--scope", default=FULL)
     args = parser.parse_args(argv)
     if args.command in {"begin", "tree"}:
         print(begin() if args.command == "begin" else tree_hash())
         return 0
-    return _write(args.image) if args.command == "write" else _check(args.image)
+    return _write(args.image, args.scope) if args.command == "write" else _check(args.image)
 
 
 if __name__ == "__main__":

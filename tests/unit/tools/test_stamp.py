@@ -118,3 +118,16 @@ def test_the_start_is_noted_per_worktree_and_a_matching_end_is_stamped(repo: Pat
     assert stamp.main(["write", "--image", IMAGE]) == 0
     assert stamp.reason_to_run(IMAGE) is None
     assert not stamp.begin_path().exists()
+
+
+def test_a_full_run_is_the_base_and_a_scoped_run_never_replaces_it(repo: Path) -> None:
+    stamp.begin()
+    full = stamp.write(IMAGE)
+    assert full is not None
+    assert stamp.read_base() == full
+    (repo / "b.md").write_text("a page\n", encoding="utf-8")
+    stamp.begin()
+    scoped = stamp.write(IMAGE, "docs")
+    assert scoped is not None
+    assert stamp.read_stamp() == scoped
+    assert stamp.read_base() == full
