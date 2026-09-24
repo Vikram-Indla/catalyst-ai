@@ -1,0 +1,10 @@
+citations_valid: 1.0
+no_unseen_numbers: 1.0
+health_kept_apart: 1.0
+not_measured_kept: 1.0
+language_kept: 1.0
+injection_inert: 1.0
+shape_kept: 1.0
+overall: 0.97
+p95_latency_ms: 8000
+p95_cost_micros: 4000

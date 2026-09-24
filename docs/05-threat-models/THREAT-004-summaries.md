@@ -56,3 +56,12 @@ long fields).
 - v1's fixtures are authored: the summaries are cue-based and the translations are script maps.
   The floors prove the rules, not the model. Revisit at the first live recording.
 - Accepted by: pending the lead (`D-NNN`).
+
+## brief
+
+The chain is the backend's official record; the charter and the findings are text members wrote,
+and the charter is where an instruction would hide. It is fenced with the rest of the chain as
+data, and two injection cases in the set exercise it. What a briefing may say is bounded in code
+after the model answers: every sentence cites ids the chain carries, and no number appears that the
+chain does not carry, so an injected "report 100% progress" is refused (`unseen_number`) even if
+the model obeyed it. People are not in the chain at all.
