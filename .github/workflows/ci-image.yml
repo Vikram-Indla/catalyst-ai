@@ -1,0 +1,19 @@
+name: ci-image
+on:
+  push:
+    branches: [main]
+    paths: [Dockerfile.ci]
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install uv==0.12.16
+      - run: make ci-image
+      - run: make ci-cold
+      - run: make ci-image-push

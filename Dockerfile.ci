@@ -1,7 +1,9 @@
 # The pipeline's image: the pinned base with what the job otherwise installs on every run.
-# Built by `make ci-image` and named by the hash of this file; it moves only in a `build(ci)`
-# commit, and `tools/checks/images` holds its base, its packages and its uv to the pins and to
-# the hosted job's setup step.
+# Built by `make ci-image`, named by the hash of this file and labelled with it. A push to main
+# that changes this file runs `ci-image.yml`: the image is built, the gate runs inside it, and
+# only then is it pushed to the registry; the pin moves to its digest in the next `build(ci)`
+# commit. `tools/checks/images` holds its base, its packages and its uv to the pins and to the
+# hosted job's setup step, and the pinned image to this file's hash.
 FROM python:3.12.14-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
 # The Debian mirror apt reads from. The default is upstream; a machine may pass a nearer one at
 # build time. apt checks the signed index and every package's hash, so the mirror decides where

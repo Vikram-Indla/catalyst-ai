@@ -216,8 +216,10 @@ WORKFLOWS = WORKFLOW.parent
 CI_JOB = "verify"
 CI_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
 CI_DATABASE_IMAGE = (
-    "pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f"
+    "pgvector/pgvector:0.8.1-pg17"
+    "@sha256:3e8b3adfd27b5707128f60956f62a793c3c9326ea8cfaf0eab7adccb5d700b21"
 )
+CI_PGVECTOR = "0.8.1"
 CI_DATABASE_ALIAS = "postgres"
 CI_DATABASE_ENV = {
     "POSTGRES_USER": "catalyst_ai",
@@ -233,6 +235,19 @@ CI_JOB_ENV = {
 }
 CI_NETWORK = "catalyst-ai-ci"
 
+CI_IMAGE_WORKFLOW = WORKFLOWS / "ci-image.yml"
+CI_IMAGE_JOB = "image"
+CI_IMAGE_TRIGGERS: dict[str, object] = {
+    "push": {"branches": ["main"], "paths": [DOCKERFILE_CI.as_posix()]}
+}
+CI_IMAGE_PERMISSIONS = {"contents": "read", "packages": "write"}
+CI_IMAGE_JOB_ENV = {"GITHUB_TOKEN": "${{ github.token }}"}
+CI_IMAGE_SETUP = "pip install uv==0.12.16"
+CI_IMAGE_ALLOWED_RUNS = (CI_IMAGE_SETUP, "make ci-image", "make ci-cold", "make ci-image-push")
+CI_REGISTRY = "ghcr.io"
+CI_IMAGE_LABEL = "org.catalyst-ai.dockerfile-sha256"
+CI_IMAGE_BUILT_FROM: str | None = None
+
 CI_ALLOWED_USES = ("actions/checkout@v4",)
 CI_SETUP = (
     "apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates"
@@ -244,6 +259,15 @@ CI_ALLOWED_RUNS = (
     "make hooks",
     "make verify",
 )
+NIGHTLY_WORKFLOW = WORKFLOWS / "nightly.yml"
+NIGHTLY_JOB = "nightly"
+NIGHTLY_TRIGGERS: dict[str, object] = {
+    "schedule": [{"cron": "0 2 * * *"}],
+    "workflow_dispatch": None,
+}
+NIGHTLY_ALLOWED_RUNS = (CI_SETUP, "make tools", "make nightly")
+NIGHTLY_SCAN_JOB = "image-scan"
+NIGHTLY_SCAN_RUNS = (CI_IMAGE_SETUP, "make tools", "make scan-tools", "make image-scan")
 
 LICENSE_ALLOWLIST = (
     "MIT",

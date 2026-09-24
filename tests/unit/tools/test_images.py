@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from tools import rules
 from tools.checks import images
 
@@ -50,3 +52,11 @@ def test_the_ci_image_is_built_on_the_pinned_base_with_the_pinned_uv() -> None:
     assert images.ci_image_violations(good.replace(rules.BASE_IMAGE, "python:3.12"), "0.12.16")
     assert images.ci_image_violations(good, "0.13.0")
     assert images.ci_image_violations(f"FROM {rules.BASE_IMAGE}\n", "0.12.16")
+
+
+@pytest.mark.parametrize("line", ["COPY . /src", "ADD src /src", "  copy --from=x /a /b"])
+def test_the_published_ci_image_carries_no_file_of_the_tree(line: str) -> None:
+    good = f"FROM {rules.BASE_IMAGE}\nRUN pip install --no-cache-dir uv==0.12.16\n"
+    assert images.ci_image_violations(good, "0.12.16") == []
+    found = images.ci_image_violations(good + line + "\n", "0.12.16")
+    assert [v.message.split(maxsplit=1)[0] for v in found] == [line.split(maxsplit=1)[0].upper()]

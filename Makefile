@@ -16,7 +16,7 @@ WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
 
-.PHONY: budgets-check coverage-check image image-scan tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load evals evals-affected security selftest verify verify-fast ci ci-cold ci-image stamp-check serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan scan-tools tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load nightly nightly-fuzz nightly-repeat evals evals-affected security selftest verify verify-fast verify-docs verify-checks ci ci-scoped ci-aware ci-cold ci-image ci-image-push stamp-check serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -73,6 +73,16 @@ drills:
 load:
 	$(RUN) python -m tools.load --concurrency $(or $(N),16) --rounds $(or $(ROUNDS),4)
 
+nightly-fuzz:
+	$(RUN) pytest tests/unit/retrieval/parsers tests/unit/retrieval/test_chunking_property.py -k property --hypothesis-profile=nightly
+
+nightly-repeat:
+	@for run in $$(seq $(or $(REPEATS),5)); do echo "nightly-repeat: storage run $$run of $(or $(REPEATS),5)"; $(RUN) pytest tests/storage -q || exit 1; done
+
+nightly: nightly-fuzz nightly-repeat
+	$(MAKE) --no-print-directory load N=64 ROUNDS=16
+	@echo "NIGHTLY GREEN"
+
 evals:
 	@if ls evals/*/set.jsonl >/dev/null 2>&1; then $(RUN) python -m tools.evals; else echo "evals: no eval set yet, nothing to run"; fi
 
@@ -94,6 +104,20 @@ coverage-check:
 verify: lint api-check ledgers-check test coverage-check storage drills evals budgets-check security selftest
 	@echo "VERIFY GREEN"
 
+verify-docs:
+	$(RUN) python -m tools.checks.gate --skip coverage,budgets
+	$(RUN) python -m tools.checks.selftest
+	gitleaks git --no-banner --redact .
+	@echo "VERIFY-DOCS GREEN"
+
+verify-checks:
+	$(RUN) ruff format --check src tests tools
+	$(RUN) ruff check src tests tools
+	$(RUN) mypy src tools tests
+	$(RUN) pytest tests/unit/tools
+	$(MAKE) --no-print-directory verify-docs
+	@echo "VERIFY-CHECKS GREEN"
+
 verify-fast: lint-fast evals-affected
 	gitleaks protect --staged --no-banner --redact
 	@echo "VERIFY-FAST GREEN (iteration, not evidence: make ci is the evidence)"
@@ -110,12 +134,28 @@ ci:
 	$(RUN) python -m tools.ci_postgres down; exit $$status
 	$(RUN) python -m tools.stamp write --image $(CI_LOCAL_IMAGE)
 
+ci-scoped:
+	@$(RUN) python -m tools.ci_image require
+	$(RUN) python -m tools.stamp begin
+	MSYS_NO_PATHCONV=1 docker run --rm -t \
+		-v "$(WORKDIR_HOST)":/work -w /work $(CI_VOLUMES) $(CI_CACHES) \
+		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
+		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
+		-e UV_OFFLINE=$(CI_UV_OFFLINE) $(CI_LOCAL_IMAGE) bash -c "make tools && make $(TARGETS)"
+	$(RUN) python -m tools.stamp write --image $(CI_LOCAL_IMAGE) --scope $(SCOPE)
+
+ci-aware:
+	$(RUN) python -m tools.change_gate --run
+
 ci-cold:
 	-docker volume rm catalyst-ai-ci-uv catalyst-ai-ci-venv catalyst-ai-ci-cache
 	$(MAKE) --no-print-directory ci CI_UV_OFFLINE=0
 
 ci-image:
 	$(RUN) python -m tools.ci_image build
+
+ci-image-push:
+	$(RUN) python -m tools.ci_image push
 
 stamp-check:
 	@$(RUN) python -m tools.stamp check --image $(CI_LOCAL_IMAGE)
@@ -144,8 +184,12 @@ clean:
 image:
 	docker build -t catalyst-ai:local .
 
-image-scan: image
-	trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress --skip-version-check catalyst-ai:local
+scan-tools:
+	$(RUN) python -m tools.install --scan
+
+image-scan: image scan-tools
+	trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --no-progress --skip-version-check catalyst-ai:local; \
+	status=$$?; trivy version; exit $$status
 
 budgets-check:
 	$(RUN) python -m tools.checks.gate --only budgets
