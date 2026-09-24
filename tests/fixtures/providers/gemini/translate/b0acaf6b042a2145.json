@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"## alsyaq\\n\\nzr tsjyl aldkhwl fy tkhtyt alhatf la ystjyb and alnqra alawla.\\n\\n## alkhtwat\\n\\n1. afth alttbyq ala alhatf\\n2. anqr tsjyl aldkhwl\\n\\nalmtwqa: yfth alnmwdhj. alfaly: la shy. lwhz ala albna 4130.\\n\\nNote 30: keep `code_30` and PRJ-330.\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 142,
+      "candidatesTokenCount": 95
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"## alsyaq\\n\\n\\nzr tsjyl aldkhwl fy tkhtyt alhatf la ystjyb and alnqra alawla.\\n\\n\\n## alkhtwat\\n\\n\\n1. afth alttbyq ala alhatf\\n2. anqr tsjyl aldkhwl\\n\\n\\nalmtwqa: yfth alnmwdhj. alfaly: la shy. lwhz ala albna 4131.\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 134,
+      "candidatesTokenCount": 87
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

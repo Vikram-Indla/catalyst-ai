@@ -157,6 +157,134 @@ components:
       - customer
       title: Audience
       type: string
+    BriefRequest:
+      additionalProperties: false
+      description: 'What the backend sends: the chain, the language, the audience and the length.'
+      properties:
+        audience:
+          const: executive
+          data_class: PUBLIC
+          default: executive
+          description: Who reads the briefing
+          title: Audience
+          type: string
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        chain:
+          $ref: '#/components/schemas/Chain'
+          data_class: CONFIDENTIAL
+          description: The strategy chain
+        locale:
+          data_class: PUBLIC
+          default: en
+          description: The briefing's language
+          enum:
+          - en
+          - ar
+          title: Locale
+          type: string
+        max_sentences:
+          data_class: PUBLIC
+          default: 5
+          description: The summary's length in sentences
+          maximum: 5.0
+          minimum: 3.0
+          title: Max Sentences
+          type: integer
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - chain
+      title: BriefRequest
+      type: object
+    BriefResponse:
+      additionalProperties: false
+      description: 'A proposal to read, never a stored fact: every sentence cites the chain.'
+      properties:
+        asks:
+          items:
+            $ref: '#/components/schemas/CitedSentence'
+          maxItems: 10
+          title: Asks
+          type: array
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          anyOf:
+          - maximum: 1.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          title: Confidence
+        empty_reason:
+          anyOf:
+          - const: nothing_to_brief
+            type: string
+          - type: 'null'
+          title: Empty Reason
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        highlights:
+          items:
+            $ref: '#/components/schemas/CitedSentence'
+          maxItems: 10
+          title: Highlights
+          type: array
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        risks:
+          items:
+            $ref: '#/components/schemas/CitedSentence'
+          maxItems: 10
+          title: Risks
+          type: array
+        summary:
+          items:
+            $ref: '#/components/schemas/CitedSentence'
+          maxItems: 5
+          title: Summary
+          type: array
+        unsupported:
+          items:
+            type: string
+          maxItems: 10
+          title: Unsupported
+          type: array
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - summary
+      - highlights
+      - risks
+      - asks
+      - unsupported
+      title: BriefResponse
+      type: object
     Candidate:
       additionalProperties: false
       description: One proposed child; the backend decides whether it becomes an item.
@@ -198,6 +326,37 @@ components:
       - description
       - confidence
       title: Candidate
+      type: object
+    Chain:
+      additionalProperties: false
+      description: The strategy chain, as the backend owns it.
+      properties:
+        findings:
+          default: []
+          items:
+            $ref: '#/components/schemas/Finding'
+          maxItems: 50
+          title: Findings
+          type: array
+        objectives:
+          default: []
+          items:
+            $ref: '#/components/schemas/Objective'
+          maxItems: 20
+          title: Objectives
+          type: array
+        projects:
+          default: []
+          items:
+            $ref: '#/components/schemas/ProjectCard'
+          maxItems: 50
+          title: Projects
+          type: array
+        theme:
+          $ref: '#/components/schemas/Theme'
+      required:
+      - theme
+      title: Chain
       type: object
     Change:
       additionalProperties: false
@@ -308,6 +467,48 @@ components:
       required:
       - source
       title: CitationFrame
+      type: object
+    CitedSentence:
+      additionalProperties: false
+      description: One sentence and the chain ids it rests on.
+      properties:
+        cites:
+          items:
+            type: string
+          minItems: 1
+          title: Cites
+          type: array
+        text:
+          maxLength: 600
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - text
+      - cites
+      title: CitedSentence
+      type: object
+    CommentInput:
+      additionalProperties: false
+      description: 'A comment, as the backend sends it: its author and every mention are tokens it chose.'
+      properties:
+        participant:
+          data_class: INTERNAL
+          description: An opaque token (p1, p2, …) for the comment's author
+          pattern: ^p[0-9]{1,4}$
+          title: Participant
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The comment as written; people only as @p<N> mentions
+          maxLength: 4000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - participant
+      - text
+      title: CommentInput
       type: object
     Context:
       additionalProperties: false
@@ -954,6 +1155,38 @@ components:
       - evidence
       title: Factor
       type: object
+    Finding:
+      additionalProperties: false
+      description: An open finding against the theme.
+      properties:
+        id:
+          data_class: INTERNAL
+          description: The finding's id; cited by the answer
+          pattern: ^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$
+          title: Id
+          type: string
+        severity:
+          data_class: INTERNAL
+          description: Its severity
+          enum:
+          - low
+          - medium
+          - high
+          title: Severity
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The finding
+          maxLength: 1000
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - id
+      - text
+      - severity
+      title: Finding
+      type: object
     GenerateChildrenRequest:
       additionalProperties: false
       description: The parent, its context, the hierarchy as data, the siblings, and the bounds.
@@ -1265,6 +1498,158 @@ components:
       - confidence
       title: GenerateTestsResponse
       type: object
+    GlossaryConflict:
+      additionalProperties: false
+      description: A glossary term that was not enforced, and why; the reviewer decides, not the model.
+      properties:
+        reason:
+          enum:
+          - ambiguous_glossary
+          - term_not_rendered
+          title: Reason
+          type: string
+        source:
+          title: Source
+          type: string
+      required:
+      - source
+      - reason
+      title: GlossaryConflict
+      type: object
+    GlossaryEntry:
+      additionalProperties: false
+      description: 'One governed term: the source, the one target it must become, a reviewer''s note.'
+      properties:
+        note:
+          anyOf:
+          - maxLength: 300
+            type: string
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: A reviewer's note; data, never an instruction
+          title: Note
+        source:
+          data_class: INTERNAL
+          description: The term as it appears in the source language
+          maxLength: 120
+          minLength: 1
+          title: Source
+          type: string
+        target:
+          data_class: INTERNAL
+          description: The exact rendering in the target language
+          maxLength: 120
+          minLength: 1
+          title: Target
+          type: string
+      required:
+      - source
+      - target
+      title: GlossaryEntry
+      type: object
+    Grammar:
+      additionalProperties: false
+      description: The filter grammar as the backend holds it; the only fields and values a query may
+        name.
+      properties:
+        fields:
+          items:
+            $ref: '#/components/schemas/GrammarField'
+          maxItems: 64
+          minItems: 1
+          title: Fields
+          type: array
+        functions:
+          items:
+            $ref: '#/components/schemas/GrammarFunction'
+          maxItems: 64
+          title: Functions
+          type: array
+      required:
+      - fields
+      title: Grammar
+      type: object
+    GrammarField:
+      additionalProperties: false
+      description: 'One filterable field: its name in the query, its type, its operators, its closed values.'
+      properties:
+        label:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          title: Label
+        name:
+          pattern: ^[A-Za-z][A-Za-z0-9_]{0,63}$
+          title: Name
+          type: string
+        operators:
+          items:
+            enum:
+            - '='
+            - '!='
+            - <
+            - '>'
+            - <=
+            - '>='
+            - in
+            - not in
+            - is
+            - is not
+            - was
+            - changed
+            type: string
+          minItems: 1
+          title: Operators
+          type: array
+        type:
+          enum:
+          - string
+          - user
+          - date
+          - array
+          - number
+          title: Type
+          type: string
+        values:
+          anyOf:
+          - items:
+              maxLength: 120
+              minLength: 1
+              type: string
+            maxItems: 200
+            type: array
+          - type: 'null'
+          description: The closed set of values, when the field has one; else any value of its type
+          title: Values
+      required:
+      - name
+      - type
+      - operators
+      title: GrammarField
+      type: object
+    GrammarFunction:
+      additionalProperties: false
+      description: One function the query language knows, and the field type it stands in for.
+      properties:
+        name:
+          pattern: ^[A-Za-z][A-Za-z0-9]{0,63}\(\)$
+          title: Name
+          type: string
+        type:
+          enum:
+          - string
+          - user
+          - date
+          - array
+          - number
+          title: Type
+          type: string
+      required:
+      - name
+      - type
+      title: GrammarFunction
+      type: object
     Hit:
       additionalProperties: false
       description: One document the search found, with the score of the documented fusion.
@@ -1309,6 +1694,8 @@ components:
       - user_story
       - shorten
       - edge_cases
+      - polish_comment
+      - reply
       title: ImproveStoryMode
       type: string
     ImproveStoryRequest:
@@ -1329,6 +1716,12 @@ components:
           pattern: ^\d+\.\d+\.\d+$
           title: Capability Version
           type: string
+        comment:
+          anyOf:
+          - $ref: '#/components/schemas/CommentInput'
+          - type: 'null'
+          data_class: CONFIDENTIAL
+          description: 'polish_comment: the comment; reply: the comment replied to'
         description:
           data_class: CONFIDENTIAL
           description: The current description, markdown
@@ -1426,6 +1819,7 @@ components:
           title: Eval Set Version
           type: string
         improved_description:
+          description: The rewritten description; for polish_comment the comment, for reply the reply
           title: Improved Description
           type: string
         model:
@@ -1894,6 +2288,119 @@ components:
       - index_chunks
       title: IngestResponse
       type: object
+    InterpretQueryRequest:
+      additionalProperties: false
+      description: A member's sentence, the grammar it must become a query in, and the moment it was asked.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        grammar:
+          $ref: '#/components/schemas/Grammar'
+          data_class: INTERNAL
+          description: The fields, operators and values allowed
+        locale:
+          data_class: PUBLIC
+          default: en
+          description: The language the sentence is written in
+          enum:
+          - en
+          - ar
+          title: Locale
+          type: string
+        now:
+          data_class: PUBLIC
+          description: When the member asked, in the organisation's zone with its offset
+          format: date-time
+          title: Now
+          type: string
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The sentence the member typed
+          maxLength: 500
+          minLength: 1
+          title: Text
+          type: string
+        timezone:
+          data_class: PUBLIC
+          default: Asia/Riyadh
+          description: The organisation's IANA zone
+          maxLength: 64
+          pattern: ^[A-Za-z]+(/[A-Za-z0-9_+-]+)*$
+          title: Timezone
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - text
+      - grammar
+      - now
+      title: InterpretQueryRequest
+      type: object
+    InterpretQueryResponse:
+      additionalProperties: false
+      description: A query that parses against the grammar, what it means in one line, and what it left
+        out.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        confidence:
+          maximum: 1.0
+          minimum: 0.0
+          title: Confidence
+          type: number
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        explanation:
+          maxLength: 300
+          title: Explanation
+          type: string
+        model:
+          title: Model
+          type: string
+        prompt_version:
+          title: Prompt Version
+          type: string
+        query:
+          maxLength: 2000
+          title: Query
+          type: string
+        request_id:
+          title: Request Id
+          type: string
+        unresolved:
+          items:
+            maxLength: 120
+            type: string
+          maxItems: 20
+          title: Unresolved
+          type: array
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - query
+      - explanation
+      - unresolved
+      - confidence
+      title: InterpretQueryResponse
+      type: object
     JobAccepted:
       additionalProperties: false
       description: What a `:jobs` submission returns with `202` and `Location`.
@@ -2001,6 +2508,58 @@ components:
       - request_id
       title: JobStatus
       type: object
+    KeyResult:
+      additionalProperties: false
+      description: A key result with its official value and target; a null value is "not measured".
+      properties:
+        as_of:
+          anyOf:
+          - format: date
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: When the value was taken
+          title: As Of
+        id:
+          data_class: INTERNAL
+          description: The key result's id; cited by the answer
+          pattern: ^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$
+          title: Id
+          type: string
+        target:
+          anyOf:
+          - type: number
+          - type: 'null'
+          data_class: INTERNAL
+          description: The official target
+          title: Target
+        title:
+          data_class: CONFIDENTIAL
+          description: Its title
+          maxLength: 300
+          minLength: 1
+          title: Title
+          type: string
+        unit:
+          anyOf:
+          - maxLength: 16
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: The unit, as shown
+          title: Unit
+        value:
+          anyOf:
+          - type: number
+          - type: 'null'
+          data_class: INTERNAL
+          description: The official value; null is not measured
+          title: Value
+      required:
+      - id
+      - title
+      title: KeyResult
+      type: object
     KindCount:
       additionalProperties: false
       description: How many items of a kind changed in the window, as the backend counted them.
@@ -2030,6 +2589,57 @@ components:
       required:
       - status
       title: LiveResponse
+      type: object
+    Objective:
+      additionalProperties: false
+      description: An objective with its official status and progress, and its key results.
+      properties:
+        id:
+          data_class: INTERNAL
+          description: The objective's id; cited by the answer
+          pattern: ^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$
+          title: Id
+          type: string
+        key_results:
+          data_class: INTERNAL
+          default: []
+          description: Its key results
+          items:
+            $ref: '#/components/schemas/KeyResult'
+          maxItems: 20
+          title: Key Results
+          type: array
+        progress:
+          anyOf:
+          - maximum: 100.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          data_class: INTERNAL
+          description: Official progress in percent; null is not measured
+          title: Progress
+        status:
+          data_class: INTERNAL
+          description: Official status
+          enum:
+          - on_track
+          - at_risk
+          - off_track
+          - not_measured
+          title: Status
+          type: string
+        title:
+          data_class: CONFIDENTIAL
+          description: Its title
+          maxLength: 300
+          minLength: 1
+          title: Title
+          type: string
+      required:
+      - id
+      - title
+      - status
+      title: Objective
       type: object
     OutlineSection:
       additionalProperties: false
@@ -2183,6 +2793,56 @@ components:
       - low
       title: Priority
       type: string
+    ProjectCard:
+      additionalProperties: false
+      description: 'A linked project: delivery health and strategic health are two facts, never one.'
+      properties:
+        blocked:
+          data_class: INTERNAL
+          default: false
+          description: Whether the project is blocked
+          title: Blocked
+          type: boolean
+        delivery_health:
+          data_class: INTERNAL
+          description: Schedule and scope health
+          enum:
+          - on_track
+          - at_risk
+          - off_track
+          - not_measured
+          title: Delivery Health
+          type: string
+        id:
+          data_class: INTERNAL
+          description: The project's id; cited by the answer
+          pattern: ^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$
+          title: Id
+          type: string
+        strategic_health:
+          data_class: INTERNAL
+          description: Contribution to the objectives
+          enum:
+          - on_track
+          - at_risk
+          - off_track
+          - not_measured
+          title: Strategic Health
+          type: string
+        title:
+          data_class: CONFIDENTIAL
+          description: Its title
+          maxLength: 300
+          minLength: 1
+          title: Title
+          type: string
+      required:
+      - id
+      - title
+      - delivery_health
+      - strategic_health
+      title: ProjectCard
+      type: object
     ProposeWorkflowRequest:
       additionalProperties: false
       description: The process in words, what the engine allows, and the scheme to extend when there is
@@ -3157,6 +3817,35 @@ components:
       - covers
       title: TestCase
       type: object
+    Theme:
+      additionalProperties: false
+      description: The theme the chain hangs from, with its charter summary.
+      properties:
+        charter_summary:
+          data_class: CONFIDENTIAL
+          default: ''
+          description: The charter, summarised
+          maxLength: 2000
+          title: Charter Summary
+          type: string
+        id:
+          data_class: INTERNAL
+          description: The theme's id; cited by the answer
+          pattern: ^[A-Za-z0-9][A-Za-z0-9_.:-]{0,63}$
+          title: Id
+          type: string
+        title:
+          data_class: CONFIDENTIAL
+          description: Its title
+          maxLength: 300
+          minLength: 1
+          title: Title
+          type: string
+      required:
+      - id
+      - title
+      title: Theme
+      type: object
     ThreadItem:
       additionalProperties: false
       description: 'One comment or message: who (a token the backend chose), when, what.'
@@ -3289,6 +3978,14 @@ components:
           data_class: CONFIDENTIAL
           description: Surrounding text that resolves pronouns and tone; not translated
           title: Context
+        glossary:
+          data_class: INTERNAL
+          description: Governed terms for this language pair
+          items:
+            $ref: '#/components/schemas/GlossaryEntry'
+          maxItems: 100
+          title: Glossary
+          type: array
         mode:
           $ref: '#/components/schemas/TranslateMode'
           data_class: PUBLIC
@@ -3349,6 +4046,16 @@ components:
         eval_set_version:
           title: Eval Set Version
           type: string
+        glossary_applied:
+          items:
+            type: string
+          title: Glossary Applied
+          type: array
+        glossary_conflict:
+          items:
+            $ref: '#/components/schemas/GlossaryConflict'
+          title: Glossary Conflict
+          type: array
         model:
           title: Model
           type: string
@@ -4158,6 +4865,118 @@ paths:
       - ai.output.invalid
       - ai.output.unsafe
       - ai.index.unavailable
+  /v1/brief:
+    post:
+      description: Brief an executive on the chain sent; every sentence cites it.
+      operationId: brief.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BriefRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.too_large'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected, ai.provider.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.provider.quota'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.output.invalid, ai.output.unsafe'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.provider.timeout'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.input.rejected, ai.input.too_large, ai.output.invalid, ai.output.unsafe, ai.provider.quota,
+            ai.provider.rejected, ai.provider.timeout, ai.provider.unavailable'
+      summary: Brief
+      tags:
+      - capabilities
+      x-capability: brief
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
   /v1/documents/ask:
     post:
       description: Answer only from the space's passages, every claim cited, or say not found.
@@ -4869,7 +5688,7 @@ paths:
       tags:
       - capabilities
       x-capability: improve-story
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -5065,6 +5884,118 @@ paths:
       - ai.provider.timeout
       - ai.provider.rejected
       - ai.provider.quota
+  /v1/interpret-query:
+    post:
+      description: Turn a sentence into a query in the grammar sent with it; nothing outside it is written.
+      operationId: interpret_query.run
+      parameters:
+      - in: header
+        name: Idempotency-Key
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Idempotency-Key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InterpretQueryRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterpretQueryResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.too_large'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected, ai.provider.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.provider.quota'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.output.invalid, ai.output.unsafe'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, ai.provider.unavailable, auth.origin.unverifiable'
+        '504':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.provider.timeout'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.input.rejected, ai.input.too_large, ai.output.invalid, ai.output.unsafe, ai.provider.quota,
+            ai.provider.rejected, ai.provider.timeout, ai.provider.unavailable'
+      summary: Interpret Query
+      tags:
+      - capabilities
+      x-capability: interpret-query
+      x-capability-version: 1.0.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.input.too_large
+      - ai.budget.exceeded
+      - ai.provider.unavailable
+      - ai.provider.timeout
+      - ai.provider.rejected
+      - ai.provider.quota
+      - ai.output.invalid
+      - ai.output.unsafe
   /v1/jobs/{job_id}:
     get:
       description: Return the job's state with `Retry-After` until it is final, then its result or error.
@@ -5774,7 +6705,7 @@ paths:
       tags:
       - capabilities
       x-capability: translate
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled

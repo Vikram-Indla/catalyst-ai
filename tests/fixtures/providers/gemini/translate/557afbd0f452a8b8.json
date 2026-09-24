@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"| \u0643\u0648\u0644\u0648\u0645\u0646 | \u0643\u064a\u0628\u062a |\\n| --- | --- |\\n| \u0643\u064a\u064a | \u064a\u064a\u0633 |\\n| \u062a\u064a\u062a\u0644\u064a | \u064a\u064a\u0633 |\\n\\n\u062a\u0647\u064a \u064a\u0643\u0633\u0628\u0648\u0631\u062a \u0643\u064a\u064a\u0628\u0633 \u0628\u0648\u062a\u0647.\", \"detected_language\": \"en\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 105,
+      "candidatesTokenCount": 56
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

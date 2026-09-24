@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"translated_text\": \"ymkn msharka almrshhat almhfwza ma alfryq. thml almsharka slahya alard aw altadyl\u061b wilgha almsharka yzyl almrshh mn alakhryn. dhw sla: PRJ-137, PRJ-237.\", \"detected_language\": \"ar\", \"rationale\": \"Mapped every word into the target script; kept code, links and keys.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 120,
+      "candidatesTokenCount": 71
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
