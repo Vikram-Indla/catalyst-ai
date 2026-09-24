@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from catalyst_ai.capabilities.translate import descriptor
+from catalyst_ai.capabilities.translate import descriptor, glossary
 from catalyst_ai.capabilities.translate.postprocess import from_cache, to_response
 from catalyst_ai.capabilities.translate.quality import detect_language
 from catalyst_ai.capabilities.translate.schema import ModelOutput, output_schema
@@ -34,9 +34,12 @@ class Parsed:
 
 def parse(request: TranslateRequest, request_id: str, idempotency: str | None) -> Parsed:
     """Stage 1: the typed request becomes the pipeline's input value."""
-    return Parsed(
-        request, request_id, idempotency, {"text": request.text, "context": request.context}
-    )
+    texts = {
+        "text": request.text,
+        "context": request.context,
+        "glossary": glossary.render(request.glossary) or None,
+    }
+    return Parsed(request, request_id, idempotency, texts)
 
 
 def require_target(request: TranslateRequest) -> str:
@@ -91,6 +94,11 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
         Segment(role="developer", name="developer", text=developer),
         Segment(role="user", name="text", text=fence("text", request.text)),
         Segment(role="user", name="context", text=fence("context", request.context or ABSENT)),
+        Segment(
+            role="user",
+            name="glossary",
+            text=fence("glossary", parsed.user_texts["glossary"] or ABSENT),
+        ),
     ]
     timeout = runtime.settings.capability_translate.timeout_ms or descriptor.timeout_ms
     return GenerateRequest(

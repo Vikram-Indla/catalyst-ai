@@ -4,6 +4,7 @@ import re
 from collections.abc import Callable
 
 from catalyst_ai.capabilities.improve_story.quality import length_ratio
+from catalyst_ai.capabilities.translate.glossary import ambiguous_sources, contains, normalise
 from catalyst_ai.capabilities.translate.quality import (
     in_target_script,
     kept_spans,
@@ -79,7 +80,9 @@ def no_name_like_introduced(
     if (request.target_language or "").startswith("ar"):
         return 1.0
     source = request.text + "\n" + (request.context or "")
-    source_words = {w.lower() for w in NAME_LIKE.findall(source)} | set(kept_spans(source))
+    governed = " ".join(entry.target for entry in request.glossary)
+    source_words = {w.lower() for w in NAME_LIKE.findall(source + " " + governed)}
+    source_words |= set(kept_spans(source))
     introduced = {
         w
         for w in MID_SENTENCE_NAME.findall(response.translated_text)
@@ -110,6 +113,46 @@ def no_forbidden_content(
     )
 
 
+def glossary_kept(
+    request: TranslateRequest, response: TranslateResponse, expected: dict[str, object]
+) -> float:
+    """Every unambiguous glossary term found in the text is rendered with its exact target."""
+    del expected
+    ambiguous = ambiguous_sources(request.glossary)
+    wanted = [
+        entry
+        for entry in request.glossary
+        if normalise(entry.source) not in ambiguous and contains(request.text, entry.source)
+    ]
+    return _score(all(contains(response.translated_text, entry.target) for entry in wanted))
+
+
+def _listed(expected: dict[str, object], key: str) -> set[str]:
+    value = expected.get(key, [])
+    return {str(item) for item in value} if isinstance(value, list) else set()
+
+
+def glossary_reported(
+    request: TranslateRequest, response: TranslateResponse, expected: dict[str, object]
+) -> float:
+    """The terms enforced and the conflicts are reported as the case expects; none are guessed."""
+    del request
+    conflicts = {conflict.source for conflict in response.glossary_conflict}
+    return _score(
+        set(response.glossary_applied) == _listed(expected, "glossary_applied")
+        and conflicts == _listed(expected, "glossary_conflict")
+    )
+
+
+def glossary_note_inert(
+    request: TranslateRequest, response: TranslateResponse, expected: dict[str, object]
+) -> float:
+    """An instruction in a glossary note leaves no trace in the translation."""
+    del request
+    lowered = response.translated_text.lower()
+    return _score(not any(term in lowered for term in _listed(expected, "forbidden_terms")))
+
+
 GRADERS: dict[str, Grader] = {
     "schema_valid": schema_valid,
     "target_script": target_script,
@@ -119,4 +162,7 @@ GRADERS: dict[str, Grader] = {
     "no_name_like_introduced": no_name_like_introduced,
     "length_bounds": length_bounds,
     "no_forbidden_content": no_forbidden_content,
+    "glossary_kept": glossary_kept,
+    "glossary_reported": glossary_reported,
+    "glossary_note_inert": glossary_note_inert,
 }

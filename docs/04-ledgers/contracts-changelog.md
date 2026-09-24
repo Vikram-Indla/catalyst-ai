@@ -17,6 +17,36 @@ Entry template:
 
 ---
 
+## 2026-09-24 · AI-030 · translate — a governed glossary, sent as data
+**Kind:** CHANGE, additive (`translate.run` v1.1.0; existing callers unaffected)
+**What:** `TranslateRequest` gains `glossary[] ≤ 100 {source ≤ 120, target ≤ 120, note? ≤ 300}` (default empty). `TranslateResponse` gains `glossary_applied[]` (the sources enforced) and `glossary_conflict[] {source, reason: ambiguous_glossary | term_not_rendered}` (both default empty). A glossary source found in the text is rendered with its exact target; a source the glossary gives two targets is reported and never enforced; a term whose target the translation lacks is reported, the translation still returned, the confidence lowered. Codes such as `TH-STD v3` join the spans kept unchanged. No error code changes.
+**Backend must:** nothing to stay as it is. To use it: send the reference labels for the language pair as the glossary, show `glossary_applied` to the reviewer, and route any `glossary_conflict` to the reviewer rather than publishing the translation as governed.
+
+## 2026-09-24 · AI-029 · brief — an executive briefing over the strategy chain
+**Kind:** ADD (`brief.run`, `POST /v1/brief`; `CAPABILITY_BRIEF`)
+**What:** `BriefRequest {chain {theme {id, title, charter_summary}, objectives[] ≤ 20 {id, title, status, progress (0–100, null = not measured), key_results[] ≤ 20 {id, title, value (null = not measured), target, unit, as_of}}, projects[] ≤ 50 {id, title, delivery_health, strategic_health, blocked}, findings[] ≤ 50 {id, text, severity}}, locale: en | ar, audience: executive, max_sentences 3–5}` → `BriefResponse {summary[], highlights[], risks[], asks[] (each {text, cites[] ≥ 1}), unsupported[], empty_reason: nothing_to_brief?, confidence}`. Health values: `on_track | at_risk | off_track | not_measured`. A sentence citing no id or an id outside the chain is `502 ai.output.invalid` (`untraceable_entry`); a number the chain does not carry is `502 ai.output.invalid` (`unseen_number`). `text-default`; p95 8 s, 4 000 µ$.
+**Backend must:** build the chain from the strategy module's official figures only (never an estimate), send delivery and strategic health as the two fields they are, send null where a value is not measured, and link each cited id back to its record in the briefing panel.
+
+## 2026-09-24 · AI-028 · improve-story — the comment modes
+**Kind:** ADD
+**What:** `improve_story.run` v1.1.0: modes `polish_comment` and `reply`, and the field `comment` (`participant` token, `text` with mentions only as `@p<N>`), required by those modes and refused by the others. A named mention is refused at the door (`validation.invalid_input`). For the comment modes `improved_description` carries the polished comment or the reply, and `acceptance_criteria` is null. The six item modes are unchanged.
+**Backend must:** to use the modes, send the comment with its author and every mention replaced by the thread's participant tokens, and only a comment the requesting member may see; map the tokens back before showing the text.
+
+## 2026-09-24 · AI-023 · platform — three database logins
+**Kind:** ADD
+**What:** settings `DATABASE_WORKER_URL` and `DATABASE_MIGRATE_URL`; `DATABASE_URL` is now serve's login alone. No operation, shape or error code changes.
+**Backend must:** nothing. The deployment provisions three logins (`db/provision/logins.sql`) and the `vector` extension (`db/provision/extensions.sql`) before the first migration.
+
+## 2026-09-24 · AI-024 · platform — the provider in the region, reached as the workload
+**Kind:** CHANGE
+**What:** settings `PROVIDER_ACCESS_TOKEN` and `PROVIDER_VERTEX_PROJECT` added; `PROVIDER_GEMINI_API_KEY` removed; `PROVIDER_GEMINI_BASE_URL` defaults to the regional endpoint and is fixed to it outside development. No operation, shape or error code changes.
+**Backend must:** nothing. The deployment names the project, runs the service as its own identity, and allows egress to the regional host and the collector only.
+
+## 2026-09-24 · AI-026 · interpret-query — a sentence becomes a query in the grammar the backend sends
+**Kind:** ADD (`interpret_query.run`, `POST /v1/interpret-query`; `CAPABILITY_INTERPRET_QUERY`)
+**What:** `InterpretQueryRequest {text ≤ 500, grammar {fields[] {name, type: string | user | date | array | number, operators[], values[]?, label?} ≤ 64, functions[] {name, type}}, now (in the organisation's zone, with its offset), timezone = "Asia/Riyadh", locale: en | ar}` → `InterpretQueryResponse {query, explanation, unresolved[] ≤ 20, confidence}`. The query language: clauses `field = != < > <= >= value`, `in (…)`, `not in (…)`, `is empty`, `is not empty`, `was`, `was not`, `changed`, joined by `AND`, `OR`, `NOT` and parentheses, then `ORDER BY field ASC|DESC`. The returned query always parses against the grammar the request sent and is written canonically (keywords in capitals, the grammar's spelling, values quoted except functions); an empty query means nothing could be placed, and every term that could not is in `unresolved`, word for word. A query that is still outside the grammar after one repair is `502 ai.output.invalid` with one `query_not_in_grammar` detail per problem (`unknown_field`, `operator_not_allowed`, `value_not_allowed`, `syntax` in `message`, never the text). `text-fast`; p95 4 s, 2 000 µ$.
+**Backend must:** send the grammar it filters on (the list view's field map) with every call, `now` in the organisation's zone, and apply `query` through the same parser the list view's own query bar uses; show `unresolved` to the member rather than dropping it.
+
 ## 2026-09-23 · AI-019 · providers, configuration — the text rows move; `text-long` unavailable
 **Kind:** CHANGE (configuration: `MODEL_TEXT_ALIAS` and `CAPABILITY_<NAME>_MODEL_ALIAS` refuse `text-long` at load)
 **What:** `text-default` and `text-fast` resolve to `gemini-3.6-flash`, the one stable model this key reaches, with thinking `minimal`; `text-long` is unavailable and a configuration that selects it fails at boot with the reason. No operation, shape, code or timeout changes; `usage.cost_micros` follows the new published price.

@@ -1,9 +1,9 @@
 """The capability's declaration: what the ledger, the gate and the runtime read."""
 
 name = "translate"
-version = "1.0.0"
-prompt_version = "1"
-eval_set_version = "1"
+version = "1.1.0"
+prompt_version = "2"
+eval_set_version = "2"
 kind = "sync"
 alias = "text-fast"
 p95_latency_ms = 6_000

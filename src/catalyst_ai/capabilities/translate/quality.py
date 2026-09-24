@@ -34,6 +34,7 @@ INLINE_CODE = re.compile(r"`[^`\n]+`")
 URL = re.compile(r"https?://[^\s)>\]]+")
 PLACEHOLDER = re.compile(r"\{\{[^}]*\}\}|\$\{[^}]*\}|\{[A-Za-z_][A-Za-z0-9_]*\}|%[sd]")
 KEY = re.compile(r"\b[A-Z][A-Z0-9]{1,9}-\d{1,7}\b")
+CODE = re.compile(r"\b[A-Z]{2,}(?:-[A-Z0-9]+)+(?: v\d+)?\b")
 
 
 def script_for(language: str) -> str:
@@ -59,12 +60,13 @@ def in_target_script(text: str, target: str) -> bool:
 
 
 def kept_spans(text: str) -> list[str]:
-    """Return what must survive untouched: fences, inline code, links, placeholders, keys."""
+    """Return what must survive untouched: fences, inline code, links, placeholders, keys, codes."""
     return sorted(
         FENCE.findall(text)
         + INLINE_CODE.findall(text)
         + URL.findall(text)
         + PLACEHOLDER.findall(text)
+        + [code for code in CODE.findall(text) if not KEY.fullmatch(code)]
         + KEY.findall(text)
     )
 
@@ -73,7 +75,7 @@ def _without_kept_spans(text: str) -> str:
     stripped = FENCE.sub(" ", text)
     stripped = INLINE_CODE.sub(" ", stripped)
     stripped = URL.sub(" ", stripped)
-    stripped = KEY.sub(" ", stripped)
+    stripped = CODE.sub(" ", KEY.sub(" ", stripped))
     return PLACEHOLDER.sub(" ", stripped)
 
 

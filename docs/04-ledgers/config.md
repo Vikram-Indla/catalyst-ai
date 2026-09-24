@@ -11,14 +11,18 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `AUTH_PUBLIC_KEYS` | text | yes | — | one or two `kid:base64url` entries of 32 raw Ed25519 bytes, ids distinct (rotation) | INTERNAL | The backend's public keys the service verifies every envelope with; `catalyst-ai check` refuses to start without one |
 | `AUTH_CLOCK_SKEW_SECONDS` | int | no | `5` | 0..60 | PUBLIC | Drift tolerated between the backend's clock and the service's when the window is checked |
 | `AUTH_MAX_TTL_SECONDS` | int | no | `60` | 1..300 | PUBLIC | A request envelope's `exp - iat` at most; a nonce is remembered until `exp` plus the skew |
-| `DATABASE_URL` | URL | yes | — | `postgres://` or `postgresql://` with a host | RESTRICTED | The service's own database; the application role |
+| `DATABASE_URL` | URL | yes | — | `postgres://` or `postgresql://` with a host | RESTRICTED | serve's login (`catalyst_ai_serve`): a member of the application role only; it cannot read another organisation or migrate. Outside development no `DATABASE_*_URL` may carry a password equal to its user name (the compose file's local logins) |
+| `DATABASE_WORKER_URL` | URL | outside development | serve's, in development | as `DATABASE_URL`; outside development a user other than serve's and the owner's | RESTRICTED | The worker's and the index jobs' login (`catalyst_ai_worker`): the application and maintenance roles (the claim, the purge, the cross-organisation listing) |
+| `DATABASE_MIGRATE_URL` | URL | outside development | serve's, in development | as `DATABASE_URL`; outside development a third user | RESTRICTED | The owner's login, read by `catalyst-ai migrate` alone |
 | `HTTP_ADDR` | host:port | no | `:8090` | `host:port` | PUBLIC | The contract listen address |
 | `OPS_ADDR` | host:port | no | `:9091` | differs from `HTTP_ADDR` | PUBLIC | `/healthz`, `/readyz`, metrics |
 | `SHUTDOWN_DRAIN_SECONDS` | int | no | `10` | positive | PUBLIC | In-flight requests may finish after SIGTERM |
 | `LOG_LEVEL` | level | no | `INFO` | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` | PUBLIC | Minimum log level |
 | `OTEL_EXPORTER_ENDPOINT` | URL | no | unset | `http(s)://` | INTERNAL | Where traces and metrics go; unset means stdout in development, refused in production |
-| `PROVIDER_GEMINI_API_KEY` | secret | for live calls | unset | non-empty when the adapter serves an alias | RESTRICTED | The first provider's key; read only by its adapter; unset means every call fails as `ai.provider.rejected` |
-| `PROVIDER_GEMINI_BASE_URL` | URL | no | the provider's origin | `https://` | INTERNAL | Overridable for a proxy; never a product host |
+| `PROVIDER_ACCESS_TOKEN` | secret | no | unset | refused outside development | RESTRICTED | A developer's own short-lived token, from their own login, for a local run against the provider; read only by `providers/gemini/credentials.py`. Unset, the token is the workload's own, from the metadata server (`ADR-008`) |
+| `PROVIDER_VERTEX_PROJECT` | text | outside development | empty | ≤ 64 characters; required in staging and production | INTERNAL | The project the provider bills and runs the calls in |
+| `PROVIDER_VERTEX_LOCATION` | text | outside development | the allowlist's first location, in development | one of `IN_KINGDOM_LOCATIONS` (`config/residency.py`) in every environment (`INV-072`) | INTERNAL | The in-Kingdom region every provider call goes to; the endpoint is built from it, so a new region is this setting plus one allowlist line |
+| `PROVIDER_GEMINI_BASE_URL` | URL | no | unset (the location's own endpoint) | `https://`; in staging and production unset or exactly the location's endpoint (`INV-072`) | INTERNAL | Overrides the provider's origin for a proxy or a recording in development; never a product host |
 | `MODEL_TEXT_ALIAS` | enum | no | `text-default` | `text-default` \| `text-fast` — an alias, never a model id; `text-long` is refused at load while it is unavailable (`D-043`) | PUBLIC | Which row of the register text work runs on in this environment; a capability may select its own with `CAPABILITY_<NAME>_MODEL_ALIAS`. The default is the row the eval floors were measured on. Since 2026-09-23 both rows resolve to the same model, the only stable one this key reaches |
 | `CAPABILITY_<NAME>_MODEL_ALIAS` | enum | no | unset | as above; unset means the environment's default | PUBLIC | One capability's alias, over the environment's default — for the one capability that needs a longer context or a better model |
 | `CAPABILITY_IMPROVE_STORY` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `improve-story` |
@@ -45,6 +49,14 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 | `CAPABILITY_UNFURL__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_UNFURL__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
 | `CAPABILITY_UNFURL__TIMEOUT_MS` | int | no | the descriptor's 10000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_INTERPRET_QUERY` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `interpret-query` |
+| `CAPABILITY_INTERPRET_QUERY__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_INTERPRET_QUERY__CACHE_TTL_SECONDS` | int | no | the descriptor's 600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_INTERPRET_QUERY__TIMEOUT_MS` | int | no | the descriptor's 10000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
+| `CAPABILITY_BRIEF` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `brief` |
+| `CAPABILITY_BRIEF__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
+| `CAPABILITY_BRIEF__CACHE_TTL_SECONDS` | int | no | the descriptor's 900 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
+| `CAPABILITY_BRIEF__TIMEOUT_MS` | int | no | the descriptor's 15000 | > 0; ≤ the job line | PUBLIC | The adapter's per-call deadline |
 | `CAPABILITY_GENERATE_TESTS` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `generate-tests` |
 | `CAPABILITY_GENERATE_TESTS__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch |
 | `CAPABILITY_GENERATE_TESTS__CACHE_TTL_SECONDS` | int | no | the descriptor's 3600 | ≥ 0 | PUBLIC | Cache and idempotency TTL |
@@ -82,7 +94,8 @@ settings are nested under `CAPABILITY_<NAME>_…` and exist for every capability
 
 Rows that arrive with later packages, declared here so the design is visible: `TENANT_BUDGET_OVERRIDES`
 (the budgets package), `QUALITY_SAMPLING_ORGANIZATIONS` (the opt-in of `ARCH-010 §4`; a row without a
-`D-NNN` reference fails `check`), `RECORD_PROVIDER_KEY` (read only by `make record`). The job line
+`D-NNN` reference fails `check`), `RECORD_PROVIDER_TOKEN` (a developer's own short-lived token, read only by `make record`, with
+`PROVIDER_VERTEX_PROJECT`). The job line
 (20 s, `ADR-007`) is a constant in `platform/jobs`, not a variable.
 
 Tooling only, never read by the service: `CATALYST_AI_EVAL_DATABASE_URL` names a PostgreSQL with pgvector

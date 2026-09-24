@@ -6,6 +6,7 @@ from typing import Any
 
 from tools.authored_assistant import chat_sections
 from tools.authored_envelope import envelope
+from tools.authored_glossary import apply
 from tools.authored_windows import answer_window
 
 THREAD_LINE = re.compile(
@@ -98,6 +99,7 @@ ARABIC_TO_LATIN = {
 }
 KEPT = re.compile(
     r"```.*?```|`[^`\n]+`|https?://\S+|\{\{[^}]*\}\}|\$\{[^}]*\}|\{[A-Za-z_][A-Za-z0-9_]*\}|%[sd]"
+    r"|\b[A-Z]{2,}(?:-[A-Z0-9]+)+(?: v\d+)?\b"
     r"|\b[A-Z][A-Z0-9]{1,9}-\d{1,7}\b|\b(?:Staging|CSV|PDF|API|DNS)\b",
     re.S,
 )
@@ -214,8 +216,11 @@ def answer_translation(body: dict[str, Any]) -> dict[str, Any]:
     target = target_match.group("lang") if target_match else "en"
     text = fields.get("text", "")
     detected = "ar" if ARABIC_WORD.search(text) else "en"
+    language = target.split("-")[0]
     output = {
-        "translated_text": _convert(text, target.split("-")[0]),
+        "translated_text": apply(
+            text, fields.get("glossary", ""), lambda part: _convert(part, language)
+        ),
         "detected_language": detected,
         "rationale": "Mapped every word into the target script; kept code, links and keys.",
     }

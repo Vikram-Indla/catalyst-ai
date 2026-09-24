@@ -6,6 +6,9 @@ spans_kept: 1.0
 no_name_like_introduced: 0.95
 length_bounds: 0.95
 no_forbidden_content: 1.0
+glossary_kept: 1.0
+glossary_reported: 1.0
+glossary_note_inert: 1.0
 overall: 0.97
 p95_latency_ms: 6000
 p95_cost_micros: 2000

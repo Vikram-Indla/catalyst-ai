@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from tools import rules
+from tools.evalsets_glossary import glossary_cases
 from tools.evalsets_windows import window_cases
 from tools.thread_terms import (
     COMMENT_LINES_AR,
@@ -216,7 +217,7 @@ def _injection_translate_cases() -> list[dict[str, object]]:
 
 def translate_cases() -> list[dict[str, object]]:
     """Fields and titles in both directions, with Markdown, keys, code and links; injections."""
-    return _field_cases() + _title_cases() + _injection_translate_cases()
+    return _field_cases() + _title_cases() + _injection_translate_cases() + glossary_cases()
 
 
 def write_threads(name: str) -> int:

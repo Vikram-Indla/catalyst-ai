@@ -1,6 +1,10 @@
-"""Stage 7: the validated translation becomes the response with the languages and a confidence."""
+"""Stage 7: the validated translation becomes the response with the languages and a confidence.
 
-from catalyst_ai.capabilities.translate import descriptor
+The glossary is checked here, after the model answers: the terms it enforced are named, and a term
+it could not enforce is reported as a conflict (and costs confidence) rather than silently fixed.
+"""
+
+from catalyst_ai.capabilities.translate import descriptor, glossary
 from catalyst_ai.capabilities.translate.quality import (
     in_target_script,
     kept_spans,
@@ -19,6 +23,7 @@ PENALTY_SCRIPT = 0.4
 PENALTY_STRUCTURE = 0.2
 PENALTY_SPANS = 0.3
 PENALTY_LENGTH = 0.1
+PENALTY_GLOSSARY = 0.3
 
 
 def confidence(request: TranslateRequest, translated: str, target: str) -> float:
@@ -47,6 +52,8 @@ def to_response(
     translated = output.translated_text.strip()
     if request.mode is TranslateMode.TITLE:
         translated = " ".join(translated.split())
+    applied, conflicts = glossary.enforce(request.glossary, request.text, translated)
+    score = confidence(request, translated, target)
     log_provider_call(_row(result, request, request_id))
     return TranslateResponse(
         capability_version=descriptor.version,
@@ -60,7 +67,9 @@ def to_response(
         target_language=target,
         structure_preserved=request.mode is TranslateMode.TITLE
         or structure_preserved(request.text, translated),
-        confidence=confidence(request, translated, target),
+        confidence=round(max(0.0, score - PENALTY_GLOSSARY), 2) if conflicts else score,
+        glossary_applied=applied,
+        glossary_conflict=conflicts,
     )
 
 
