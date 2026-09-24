@@ -44,3 +44,48 @@ def test_refuse_if_unsafe_raises_output_unsafe() -> None:
     assert caught.value.code is ErrorCode.OUTPUT_UNSAFE
     assert caught.value.details[0].code == "foreign_identifier"
     refuse_if_unsafe("fine", REQUEST, "rid")
+
+
+MEMBER_LINK = "https://portal.example.gov/permits"
+BRACKETED = "https://en.wikipedia.org/wiki/Mercury_(planet)"
+
+
+@pytest.mark.parametrize(
+    "completion",
+    [
+        f"Apply at {MEMBER_LINK}.",
+        f"Apply at {MEMBER_LINK}, then wait.",
+        f"Apply at {MEMBER_LINK}; then wait.",
+        f"Is it {MEMBER_LINK}?",
+        f"Apply at {MEMBER_LINK}!",
+        f"The link: {MEMBER_LINK}: open it.",
+        f"قدّم عبر {MEMBER_LINK}، ثم انتظر.",
+        f"هل هو {MEMBER_LINK}؟",
+        f"قدّم عبر {MEMBER_LINK}؛ ثم انتظر.",
+        f"قدّم عبر {MEMBER_LINK}۔",
+        f"(apply at {MEMBER_LINK})",
+        f"[the portal]({MEMBER_LINK}).",
+        f"Read {BRACKETED}.",
+        f"(read {BRACKETED})",
+    ],
+)
+def test_a_members_link_ending_a_sentence_or_a_bracket_is_the_members_link(completion: str) -> None:
+    assert scan_output(completion, [f"apply at {MEMBER_LINK} or read {BRACKETED}"]) == []
+
+
+@pytest.mark.parametrize(
+    "completion",
+    [
+        "See https://evil.example/x.",
+        "See https://evil.example/x، الآن",
+        "هل هو https://evil.example/x؟",
+        "(see https://evil.example/x)",
+        f"Read {MEMBER_LINK}/more.",
+        "Read https://en.wikipedia.org/wiki/Mercury_(element).",
+    ],
+)
+def test_an_unrequested_link_is_refused_whatever_follows_it(completion: str) -> None:
+    codes = [
+        d.code for d in scan_output(completion, [f"apply at {MEMBER_LINK} or read {BRACKETED}"])
+    ]
+    assert codes == ["unrequested_url"]

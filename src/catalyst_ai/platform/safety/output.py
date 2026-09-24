@@ -5,10 +5,10 @@ import re
 
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.platform.errors import Error
+from catalyst_ai.platform.language import links
 from catalyst_ai.platform.safety.input import RESTRICTED_PATTERNS
 
 ITEM_KEY = re.compile(r"\b[A-Z][A-Z0-9]{1,9}-\d{1,7}\b")
-URL = re.compile(r"https?://[^\s)>\]]+")
 FENCE_MARKER = re.compile(r"<<<[^<>]{0,64}>>>")
 INJECTION_PHRASE = re.compile(r"\bignore (?:all |the )?previous instructions\b", re.I)
 log = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ def scan_output(completion: str, request_texts: list[str]) -> list[ErrorDetail]:
     """Return one detail per class of leak; the completion itself is never in a detail."""
     details: list[ErrorDetail] = []
     known_keys = _known(ITEM_KEY, request_texts)
-    known_urls = _known(URL, request_texts)
+    known_urls = set().union(*(links(text) for text in request_texts))
     foreign_keys = set(ITEM_KEY.findall(completion)) - known_keys
     if foreign_keys:
         details.append(
@@ -35,7 +35,7 @@ def scan_output(completion: str, request_texts: list[str]) -> list[ErrorDetail]:
                 message="an item key the request did not carry",
             )
         )
-    if set(URL.findall(completion)) - known_urls:
+    if links(completion) - known_urls:
         details.append(
             ErrorDetail(
                 field="completion",

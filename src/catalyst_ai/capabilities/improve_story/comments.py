@@ -9,9 +9,9 @@ someone new or points somewhere new has invented a fact.
 import re
 
 from catalyst_ai.contract.improve_story import CommentInput, ImproveStoryMode
+from catalyst_ai.platform.language import links
 
 TOKEN_MENTION = re.compile(r"(?<![\w.])@p[0-9]{1,4}\b")
-LINK = re.compile(r"https?://[^\s)>\]]+")
 CODE_SPAN = re.compile(r"`[^`\n]+`")
 DROPPED = "markup_dropped"
 INVENTED = "reference_invented"
@@ -24,15 +24,13 @@ def mentions(text: str) -> set[str]:
 
 def markup(text: str) -> set[str]:
     """Return every mention, link and code span in the text."""
-    return mentions(text) | set(LINK.findall(text)) | set(CODE_SPAN.findall(text))
+    return mentions(text) | links(text) | set(CODE_SPAN.findall(text))
 
 
 def allowed_references(comment: CommentInput, context: str) -> set[str]:
     """Return what a reply may mention or link: the comment's people and the known links."""
     return (
-        mentions(comment.text)
-        | {f"@{comment.participant}"}
-        | set(LINK.findall(comment.text + "\n" + context))
+        mentions(comment.text) | {f"@{comment.participant}"} | links(comment.text + "\n" + context)
     )
 
 
@@ -42,5 +40,5 @@ def markup_problem(
     """Return the detail code when the output breaks the comment modes' markup rule, or None."""
     if mode is ImproveStoryMode.POLISH_COMMENT:
         return DROPPED if not markup(comment.text) <= markup(output) else None
-    referenced = mentions(output) | set(LINK.findall(output))
+    referenced = mentions(output) | links(output)
     return INVENTED if not referenced <= allowed_references(comment, context) else None
