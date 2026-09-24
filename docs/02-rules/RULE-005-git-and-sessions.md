@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.3.0
+version: 1.3.1
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -48,9 +48,15 @@ created: 2026-09-18
   so the local pipeline and the hosted job run the same bytes and the stamp's image is the one
   that ran (`tools/checks/images`). The pin moves only in a `build(ci)` commit that changes it and
   every reference together. `Dockerfile.ci` builds the pipeline's own image on the same base, with
-  the tools the job otherwise installs on every run baked in. Until that image has a registry
-  (`Q-018`), the pipeline runs on the base image with its setup step, and `make ci-image` only
-  builds it locally.
+  the tools the hosted job installs in its setup step baked in, and `tools/checks/images` holds
+  the two to the same packages and uv pin. `make ci` runs in that image, named
+  `catalyst-ai-ci:<hash of Dockerfile.ci>` (`tools/ci_image`); if it is missing on the machine,
+  `make ci` refuses and names `make ci-image`, so an image is never built inside a push. The
+  local run leaves out the setup step and runs uv offline against its warm volume; `make
+  ci-cold` runs online. Debian's mirror is a build argument whose default is upstream: a
+  machine may pass a nearer one from its own environment, never from the repository, and it
+  never changes the image's name. The hosted job keeps its setup step until the image has a
+  registry.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast` (format, lint,
   the ⚡ checks, the eval sets a change can move, gitleaks on the staged tree — iteration, never

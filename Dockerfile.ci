@@ -1,8 +1,15 @@
 # The pipeline's image: the pinned base with what the job otherwise installs on every run.
-# Built by `make ci-image`; it moves only in a `build(ci)` commit, and `tools/checks/images`
-# holds its base and its uv to the pins.
+# Built by `make ci-image` and named by the hash of this file; it moves only in a `build(ci)`
+# commit, and `tools/checks/images` holds its base, its packages and its uv to the pins and to
+# the hosted job's setup step.
 FROM python:3.12.14-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
-RUN apt-get update \
+# The Debian mirror apt reads from. The default is upstream; a machine may pass a nearer one at
+# build time. apt checks the signed index and every package's hash, so the mirror decides where
+# the bytes come from, not which bytes are accepted. The log names the mirror used.
+ARG APT_MIRROR=http://deb.debian.org/debian
+RUN echo "apt mirror: ${APT_MIRROR}" \
+    && sed -i "s|^URIs: http://deb.debian.org/debian$|URIs: ${APT_MIRROR}|" /etc/apt/sources.list.d/debian.sources \
+    && apt-get update \
     && apt-get install -y --no-install-recommends make git curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install --no-cache-dir uv==0.12.16

@@ -7,6 +7,8 @@ RUN := $(UV) run --frozen
 TOOLS_BIN := $(shell $(RUN) python -c "from tools.install import target_dir; print(target_dir())" 2>/dev/null || echo .tools/bin/unknown)
 export PATH := $(CURDIR)/$(TOOLS_BIN):$(PATH)
 CI_IMAGE := python:3.12.14-slim@sha256:2f17fc044b579bab302c2e8054d3a686e2cb9a83de48e70534b94cd8ebbe06a9
+CI_LOCAL_IMAGE = $(shell $(RUN) python -m tools.ci_image tag)
+CI_UV_OFFLINE ?= 1
 CI_VOLUMES := -v catalyst-ai-ci-uv:/tmp/uv-cache -v catalyst-ai-ci-venv:/tmp/venv -v catalyst-ai-ci-cache:/tmp/.cache
 CI_CACHES := -e RUFF_CACHE_DIR=/tmp/.cache/ruff -e MYPY_CACHE_DIR=/tmp/.cache/mypy -e HYPOTHESIS_STORAGE_DIRECTORY=/tmp/.cache/hypothesis
 PYTEST_ITERATE := --import-mode=importlib --disable-socket --allow-hosts=127.0.0.1,::1 --strict-markers -q
@@ -97,26 +99,26 @@ verify-fast: lint-fast evals-affected
 	@echo "VERIFY-FAST GREEN (iteration, not evidence: make ci is the evidence)"
 
 ci:
+	@$(RUN) python -m tools.ci_image require
 	$(RUN) python -m tools.stamp begin
 	$(RUN) python -m tools.ci_postgres up
 	status=0; MSYS_NO_PATHCONV=1 docker run --rm -t $$($(RUN) python -m tools.ci_postgres args) \
 		-v "$(WORKDIR_HOST)":/work -w /work $(CI_VOLUMES) $(CI_CACHES) \
 		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
 		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
-		$(CI_IMAGE) bash -c "$$($(RUN) python -m tools.ci_steps)" || status=$$?; \
+		-e UV_OFFLINE=$(CI_UV_OFFLINE) $(CI_LOCAL_IMAGE) bash -c "$$($(RUN) python -m tools.ci_steps --prebuilt)" || status=$$?; \
 	$(RUN) python -m tools.ci_postgres down; exit $$status
-	$(RUN) python -m tools.stamp write --image $(CI_IMAGE)
+	$(RUN) python -m tools.stamp write --image $(CI_LOCAL_IMAGE)
 
 ci-cold:
 	-docker volume rm catalyst-ai-ci-uv catalyst-ai-ci-venv catalyst-ai-ci-cache
-	$(MAKE) --no-print-directory ci
+	$(MAKE) --no-print-directory ci CI_UV_OFFLINE=0
 
 ci-image:
-	docker build -f Dockerfile.ci -t catalyst-ai-ci:local .
-	@echo "ci-image: local id $$(docker image inspect --format '{{.Id}}' catalyst-ai-ci:local) (not a registry digest; nothing is pushed)"
+	$(RUN) python -m tools.ci_image build
 
 stamp-check:
-	@$(RUN) python -m tools.stamp check --image $(CI_IMAGE)
+	@$(RUN) python -m tools.stamp check --image $(CI_LOCAL_IMAGE)
 
 serve:
 	$(RUN) catalyst-ai serve
