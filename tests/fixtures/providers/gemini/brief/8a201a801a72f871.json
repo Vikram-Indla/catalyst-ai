@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": [{\"text\": \"Digital services for citizens: this briefing covers its objectives, projects and findings.\", \"cites\": [\"T-1\"]}, {\"text\": \"Launch online permit renewal has strategic status on track, at 70% progress.\", \"cites\": [\"O-1\"]}, {\"text\": \"Cut average waiting time at service centres has strategic status on track, at 60% progress.\", \"cites\": [\"O-2\"]}], \"highlights\": [{\"text\": \"Launch online permit renewal has strategic status on track, at 70% progress.\", \"cites\": [\"O-1\"]}, {\"text\": \"Cut average waiting time at service centres has strategic status on track, at 60% progress.\", \"cites\": [\"O-2\"]}, {\"text\": \"Permit portal rebuild: delivery health on track, strategic health on track.\", \"cites\": [\"P-1\"]}, {\"text\": \"Queue management rollout: delivery health on track, strategic health on track.\", \"cites\": [\"P-2\"]}], \"risks\": [], \"asks\": [{\"text\": \"Set a measurement for Citizen satisfaction score.\", \"cites\": [\"KR-3\"]}], \"unsupported\": [\"some key results are not measured\"], \"empty_reason\": null, \"rationale\": \"Briefed from the chain's official figures only.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 209,
+      "candidatesTokenCount": 268
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

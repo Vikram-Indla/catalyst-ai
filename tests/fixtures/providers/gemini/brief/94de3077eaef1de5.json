@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": [], \"highlights\": [], \"risks\": [], \"asks\": [], \"unsupported\": [], \"empty_reason\": \"nothing_to_brief\", \"rationale\": \"Briefed from the chain's official figures only.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 56,
+      "candidatesTokenCount": 44
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
