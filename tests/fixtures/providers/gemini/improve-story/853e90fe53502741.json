@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"GET /v1/items returns 502 after 30 seconds when the org has more than 10000 items, see INC-7 for the timeline. In practice this means the behaviour above applies to every affected screen, the result is visible immediately, and the existing data is left untouched.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the expand operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 250,
+      "candidatesTokenCount": 103
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Thanks @p4, noted on 'Export board to CSV'; we will follow up here.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Suggested a reply.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 277,
+      "candidatesTokenCount": 41
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

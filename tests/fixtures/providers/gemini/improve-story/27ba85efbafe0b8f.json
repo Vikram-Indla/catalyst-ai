@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Looks good to me. Ship it.\", \"acceptance_criteria\": null, \"changed\": false, \"rationale\": \"Fixed spelling and phrasing; kept every mention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 246,
+      "candidatesTokenCount": 39
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

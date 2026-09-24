@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"The export don't respect filters, see https://example.test/boards/42 and the `export_csv` flag.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Fixed spelling and phrasing; kept every mention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 262,
+      "candidatesTokenCount": 56
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

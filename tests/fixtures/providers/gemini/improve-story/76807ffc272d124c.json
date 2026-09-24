@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"\", \"acceptance_criteria\": null, \"changed\": false, \"rationale\": \"Nothing to edit.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 323,
+      "candidatesTokenCount": 24
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

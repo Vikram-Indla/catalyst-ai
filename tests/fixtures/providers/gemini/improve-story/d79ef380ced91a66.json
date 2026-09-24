@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Thanks @p5, noted on 'Rotate the signing key'; we will follow up here.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Suggested a reply.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 272,
+      "candidatesTokenCount": 42
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

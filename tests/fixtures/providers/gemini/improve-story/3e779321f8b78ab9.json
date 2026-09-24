@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"leadership need a reporting hub where they see all initiatives, budget spend vs plan and risks per program, refreshed daily\", \"acceptance_criteria\": \"- Given the item 'Portfolio reporting', when the described behaviour runs, then the outcome matches the description.\\n- Given the same starting state, when the action runs twice, then the second run changes nothing.\", \"changed\": true, \"rationale\": \"Applied the acceptance_criteria operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 245,
+      "candidatesTokenCount": 125
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

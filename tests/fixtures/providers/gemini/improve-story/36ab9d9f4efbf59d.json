@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"I don't think the redirect works on mobile, @p2 can you check the logs.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Fixed spelling and phrasing; kept every mention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 257,
+      "candidatesTokenCount": 50
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

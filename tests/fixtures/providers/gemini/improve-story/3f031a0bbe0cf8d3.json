@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Thanks @p2. The description of 'Login with SSO' does not answer this yet; could you add the detail you need?\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Suggested a reply.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 271,
+      "candidatesTokenCount": 52
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

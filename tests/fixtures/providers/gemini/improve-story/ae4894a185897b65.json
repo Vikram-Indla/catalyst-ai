@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"User should be able to login with the company SSO so they don't need password, this must work on mobile to and the session should stay for 8 hours.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 359,
+      "candidatesTokenCount": 74
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

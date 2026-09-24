@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Der signaturschl\u00fcssel muss alle 90 tage rotiert werden, alter schl\u00fcssel bleibt 24 stunden g\u00fcltig damit nichts kaputt geht.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 353,
+      "candidatesTokenCount": 68
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

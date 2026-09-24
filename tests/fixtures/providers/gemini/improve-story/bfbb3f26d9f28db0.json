@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"Please keep the old key for 24h because PAY-12 depends on it, @p5 @p6.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Fixed spelling and phrasing; kept every mention.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 257,
+      "candidatesTokenCount": 50
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

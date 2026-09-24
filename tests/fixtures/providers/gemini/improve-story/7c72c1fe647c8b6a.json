@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"As a PM I want export the board to csv. All columns. The file name should include date. Also filters applied should be respected. In practice this means the behaviour above applies to every affected screen, the result is visible immediately, and the existing data is left untouched.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the expand operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 252,
+      "candidatesTokenCount": 108
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
