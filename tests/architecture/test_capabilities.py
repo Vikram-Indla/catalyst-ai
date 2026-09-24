@@ -1,5 +1,7 @@
 """ARCH-003, ARCH-005, ARCH-012 §4: capability, prompt, model and interface invariants."""
 
+import re
+
 from tests.conftest import REPO_ROOT
 from tools import api, rules
 from tools.checks import (
@@ -92,3 +94,21 @@ def test_no_interface_without_substitution() -> None:
 def test_no_banned_names() -> None:
     found = naming.run(REPO_ROOT)
     assert not found, "ARCHITECTURE VIOLATION: banned name\n" + _lines(found)
+
+
+RECORD_KINDS = re.compile(
+    r"""["'](?:theme_charter|okr|key_result|project_card|project_objective)["']|strata""", re.I
+)
+
+
+def test_no_record_kind_is_spelled_in_the_service() -> None:
+    """A product's record kinds reach the service as data; its source and prompts name none."""
+    source = REPO_ROOT / rules.SRC
+    found = [
+        str(path.relative_to(REPO_ROOT))
+        for path in sorted(source.rglob("*"))
+        if path.suffix in {".py", ".md"} and RECORD_KINDS.search(path.read_text(encoding="utf-8"))
+    ]
+    assert not found, "ARCHITECTURE VIOLATION: a record kind is spelled in the service\n" + (
+        "\n".join(found)
+    )
