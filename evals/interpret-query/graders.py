@@ -4,6 +4,7 @@ import re
 from collections.abc import Callable
 
 from catalyst_ai.capabilities.interpret_query.grammar import GrammarError, canonical
+from catalyst_ai.capabilities.interpret_query.listing import normalise
 from catalyst_ai.contract.interpret_query import InterpretQueryRequest, InterpretQueryResponse
 from catalyst_ai.platform.safety import scan_output
 
@@ -17,8 +18,8 @@ def _score(ok: bool) -> float:
 
 
 def _written(query: str, request: InterpretQueryRequest) -> str | None:
-    if not query.strip():
-        return ""
+    if not query.strip() or request.grammar is None:
+        return "" if not query.strip() else None
     try:
         return canonical(query, request.grammar)
     except GrammarError:
@@ -69,10 +70,42 @@ def explanation_language(
     return _score(bool(ARABIC.search(response.explanation)) == (request.locale == "ar"))
 
 
+def parameters_declared(
+    request: InterpretQueryRequest, response: InterpretQueryResponse, expected: dict[str, object]
+) -> float:
+    """Score every parameter, value and sort being one the list declares, in its format."""
+    del expected
+    if request.listing is None:
+        return _score(not response.parameters and response.sort is None)
+    kept, _, problems = normalise(response.parameters, response.sort, request.listing)
+    return _score(not problems and kept == response.parameters)
+
+
+def parameters_expected(
+    request: InterpretQueryRequest, response: InterpretQueryResponse, expected: dict[str, object]
+) -> float:
+    """Score the parameters and the sort being the ones the case expects."""
+    del request
+    wanted = expected.get("parameters", {})
+    return _score(response.parameters == wanted and response.sort == expected.get("sort"))
+
+
+def latin_digits(
+    request: InterpretQueryRequest, response: InterpretQueryResponse, expected: dict[str, object]
+) -> float:
+    """Score every digit in the parameters being Latin, whatever the sentence's script."""
+    del request, expected
+    written = "".join(response.parameters.values())
+    return _score(all(not ch.isdigit() or ch in "0123456789" for ch in written))
+
+
 GRADERS: dict[str, Grader] = {
     "query_parses": query_parses,
     "query_equivalent": query_equivalent,
     "unresolved_reported": unresolved_reported,
     "injection_inert": injection_inert,
     "explanation_language": explanation_language,
+    "parameters_declared": parameters_declared,
+    "parameters_expected": parameters_expected,
+    "latin_digits": latin_digits,
 }

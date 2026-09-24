@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from tools import rules
+from tools.evalsets_listing import listing_cases
 
 ORG = "11111111-1111-7111-8111-111111111111"
 VERSION = "1.0.0"
@@ -234,7 +235,7 @@ def write_query(name: str) -> int:
     """Write `set.jsonl` of the interpret-query set."""
     directory = Path(rules.EVALS) / name
     directory.mkdir(parents=True, exist_ok=True)
-    built = cases()
+    built = cases() + listing_cases()
     (directory / "set.jsonl").write_text(
         "".join(json.dumps(case, ensure_ascii=False) + "\n" for case in built), encoding="utf-8"
     )

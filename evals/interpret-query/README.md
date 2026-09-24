@@ -1,6 +1,10 @@
 # interpret-query — eval set
 
-**Set version:** 1 · **Cases:** see `set.jsonl` — 41 sentences, 30 in English and 11 in Arabic:
+**Set version:** 2 · **Cases:** see `set.jsonl` — 52 sentences: 41 over the grammar and 11 over a
+list declaration (STRATA's cycles, themes and approvals as the list contract serves them, and cycles
+with a start-date range: states, sorts, an undeclared field, a date the list cannot filter on yet,
+Arabic-Indic digits that must come back Latin; graded by `parameters_declared`,
+`parameters_expected` and `latin_digits`, floors 1.0). The grammar's 41, 30 in English and 11 in Arabic:
 people ("my", "unassigned", "reported by me"), statuses and types, priorities, negation, relative
 dates and "today" read in the organisation's zone, sorting, `was` and `changed`, empty fields,
 functions, labels, terms the grammar cannot hold, and injected instructions · **Provenance:**

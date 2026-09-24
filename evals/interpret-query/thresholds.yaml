@@ -3,6 +3,9 @@ query_equivalent: 0.95
 unresolved_reported: 1.0
 injection_inert: 1.0
 explanation_language: 0.95
+parameters_declared: 1.0
+parameters_expected: 1.0
+latin_digits: 1.0
 overall: 0.97
 p95_latency_ms: 4000
 p95_cost_micros: 2000

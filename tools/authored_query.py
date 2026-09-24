@@ -12,6 +12,7 @@ import re
 from typing import Any
 
 from tools.authored_envelope import envelope
+from tools.authored_listing import answer_listing, is_listing
 
 FENCE = re.compile(r"<<<(?P<name>[a-z_]+)>>>\n(?P<body>.*?)\n<<<end (?P=name)>>>", re.S)
 NOW = re.compile(r"^Now: (?P<date>\d{4}-\d{2}-\d{2})", re.M)
@@ -135,7 +136,9 @@ def interpret(sentence: str, today: str) -> tuple[str, list[str]]:
 
 
 def answer_query(body: dict[str, Any]) -> dict[str, Any]:
-    """Build the interpret-query answer for one prompt."""
+    """Build the interpret-query answer for one prompt: a query, or a list's parameters."""
+    if is_listing("".join(part.get("text", "") for part in body["contents"][0]["parts"])):
+        return answer_listing(body)
     sentence, today = _sentence_and_today(body)
     query, unresolved = interpret(sentence, today)
     arabic = bool(re.search(r"[؀-ۿ]", sentence))

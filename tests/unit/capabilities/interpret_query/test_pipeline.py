@@ -103,3 +103,57 @@ async def test_the_switch_refuses_before_any_call() -> None:
         await run(_request(), make_runtime(provider, settings), "r")
     assert caught.value.code is ErrorCode.CAPABILITY_DISABLED
     assert provider.calls == []
+
+
+LISTING = {
+    "filters": [{"param": "state", "type": "enum", "values": ["planned", "active", "closed"]}],
+    "sorts": ["-startsOn"],
+}
+
+
+def _listed(parameters: dict[str, str], sort: str | None = None) -> str:
+    return json.dumps(
+        {
+            "parameters": parameters,
+            "sort": sort,
+            "explanation": "Cycles filtered",
+            "unresolved": [],
+            "rationale": "Declared only.",
+        }
+    )
+
+
+def _listing_request(text: str = "active cycles") -> InterpretQueryRequest:
+    return InterpretQueryRequest.model_validate(
+        {
+            "organization_id": str(ORG),
+            "capability_version": "1.1.0",
+            "text": text,
+            "listing": LISTING,
+            "now": "2026-09-24T01:30:00+03:00",
+        }
+    )
+
+
+async def test_a_list_declaration_is_answered_in_its_own_parameters() -> None:
+    provider = ScriptedProvider([_listed({"state": "Active"}, "-startsOn")])
+    request = _listing_request()
+    generate = assemble(parse(request, "r", None), make_runtime(provider))
+    assert "- state (enum): planned | active | closed" in generate.segments[1].text
+    response = await run(request, make_runtime(provider), "r")
+    assert response.parameters == {"state": "active"}
+    assert response.sort == "-startsOn"
+    assert response.query == ""
+
+
+async def test_an_undeclared_parameter_gets_one_repair_then_a_refusal() -> None:
+    repaired = ScriptedProvider([_listed({"budget": "5"}), _listed({"state": "closed"})])
+    response = await run(_listing_request("closed cycles"), make_runtime(repaired), "r")
+    assert response.parameters == {"state": "closed"}
+    assert len(repaired.calls) == 2
+    stubborn = ScriptedProvider([_listed({"budget": "5"}, "name")])
+    with pytest.raises(Error) as caught:
+        await run(_listing_request("cycles by budget"), make_runtime(stubborn), "r")
+    assert caught.value.code is ErrorCode.OUTPUT_INVALID
+    assert {d.code for d in caught.value.details} == {"parameters_not_declared"}
+    assert {d.message for d in caught.value.details} == {"param_not_declared", "sort_not_declared"}
