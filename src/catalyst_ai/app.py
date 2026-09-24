@@ -12,12 +12,14 @@ from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 
 from catalyst_ai.capabilities.assistant import router as assistant_router
+from catalyst_ai.capabilities.brief import router as brief_router
 from catalyst_ai.capabilities.documents import descriptor as documents_descriptor
 from catalyst_ai.capabilities.documents import router as documents_router
 from catalyst_ai.capabilities.documents.jobs import run_ingest_payload
 from catalyst_ai.capabilities.generate_children import router as generate_children_router
 from catalyst_ai.capabilities.generate_tests import router as generate_tests_router
 from catalyst_ai.capabilities.improve_story import router as improve_story_router
+from catalyst_ai.capabilities.interpret_query import router as interpret_query_router
 from catalyst_ai.capabilities.post_mortem import router as post_mortem_router
 from catalyst_ai.capabilities.propose_workflow import router as propose_workflow_router
 from catalyst_ai.capabilities.release_notes import router as release_notes_router
@@ -113,7 +115,11 @@ async def live() -> LiveResponse:
 async def ready(request: Request) -> ReadyResponse:
     """Report whether the process can serve; every dependency it has answers."""
     runtime: RuntimeContext = request.app.state.runtime
-    checks = {"settings": True, "storage": await runtime.storage.ready()}
+    checks = {
+        "settings": True,
+        "storage": await runtime.storage.ready(),
+        "provider_credentials": await runtime.credentials_ready(),
+    }
     checks.update(_worker_check(request))
     return ReadyResponse(status="ready" if all(checks.values()) else "not_ready", checks=checks)
 
@@ -171,20 +177,26 @@ PROVIDER_CLIENT_TIMEOUT_S = 30.0
 
 
 def default_runtime(
-    settings: Settings, transport: httpx.AsyncBaseTransport | None = None
+    settings: Settings,
+    transport: httpx.AsyncBaseTransport | None = None,
+    dsn: str | None = None,
 ) -> RuntimeContext:
-    """Build the production runtime: system clock, Gemini adapter, in-process cache and caps."""
+    """Build the production runtime: system clock, Gemini adapter, in-process cache and caps.
+
+    The database login is serve's unless the caller names another (the worker names its own).
+    """
     clock = SystemClock()
     client = httpx.AsyncClient(timeout=PROVIDER_CLIENT_TIMEOUT_S, transport=transport)
     storage = PostgresStorage(
-        settings.database_url.get_secret_value(),
+        dsn or settings.database_url.get_secret_value(),
         clock,
         settings.database_pool_max,
         STORAGE_COMMAND_TIMEOUT_S,
     )
+    provider = GeminiProvider(settings, client, clock)
     return RuntimeContext(
         settings=settings,
-        provider=GeminiProvider(settings, client, clock),
+        provider=provider,
         cache=MemoryCache(clock),
         budgets=TenantBudgets(
             clock, settings.tenant_budget_default_micros_per_day, settings.tenant_concurrency_max
@@ -192,6 +204,7 @@ def default_runtime(
         clock=clock,
         storage=storage,
         jobs=PostgresJobStore(storage),
+        credentials_ready=provider.credentials_ready,
     )
 
 
@@ -271,5 +284,7 @@ def create_app(settings: Settings, runtime: RuntimeContext | None = None) -> Fas
     app.include_router(documents_router)
     app.include_router(assistant_router)
     app.include_router(unfurl_router)
+    app.include_router(interpret_query_router)
+    app.include_router(brief_router)
     app.include_router(jobs_router)
     return app

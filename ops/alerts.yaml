@@ -22,7 +22,7 @@ groups:
           histogram_quantile(
             0.95,
             sum by (operation, le) (
-              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(improve_story|unfurl)[.].*"}[1h])
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(improve_story|unfurl|interpret_query)[.].*"}[1h])
             )
           ) > 4
         for: 15m
@@ -50,7 +50,7 @@ groups:
           histogram_quantile(
             0.95,
             sum by (operation, le) (
-              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(generate_children|summarize)[.].*"}[1h])
+              rate(catalyst_ai_http_request_duration_seconds_bucket{operation=~"(generate_children|summarize|brief)[.].*"}[1h])
             )
           ) > 8
         for: 15m
@@ -156,7 +156,7 @@ groups:
           histogram_quantile(
             0.95,
             sum by (capability, le) (
-              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"improve-story|unfurl"}[1h])
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"improve-story|unfurl|interpret-query"}[1h])
             )
           ) > 4
         for: 15m
@@ -184,7 +184,7 @@ groups:
           histogram_quantile(
             0.95,
             sum by (capability, le) (
-              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"generate-children|summarize"}[1h])
+              rate(catalyst_ai_provider_call_duration_seconds_bucket{capability=~"generate-children|summarize|brief"}[1h])
             )
           ) > 8
         for: 15m
