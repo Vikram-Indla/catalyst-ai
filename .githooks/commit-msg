@@ -10,3 +10,4 @@ if grep -qiE '^(Co-Authored-By|Signed-off-by):' "$1"; then
   echo "commit-msg: no trailer is allowed after the one line" >&2
   exit 1
 fi
+uv run --frozen python -m tools.checks.commitsize "$1"

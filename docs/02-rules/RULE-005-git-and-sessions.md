@@ -22,7 +22,11 @@ created: 2026-09-18
   banned.
 - A change is one ticket, ≤ 400 changed hand-written lines per commit (the lockfile, the
   rendered document and recorded fixtures are committed separately and do not count), both
-  gates green, read by the lead before the yes.
+  gates green, read by the lead before the yes. `tools/checks/commitsize` measures it at
+  commit: added plus deleted lines outside the generated paths, the ticket from the staged
+  records' `**Ticket:**` field; a `gen:` commit may hold generated paths only. The one
+  exception is a decision the lead has taken (a `D-NNN` decided by `lead`, naming RULE-005),
+  named in the commit's record as `**Size exception:** D-NNN`; there is no flag.
 - Conventional Commits: `type(scope): imperative summary`, ≤ 80 characters, `scope` the
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,

@@ -13,6 +13,7 @@ from tools.checks import (
     ci_image_job,
     commitclass,
     commits,
+    commitsize,
     coverage,
     deprecations,
     deps,
@@ -95,6 +96,12 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     ),
     "commitclass": lambda: commitclass.check(
         ["tools/checks/x.py", "src/catalyst_ai/config/x.py"], {"r.md": "Blast radius: LOCAL"}
+    ),
+    "commitsize": lambda: commitsize.check(
+        [commitsize.Staged("src/catalyst_ai/x.py", 401), commitsize.Staged("uv.lock", 900)],
+        {"r.md": "**Ticket:** AI-001 · x", "s.md": "**Ticket:** AI-002 · y"},
+        "| D-001 | 2026-01-01 | lead (proposed) | RULE-005 | x |",
+        "gen: a mixed commit",
     ),
     "invariants": lambda: invariants.check(BAD_REGISTRY, set(), set(), "w"),
     "evals": lambda: (

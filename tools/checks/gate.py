@@ -56,6 +56,7 @@ CHECKS = (
     "sessions",
     "prclass",
     "commitclass",
+    "commitsize",
     "invariants",
     "mypy_overrides",
     "capabilities",
@@ -84,6 +85,7 @@ FAST = frozenset(
         "mypy_overrides",
         "vocabulary",
         "commitclass",
+        "commitsize",
     }
 )
 
