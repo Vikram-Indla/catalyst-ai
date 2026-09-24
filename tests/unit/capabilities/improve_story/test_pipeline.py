@@ -1,5 +1,7 @@
 """The pipeline: every stage, every door refusal, the repair, the cache, the switch, the budget."""
 
+import json
+
 import pytest
 
 from catalyst_ai.capabilities.improve_story import descriptor
@@ -145,3 +147,53 @@ async def test_settings_override_ttl_and_timeout(provider: ScriptedProvider) -> 
     await run(make_request(), runtime, "r2")
     assert len(provider.calls) == 2
     assert provider.calls[0].timeout_ms == 1234
+
+
+def _comment_answer(text: str, criteria: str | None = None) -> str:
+    return json.dumps(
+        {
+            "description": text,
+            "acceptance_criteria": criteria,
+            "rationale": "Polished the comment.",
+            "changed": True,
+        }
+    )
+
+
+COMMENT = {"participant": "p2", "text": "pls check teh logs @p3, see `flag_x`"}
+
+
+async def test_a_comment_mode_names_its_author_and_fences_the_comment() -> None:
+    request = make_request(mode=ImproveStoryMode.REPLY, comment=COMMENT)
+    runtime = make_runtime(ScriptedProvider([_comment_answer("Thanks @p2, @p3 will look.")]))
+    generate = assemble(parse(request, "rid", None), runtime)
+    assert "Comment by: p2" in generate.segments[1].text
+    comment = next(s.text for s in generate.segments if s.name == "comment")
+    assert comment.startswith("<<<comment>>>\n")
+
+
+async def test_a_polish_keeps_the_markup_and_never_returns_criteria() -> None:
+    kept = "Please check the logs, @p3; see `flag_x`."
+    provider = ScriptedProvider([_comment_answer(kept, criteria="- Given x")])
+    request = make_request(mode=ImproveStoryMode.POLISH_COMMENT, comment=COMMENT)
+    response = await run(request, make_runtime(provider), "rid")
+    assert response.improved_description == kept
+    assert response.acceptance_criteria is None
+
+
+@pytest.mark.parametrize(
+    ("mode", "text", "code"),
+    [
+        (ImproveStoryMode.POLISH_COMMENT, "Please check the logs; see flag_x.", "markup_dropped"),
+        (ImproveStoryMode.REPLY, "Thanks @p2, I asked @p9 to look.", "reference_invented"),
+    ],
+    ids=["polish drops markup", "reply names someone new"],
+)
+async def test_a_comment_mode_breaking_the_markup_rule_is_refused(
+    mode: ImproveStoryMode, text: str, code: str
+) -> None:
+    request = make_request(mode=mode, comment=COMMENT)
+    with pytest.raises(Error) as caught:
+        await run(request, make_runtime(ScriptedProvider([_comment_answer(text)])), "rid")
+    assert caught.value.code is ErrorCode.OUTPUT_INVALID
+    assert [detail.code for detail in caught.value.details] == [code]

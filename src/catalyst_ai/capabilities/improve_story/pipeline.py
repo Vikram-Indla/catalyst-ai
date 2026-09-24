@@ -4,9 +4,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from catalyst_ai.capabilities.improve_story import descriptor
+from catalyst_ai.capabilities.improve_story.comments import markup_problem
 from catalyst_ai.capabilities.improve_story.postprocess import from_cache, to_response
 from catalyst_ai.capabilities.improve_story.schema import ModelOutput, output_schema
+from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.contract.improve_story import ImproveStoryRequest, ImproveStoryResponse
+from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.pipeline import Door, Stages, admit, parse_with_repair, run_stages
 from catalyst_ai.platform.prompts import PromptFile, fill
 from catalyst_ai.platform.runtime import RuntimeContext
@@ -21,9 +24,11 @@ USER_FIELDS = (
     "focus_hint",
     "parent_title",
     "parent_description",
+    "comment",
 )
 ABSENT = "(none)"
 PRESERVE = "preserve the input's language"
+NO_AUTHOR = "(no comment)"
 
 
 @dataclass(frozen=True)
@@ -38,7 +43,8 @@ class Parsed:
 
 def parse(request: ImproveStoryRequest, request_id: str, idempotency: str | None) -> Parsed:
     """Stage 1: the typed request becomes the pipeline's input value."""
-    texts = {name: getattr(request, name) for name in USER_FIELDS}
+    texts = {name: getattr(request, name) for name in USER_FIELDS if name != "comment"}
+    texts["comment"] = request.comment.text if request.comment else None
     return Parsed(request, request_id, idempotency, texts)
 
 
@@ -78,6 +84,7 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
             "type_focus": _focus_section(prompt, request.item_type),
             "operation": request.mode.value,
             "language": request.language or PRESERVE,
+            "comment_author": request.comment.participant if request.comment else NO_AUTHOR,
             "instructions": _operation_section(prompt, request.mode.value),
         },
     )
@@ -116,7 +123,20 @@ async def validate_output(
     texts = [text for text in parsed.user_texts.values() if text]
     completion = output.description + "\n" + (output.acceptance_criteria or "")
     refuse_if_unsafe(completion, texts, parsed.request_id)
+    _refuse_broken_markup(parsed, output.description)
     return output, current
+
+
+def _refuse_broken_markup(parsed: Parsed, text: str) -> None:
+    """Refuse a comment mode's output that dropped markup or named someone new."""
+    request = parsed.request
+    if request.comment is None:
+        return
+    context = request.title + "\n" + request.description
+    problem = markup_problem(request.mode, request.comment, context, text)
+    if problem is not None:
+        detail = ErrorDetail(field="improved_description", code=problem, message=problem)
+        raise Error(ErrorCode.OUTPUT_INVALID, "the comment's markup was not kept", details=[detail])
 
 
 def postprocess(

@@ -1,11 +1,18 @@
 # improve-story — eval set
 
-**Set version:** 1 · **Cases:** 52 (6 tagged `injection`, 3 tagged `leakage`) · **Provenance:** synthetic,
+**Set version:** 2 · **Cases:** 65 (8 tagged `injection`, 3 tagged `leakage`; 13 on the comment modes, English and Arabic) · **Provenance:** synthetic,
 authored from the behaviour of the previous system's `ai-improve-story` (its six editorial modes,
 its conservative default, its refusal list, its type-specific focus) and `ai-improve-comment` (its
 language-preservation rule). No case comes from tenant data.
 
 ## What a good output is
+
+- **polish_comment**: the comment, clearer, in its own language, with every `@p<N>` mention, link and
+  code span exactly as written (`markup_kept`), no key or number the inputs lack (`no_new_facts`);
+  an already-clear comment may come back unchanged.
+- **reply**: a short reply addressed to the comment's author by token, in the comment's language,
+  naming no participant and linking nothing the comment, the title or the description does not
+  (`markup_kept`), stating no key or number they lack (`no_new_facts`).
 
 - **clarify** on rough text: the same item, readable, no new sections or facts; on already-good
   text: near-identical (length ratio 0.9–1.15), `changed` may be false.

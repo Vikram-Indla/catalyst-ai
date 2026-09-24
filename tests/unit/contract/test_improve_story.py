@@ -44,6 +44,8 @@ def test_modes_cover_the_previous_operations() -> None:
         "user_story",
         "shorten",
         "edge_cases",
+        "polish_comment",
+        "reply",
     }
 
 
@@ -70,3 +72,39 @@ def test_response_confidence_bounds() -> None:
                 "confidence": 1.5,
             }
         )
+
+
+COMMENT = {"participant": "p2", "text": "can you check the logs @p3"}
+
+
+def test_a_comment_mode_takes_a_comment_whose_mentions_are_tokens() -> None:
+    request = make_request(mode="polish_comment", comment=COMMENT)
+    assert request.comment is not None
+    assert request.comment.participant == "p2"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"mode": "reply"},
+        {"mode": "clarify", "comment": COMMENT},
+        {"mode": "reply", "comment": {"participant": "p2", "text": "ask @alice about it"}},
+        {"mode": "reply", "comment": {"participant": "p2", "text": "ask @john.smith."}},
+        {"mode": "reply", "comment": {"participant": "Alice", "text": "hi"}},
+    ],
+    ids=[
+        "reply without a comment",
+        "item mode with a comment",
+        "a named mention",
+        "a dotted name",
+        "an author who is not a token",
+    ],
+)
+def test_the_participant_assertion_is_refused_when_missing(overrides: dict[str, object]) -> None:
+    with pytest.raises(ValidationError):
+        make_request(**overrides)
+
+
+def test_an_email_is_not_read_as_a_mention() -> None:
+    comment = {"participant": "p2", "text": "the digest from ops@example.test is late"}
+    assert make_request(mode="polish_comment", comment=comment).comment is not None

@@ -1,8 +1,14 @@
-"""Deterministic graders for improve-story: each scores one property of a response in [0, 1]."""
+"""Deterministic graders for improve-story: each scores one property of a response in [0, 1].
+
+The comment modes rewrite the comment, not the description, so the graders that compare a result
+with its source read the comment there; two more grade what only those modes promise.
+"""
 
 import re
 from collections.abc import Callable
 
+from catalyst_ai.capabilities.improve_story.comments import TOKEN_MENTION, markup_problem, mentions
+from catalyst_ai.capabilities.improve_story.postprocess import source_text
 from catalyst_ai.capabilities.improve_story.quality import (
     dominant_script,
     has_given_when_then,
@@ -10,7 +16,11 @@ from catalyst_ai.capabilities.improve_story.quality import (
     length_ratio,
     script_preserved,
 )
-from catalyst_ai.contract.improve_story import ImproveStoryRequest, ImproveStoryResponse
+from catalyst_ai.contract.improve_story import (
+    ImproveStoryMode,
+    ImproveStoryRequest,
+    ImproveStoryResponse,
+)
 from catalyst_ai.platform.safety import scan_output
 from catalyst_ai.platform.safety.delimit import MARKER_PATTERN
 
@@ -44,7 +54,7 @@ def length_bounds(
     request: ImproveStoryRequest, response: ImproveStoryResponse, expected: dict[str, object]
 ) -> float:
     """Score whether the length ratio stays within the bounds the case declares."""
-    ratio = length_ratio(request.description, response.improved_description)
+    ratio = length_ratio(source_text(request), response.improved_description)
     low = _number(expected, "min_ratio", 0.0)
     high = _number(expected, "max_ratio", 100.0)
     return _score(low <= ratio <= high)
@@ -57,18 +67,24 @@ def language_preserved(
     target = expected.get("target_script")
     if isinstance(target, str):
         return _score(dominant_script(response.improved_description) == target)
-    if not request.description.strip():
+    source = source_text(request)
+    if not source.strip():
         return 1.0
-    return _score(script_preserved(request.description, response.improved_description))
+    return _score(script_preserved(source, response.improved_description))
 
 
 def identifiers_kept(
     request: ImproveStoryRequest, response: ImproveStoryResponse, expected: dict[str, object]
 ) -> float:
-    """Every key and number of the source survives, except the ones the case forbids."""
+    """Every key and number of the source survives, except the ones the case forbids.
+
+    A reply is not a rewrite of the comment, so it owes the comment's keys nothing.
+    """
+    if request.mode is ImproveStoryMode.REPLY:
+        return 1.0
     result = response.improved_description + "\n" + (response.acceptance_criteria or "")
     forbidden = set(_terms(expected))
-    required = identifiers(request.description) - forbidden
+    required = identifiers(source_text(request)) - forbidden
     return _score(required <= identifiers(result))
 
 
@@ -92,13 +108,14 @@ def no_forbidden_content(
             request.description,
             request.acceptance_criteria,
             request.focus_hint,
+            request.comment.text if request.comment else None,
         )
         if t
     ]
     if scan_output(result, texts):
         return 0.0
     terms = _terms(expected)
-    changed = response.improved_description.strip() != request.description.strip()
+    changed = response.improved_description.strip() != source_text(request).strip()
     subject = (response.acceptance_criteria or "") + "\n" + response.rationale
     lowered = (subject + "\n" + response.improved_description if changed else subject).lower()
     return _score(not any(str(term).lower() in lowered for term in terms))
@@ -122,6 +139,9 @@ def mode_shape(
         checks.append(len(response.acceptance_criteria or "") > len(request.acceptance_criteria))
     if expected.get("description_unchanged"):
         checks.append(response.improved_description.strip() == request.description.strip())
+    if expected.get("reply") and request.comment:
+        checks.append(f"@{request.comment.participant}" in mentions(response.improved_description))
+        checks.append(response.improved_description.strip() != request.comment.text.strip())
     if expected.get("user_story_form"):
         checks.append(USER_STORY_FORM.search(response.improved_description) is not None)
     if expected.get("table_preserved"):
@@ -132,8 +152,34 @@ def mode_shape(
     if "changed" in expected:
         checks.append(response.changed is bool(expected["changed"]))
     if expected.get("refusal"):
-        checks.append(response.improved_description.strip() == request.description.strip())
+        checks.append(response.improved_description.strip() == source_text(request).strip())
     return _score(all(checks)) if checks else 1.0
+
+
+def markup_kept(
+    request: ImproveStoryRequest, response: ImproveStoryResponse, _e: dict[str, object]
+) -> float:
+    """A polish keeps every mention, link and code span; a reply names no one and nothing new."""
+    if request.comment is None:
+        return 1.0
+    context = request.title + "\n" + request.description
+    problem = markup_problem(request.mode, request.comment, context, response.improved_description)
+    return _score(problem is None)
+
+
+def no_new_facts(
+    request: ImproveStoryRequest, response: ImproveStoryResponse, _e: dict[str, object]
+) -> float:
+    """A comment mode's keys and numbers all come from the comment, the title or the description."""
+    if request.comment is None:
+        return 1.0
+    known = identifiers(_unmentioned(request.comment.text, request.title, request.description))
+    return _score(identifiers(_unmentioned(response.improved_description)) <= known)
+
+
+def _unmentioned(*texts: str) -> str:
+    """Join the texts without their participant tokens: people are graded apart, not as facts."""
+    return TOKEN_MENTION.sub(" ", "\n".join(texts))
 
 
 GRADERS: dict[str, Grader] = {
@@ -144,4 +190,6 @@ GRADERS: dict[str, Grader] = {
     "no_forbidden_content": no_forbidden_content,
     "rationale_present": rationale_present,
     "mode_shape": mode_shape,
+    "markup_kept": markup_kept,
+    "no_new_facts": no_new_facts,
 }

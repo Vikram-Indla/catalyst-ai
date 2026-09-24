@@ -7,7 +7,11 @@ from catalyst_ai.capabilities.improve_story.quality import (
     script_preserved,
 )
 from catalyst_ai.capabilities.improve_story.schema import ModelOutput
-from catalyst_ai.contract.improve_story import ImproveStoryRequest, ImproveStoryResponse
+from catalyst_ai.contract.improve_story import (
+    COMMENT_MODES,
+    ImproveStoryRequest,
+    ImproveStoryResponse,
+)
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
 from catalyst_ai.providers.port import GenerateResult
 
@@ -18,10 +22,15 @@ PENALTY_LENGTH = 0.2
 PENALTY_SCRIPT = 0.3
 
 
+def source_text(request: ImproveStoryRequest) -> str:
+    """Return the text the mode rewrites: the comment for a comment mode, else the description."""
+    return request.comment.text if request.comment else request.description
+
+
 def confidence(request: ImproveStoryRequest, output: ModelOutput) -> float:
     """Score deterministically: start at one, lose a fixed share per violated property."""
     score = 1.0
-    source = request.description
+    source = source_text(request)
     if not identifiers_preserved(source, output.description):
         score -= PENALTY_IDENTIFIERS
     if output.changed and not MIN_RATIO <= length_ratio(source, output.description) <= MAX_RATIO:
@@ -60,7 +69,7 @@ def to_response(
         usage=result.usage,
         request_id=request_id,
         improved_description=output.description,
-        acceptance_criteria=output.acceptance_criteria,
+        acceptance_criteria=None if request.mode in COMMENT_MODES else output.acceptance_criteria,
         rationale=output.rationale,
         changed=output.changed,
         confidence=confidence(request, output),

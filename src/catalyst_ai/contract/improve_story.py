@@ -1,9 +1,16 @@
-"""The improve-story operation: a rewrite of a work item's text under one editorial mode."""
+"""The improve-story operation: a rewrite of a work item's text under one editorial mode.
 
+Two modes work on a comment rather than the item: `polish_comment` rewrites the comment clearly in
+its own language, and `reply` suggests a reply to it, with the item as context. People appear only
+as the backend's tokens: the comment's author is one, and every mention in the comment's text must
+be one (`@p1`); a comment that mentions anyone by name is refused at the door.
+"""
+
+import re
 from enum import StrEnum
-from typing import Annotated
+from typing import Annotated, Self
 
-from pydantic import ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope, classified
 
@@ -13,6 +20,12 @@ MAX_CRITERIA = 10_000
 MAX_HINT = 500
 MAX_TYPE = 64
 MAX_LANGUAGE = 16
+MAX_COMMENT = 4_000
+PARTICIPANT_SHAPE = r"^p[0-9]{1,4}$"
+MENTION = re.compile(r"(?<![\w.])@(?P<handle>[\w-]+(?:\.[\w-]+)*)")
+TOKEN = re.compile(PARTICIPANT_SHAPE)
+NAMED_MENTION = "a mention must be a participant token such as @p1, never a name"
+COMMENT_NEEDED = "polish_comment and reply need `comment`; the other modes take none"
 
 
 class ImproveStoryMode(StrEnum):
@@ -24,6 +37,49 @@ class ImproveStoryMode(StrEnum):
     USER_STORY = "user_story"
     SHORTEN = "shorten"
     EDGE_CASES = "edge_cases"
+    POLISH_COMMENT = "polish_comment"
+    REPLY = "reply"
+
+
+COMMENT_MODES = frozenset({ImproveStoryMode.POLISH_COMMENT, ImproveStoryMode.REPLY})
+
+
+def named_mentions(text: str) -> list[str]:
+    """Return every mention in the text that is not a participant token."""
+    return [m.group("handle") for m in MENTION.finditer(text) if not TOKEN.match(m.group("handle"))]
+
+
+class CommentInput(BaseModel):
+    """A comment, as the backend sends it: its author and every mention are tokens it chose."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    participant: Annotated[
+        str,
+        Field(
+            pattern=PARTICIPANT_SHAPE,
+            json_schema_extra=classified(
+                "INTERNAL", "An opaque token (p1, p2, …) for the comment's author"
+            ),
+        ),
+    ]
+    text: Annotated[
+        str,
+        Field(
+            min_length=1,
+            max_length=MAX_COMMENT,
+            json_schema_extra=classified(
+                "CONFIDENTIAL", "The comment as written; people only as @p<N> mentions"
+            ),
+        ),
+    ]
+
+    @field_validator("text")
+    @classmethod
+    def _mentions_are_tokens(cls, value: str) -> str:
+        if named_mentions(value):
+            raise ValueError(NAMED_MENTION)
+        return value
 
 
 class ImproveStoryRequest(RequestEnvelope):
@@ -96,6 +152,20 @@ class ImproveStoryRequest(RequestEnvelope):
             ),
         ),
     ] = None
+    comment: Annotated[
+        CommentInput | None,
+        Field(
+            json_schema_extra=classified(
+                "CONFIDENTIAL", "polish_comment: the comment; reply: the comment replied to"
+            ),
+        ),
+    ] = None
+
+    @model_validator(mode="after")
+    def _comment_matches_mode(self) -> Self:
+        if (self.mode in COMMENT_MODES) != (self.comment is not None):
+            raise ValueError(COMMENT_NEEDED)
+        return self
 
 
 class ImproveStoryResponse(ResponseEnvelope):
@@ -103,7 +173,9 @@ class ImproveStoryResponse(ResponseEnvelope):
 
     model_config = ConfigDict(extra="forbid")
 
-    improved_description: str
+    improved_description: str = Field(
+        description="The rewritten description; for polish_comment the comment, for reply the reply"
+    )
     acceptance_criteria: str | None
     rationale: str
     changed: bool

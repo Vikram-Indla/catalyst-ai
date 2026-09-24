@@ -1,6 +1,6 @@
 ---
 id: THREAT-002
-family: rewrite (improve-story; later improve-comment, translate-field)
+family: rewrite (improve-story with its comment modes; translate-field)
 status: Draft
 reviewed: —
 asvs: 5.0
@@ -58,3 +58,21 @@ service token · an operator with configuration access.
   live model's behaviour under attack. Revisit at the first live recording; the eval numbers are
   re-stated then.
 - Accepted by: pending the lead (`D-NNN`).
+
+## The comment modes (`polish_comment`, `reply`)
+
+A comment is written by another member and is the most hostile text this family reads. It is data,
+fenced like every field; the prompt names it so. People reach the service only as the backend's
+tokens: the author is one, and a comment that mentions anyone by name is refused at the door, so
+no name can be copied into a reply. A polished comment must keep every mention, link and code span
+exactly, and a reply may name only the comment's own participants and link only what the inputs
+link; either failure is `ai.output.invalid` (`markup_dropped`, `reference_invented`), never a
+silently altered comment. Two injection cases in the set exercise the refusal path.
+
+## translate's glossary
+
+A glossary note is a reviewer's text and may carry an instruction. The glossary is fenced as data
+with the rest, the prompt says a note is never an instruction, and two cases put an instruction in a
+note. What the glossary may change is bounded in code after the model answers: an enforced term is
+reported by name, an unenforced one as a conflict, and a source with two targets is never enforced,
+so a poisoned glossary can at most raise a conflict for a reviewer, never silently rewrite a term.
