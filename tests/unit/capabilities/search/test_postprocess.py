@@ -11,6 +11,7 @@ from catalyst_ai.capabilities.search.postprocess import (
     to_upsert_response,
 )
 from catalyst_ai.contract.envelopes import Usage
+from catalyst_ai.contract.search import Hit, Provenance
 from catalyst_ai.retrieval import Found, UpsertOutcome
 from catalyst_ai.retrieval.embeddings import NO_USAGE
 from catalyst_ai.retrieval.ingest import IndexedOutcome
@@ -44,3 +45,22 @@ def test_upsert_and_delete_responses() -> None:
     assert deleted.deleted_chunks == 3
     assert deleted.usage == NO_USAGE
     assert deleted.prompt_version == descriptor.prompt_version
+
+
+def test_ids_only_returns_keys_kinds_and_scores_without_content() -> None:
+    provenance = Provenance(chunk_index=0, embedding_model="m", embedding_version="v")
+    hit = Hit(
+        external_id="KR-7",
+        kind="record",
+        title="A private title",
+        score=0.8,
+        snippet="private text",
+        provenance=provenance,
+    )
+    found = Found([hit], SPENT, "m", "v")
+    bare = to_response(found, search_request(ids_only=True), "r").hits[0]
+    assert (bare.external_id, bare.kind, bare.score) == ("KR-7", "record", 0.8)
+    assert bare.title is None
+    assert bare.snippet == ""
+    full = to_response(found, search_request(), "r").hits[0]
+    assert full.title == "A private title"

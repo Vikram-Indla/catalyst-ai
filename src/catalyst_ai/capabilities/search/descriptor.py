@@ -1,7 +1,7 @@
 """The capability's declaration: what the ledger, the gate and the runtime read."""
 
 name = "search"
-version = "1.0.0"
+version = "1.1.0"
 prompt_version = "0"
 eval_set_version = "1"
 kind = "sync"

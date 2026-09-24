@@ -192,6 +192,14 @@ class SearchRequest(RequestEnvelope):
         int,
         Field(ge=1, le=MAX_K, json_schema_extra=classified("PUBLIC", "How many hits at most")),
     ] = DEFAULT_K
+    ids_only: Annotated[
+        bool,
+        Field(
+            json_schema_extra=classified(
+                "PUBLIC", "Keys, kinds and scores only: no title, an empty snippet"
+            ),
+        ),
+    ] = False
 
 
 class Provenance(BaseModel):

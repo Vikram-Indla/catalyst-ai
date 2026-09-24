@@ -5,6 +5,7 @@ from uuid import UUID
 from catalyst_ai.capabilities.search import descriptor
 from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.contract.search import (
+    Hit,
     IndexDeleteResult,
     IndexedDocument,
     IndexUpsertResult,
@@ -38,6 +39,11 @@ def _model(model_id: str) -> str:
     return f"{descriptor.alias}@{model_id}"
 
 
+def bare(hit: Hit) -> Hit:
+    """Return the hit without its content: the key, the kind, the score and how it ranked."""
+    return hit.model_copy(update={"title": None, "snippet": ""})
+
+
 def to_response(found: Found, request: SearchRequest, request_id: str) -> SearchResponse:
     """Build the search response; the usage row is logged when the port was called."""
     if found.usage != NO_USAGE:
@@ -49,7 +55,7 @@ def to_response(found: Found, request: SearchRequest, request_id: str) -> Search
         eval_set_version=descriptor.eval_set_version,
         usage=found.usage,
         request_id=request_id,
-        hits=found.hits,
+        hits=[bare(hit) for hit in found.hits] if request.ids_only else found.hits,
         fusion=found.fusion,
         embedding_version=found.embedding_version,
     )
