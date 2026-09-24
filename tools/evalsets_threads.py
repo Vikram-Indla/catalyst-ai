@@ -6,6 +6,7 @@ from pathlib import Path
 
 from tools import rules
 from tools.evalsets_glossary import glossary_cases
+from tools.evalsets_strata import comment_cases
 from tools.evalsets_windows import window_cases
 from tools.thread_terms import (
     COMMENT_LINES_AR,
@@ -133,7 +134,7 @@ def summarize_cases() -> list[dict[str, object]]:
                 cases.append(_case(f"{mode}-{name}-empty", empty, [mode, "empty"], {"empty": True}))
         cases += _injection_thread_cases(mode, seed + 1)
         seed += len(INJECTION_COMMENTS)
-    return cases + window_cases()
+    return cases + window_cases() + comment_cases()
 
 
 def _translate_request(mode: str, text: str, target: str, **extra: object) -> dict[str, object]:

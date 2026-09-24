@@ -3,7 +3,7 @@
 name = "summarize"
 version = "1.1.0"
 prompt_version = "2"
-eval_set_version = "2"
+eval_set_version = "3"
 kind = "sync"
 alias = "text-default"
 p95_latency_ms = 8_000
