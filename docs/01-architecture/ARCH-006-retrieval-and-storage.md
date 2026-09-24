@@ -16,7 +16,9 @@ service (`ADR-006`). It holds what the service produces and nothing the product 
 
 | Table family | Holds | Tenancy | Lifecycle |
 | --- | --- | --- | --- |
-| `embeddings_<corpus>` | vector, embedding model version, chunk provenance, source key and version supplied by the backend | tenant, RLS | re-embedded on model change; deleted on the backend's `knowledge.forget` call or organisation deletion |
+| `index_documents_<corpus>` | the document's full text (`CONFIDENTIAL`), its title, key, kind, content hash, data class, embedding version, chunk count, when it was last sent | tenant, RLS | re-chunked on a revision; deleted on the backend's forget call, organisation deletion, or the retention job after `RETRIEVAL_DOCUMENT_TTL_DAYS` |
+| `embeddings_<corpus>` | vector, the chunk's text (`CONFIDENTIAL`), embedding model version, chunk provenance, source key and version supplied by the backend | tenant, RLS | re-embedded on model change; deleted with its document |
+| `auth_nonces` | an envelope's nonce and expiry — no tenant content | platform | forgotten in the transaction of every accepted request once expired (`retention.md`) |
 | `cache_entries` | key (`ARCH-008 §3`), response model JSON, expiry | tenant, RLS | TTL; purged by the retention job |
 | `jobs` | job id, capability, status, request hash, result JSON, expiry | tenant, RLS | expires after `job_result_ttl` (`ADR-007`) |
 | `provider_calls` | organisation, capability, versions, model, tokens, cost, latency, outcome, cache hit — never content | tenant, RLS | retention per `ARCH-010 §3` |

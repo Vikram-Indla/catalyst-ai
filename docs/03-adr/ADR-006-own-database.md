@@ -61,6 +61,9 @@ problem; the revisit trigger says when.
   HNSW index tuned within the documented ranges.
 - p95 retrieval latency exceeds its budget on two consecutive eval runs at production scale.
 - The platform team decides on managed PostgreSQL without the `pgvector` extension.
+- The platform offers `pgvector` at or above the version the HNSW settings need (0.5.0) — or
+  stops offering it: the migrations require the extension and never create it, and the
+  development image carries the managed tier's version.
 
 ## Enforcement
 

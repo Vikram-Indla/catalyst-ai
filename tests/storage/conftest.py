@@ -11,7 +11,13 @@ from testcontainers.postgres import PostgresContainer
 from catalyst_ai.platform.storage import PostgresStorage, migrate
 from tests.conftest import REPO_ROOT
 from tests.unit.capabilities.improve_story.conftest import FrozenClock
-from tools.evalkit import DATABASE_IMAGE, DATABASE_VARIABLE, container_dsn
+from tools.evalkit import (
+    DATABASE_IMAGE,
+    DATABASE_VARIABLE,
+    EXTENSIONS,
+    container_dsn,
+    provision,
+)
 
 MIGRATIONS = REPO_ROOT / "db" / "migrations"
 COMMAND_TIMEOUT_S = 10.0
@@ -32,6 +38,7 @@ def database_url() -> Iterator[str]:
 @pytest.fixture
 async def storage(database_url: str) -> AsyncIterator[PostgresStorage]:
     if database_url not in MIGRATED:
+        await provision(database_url, REPO_ROOT, EXTENSIONS)
         await migrate(database_url, MIGRATIONS)
         MIGRATED.add(database_url)
     store = PostgresStorage(database_url, FrozenClock(), 4, COMMAND_TIMEOUT_S)

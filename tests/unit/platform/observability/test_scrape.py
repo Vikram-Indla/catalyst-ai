@@ -36,11 +36,13 @@ def _row() -> JobRow:
     )
 
 
-async def _client(metrics: Metrics, jobs: object) -> httpx.AsyncClient:
+async def _client(metrics: Metrics, jobs: object, *, worker: bool = True) -> httpx.AsyncClient:
     app = FastAPI()
     app.include_router(metrics_router)
     app.state.metrics = metrics
     app.state.runtime = type("R", (), {"jobs": jobs})()
+    if worker:
+        app.state.worker = object()
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
     return httpx.AsyncClient(transport=transport, base_url="http://ops")
 
@@ -77,3 +79,14 @@ async def test_a_depth_read_before_an_outage_does_not_survive_the_failed_read() 
     assert 'catalyst_ai_jobs{state="queued"} 1' in metrics.render()
     await read_gauges(metrics, _DownStore())
     assert "catalyst_ai_jobs" not in metrics.render()
+
+
+async def test_serve_scrapes_its_counters_but_never_reads_the_queue() -> None:
+    metrics = Metrics()
+    metrics.count(ORIGIN_REFUSED, {"reason": "expired"})
+    store = MemoryJobStore()
+    await store.create_job(_row())
+    async with await _client(metrics, store, worker=False) as client:
+        response = await client.get("/metrics")
+    assert 'catalyst_ai_origin_refused_total{reason="expired"} 1' in response.text
+    assert "catalyst_ai_jobs" not in response.text

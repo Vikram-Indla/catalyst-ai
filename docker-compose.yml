@@ -1,9 +1,16 @@
 # `docker compose up` migrates before it serves: `migrate` is a one-shot run of the same image
-# against the same database, and `ai` starts only once it has exited 0. A failed migration keeps
-# the service down rather than serving an empty schema.
+# against the same database, and `ai` and `worker` start only once it has exited 0. A failed
+# migration keeps the service down rather than serving an empty schema. The database provisions
+# itself on its first start as a provisioner would (`db/provision/`): the extensions the
+# migrations require, the three logins, and — here only — their development passwords. Each
+# process then logs in as its own: `migrate` the owner, `ai` serve, `worker` the worker.
+x-database: &database
+  CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai_serve:catalyst_ai_serve@db:5432/catalyst_ai
+  CATALYST_AI_DATABASE_WORKER_URL: postgresql://catalyst_ai_worker:catalyst_ai_worker@db:5432/catalyst_ai
+  CATALYST_AI_DATABASE_MIGRATE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
 services:
   db:
-    image: pgvector/pgvector:pg17@sha256:cf134a767f474095eeba57e0117be8e568e011a63f33fbf252f14c9b760f8e6f
+    image: pgvector/pgvector:0.8.1-pg17@sha256:3e8b3adfd27b5707128f60956f62a793c3c9326ea8cfaf0eab7adccb5d700b21
     environment:
       POSTGRES_USER: catalyst_ai
       POSTGRES_PASSWORD: catalyst_ai
@@ -12,6 +19,9 @@ services:
       - "5433:5432"
     volumes:
       - db:/var/lib/postgresql/data
+      - ./db/provision/extensions.sql:/docker-entrypoint-initdb.d/10-extensions.sql:ro
+      - ./db/provision/logins.sql:/docker-entrypoint-initdb.d/20-logins.sql:ro
+      - ./db/provision/development.sql:/docker-entrypoint-initdb.d/30-development.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U catalyst_ai"]
       interval: 5s
@@ -22,8 +32,7 @@ services:
     image: catalyst-ai:local
     command: ["migrate"]
     env_file: .env
-    environment:
-      CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
+    environment: *database
     depends_on:
       db:
         condition: service_healthy
@@ -31,11 +40,23 @@ services:
     build: .
     image: catalyst-ai:local
     env_file: .env
-    environment:
-      CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
+    environment: *database
     ports:
       - "8090:8090"
       - "9091:9091"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+  worker:
+    build: .
+    image: catalyst-ai:local
+    command: ["worker"]
+    env_file: .env
+    environment: *database
+    ports:
+      - "9092:9091"
     depends_on:
       db:
         condition: service_healthy

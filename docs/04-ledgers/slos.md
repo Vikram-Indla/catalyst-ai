@@ -16,12 +16,19 @@ two, or when a threshold is not a bucket edge. The histogram's bounds carry an e
 budget (0.8, 4, 6, 8, 10, 12 and 15 s), so the quantile a rule judges is read at its threshold
 rather than interpolated across it.
 
+## The database is on every request's path
+
+Every request is checked against the replay store (`auth_nonces`) before any route runs, and the
+store fails closed: a database that does not answer is a `503` for every capability
+(`replay-store-down.md`). So no availability objective of this service can be better than the
+database tier's, and the objectives below assume it.
+
 ## Service level objectives
 
 | SLO | Objective | Metric | Window | Alert |
 | --- | --- | --- | --- | --- |
 | Availability of a synchronous capability | 99.0 % of calls answer without `5xx` | `catalyst_ai_http_requests_total{status}` per `operation` | 30 days | `CapabilityErrorBudgetBurn` |
-| Latency of a capability | p95 within the `p95_latency_ms` its descriptor declares (`ARCH-008 §1`): 4 s `improve-story`, `unfurl`; 6 s `translate`; 8 s `generate-children`, `summarize`; 10 s `propose-workflow`, `release-notes`; 12 s the assistant, `generate-tests`, `post-mortem`; 15 s `documents` | `catalyst_ai_http_request_duration_seconds` per `operation` | 1 hour | `CapabilityLatencyHigh` (one rule per budget) |
+| Latency of a capability | p95 within the `p95_latency_ms` its descriptor declares (`ARCH-008 §1`): 4 s `improve-story`, `unfurl`, `interpret-query`; 6 s `translate`; 8 s `generate-children`, `summarize`, `brief`; 10 s `propose-workflow`, `release-notes`; 12 s the assistant, `generate-tests`, `post-mortem`; 15 s `documents` | `catalyst_ai_http_request_duration_seconds` per `operation` | 1 hour | `CapabilityLatencyHigh` (one rule per budget) |
 | Latency of retrieval | p95 within 800 ms (`ARCH-008 §1`) for `search.run` and the index operations | `catalyst_ai_http_request_duration_seconds{operation=~"(search\|index)[.].*"}` | 1 hour | `RetrievalLatencyHigh` |
 | Latency of the provider | p95 provider call within the same capability's budget; a slow provider is not a slow capability twice | `catalyst_ai_provider_call_duration_seconds` per `capability` | 1 hour | `ProviderLatencyHigh` (one rule per budget) |
 | Provider availability | fewer than 5 % of provider calls end in `ai.provider.unavailable`, `timeout` or `quota` | `catalyst_ai_provider_calls_total{outcome}` | 1 hour | `ProviderFailing` |

@@ -11,7 +11,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from catalyst_ai.app import create_app, create_ops_app, default_runtime, job_runners
 from catalyst_ai.config import Settings, load_settings
@@ -104,14 +104,20 @@ def check(root: Path, *, load: bool) -> int:
     return EXIT_OK
 
 
+def _login(settings: Settings, own: SecretStr | None) -> str:
+    """Return the process's own login; in development it may be serve's."""
+    return (own or settings.database_url).get_secret_value()
+
+
 async def _migrate(settings: Settings) -> int:
-    applied = await migrate(settings.database_url.get_secret_value(), Path.cwd() / MIGRATIONS)
+    owner = _login(settings, settings.database_migrate_url)
+    applied = await migrate(owner, Path.cwd() / MIGRATIONS)
     print(f"migrate: {len(applied)} applied " + " ".join(applied))
     return EXIT_OK
 
 
 async def _job(settings: Settings, command: str) -> int:
-    runtime = default_runtime(settings)
+    runtime = default_runtime(settings, dsn=_login(settings, settings.database_worker_url))
     storage = runtime.storage
     if not isinstance(storage, PostgresStorage):
         return EXIT_FAIL
@@ -159,7 +165,7 @@ def assemble_worker(settings: Settings, runtime: RuntimeContext) -> tuple[FastAP
 
 async def _worker(settings: Settings) -> int:
     """Run the worker: claim, verify the stored proof, execute; drain on SIGTERM."""
-    runtime = default_runtime(settings)
+    runtime = default_runtime(settings, dsn=_login(settings, settings.database_worker_url))
     storage = runtime.storage
     if not isinstance(storage, PostgresStorage):
         return EXIT_FAIL
