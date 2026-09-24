@@ -31,6 +31,7 @@ from catalyst_ai.capabilities.search import run as search_run
 from catalyst_ai.capabilities.search import run_upsert
 from catalyst_ai.capabilities.summarize import run as summarize
 from catalyst_ai.capabilities.translate import run as translate
+from catalyst_ai.capabilities.translate.drafts import run_drafts
 from catalyst_ai.capabilities.unfurl.pipeline import run as unfurl_run
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.assistant import TurnRequest, TurnResponse
@@ -47,6 +48,7 @@ from catalyst_ai.contract.release_notes import ReleaseNotesRequest
 from catalyst_ai.contract.search import IndexUpsertRequest, SearchRequest
 from catalyst_ai.contract.summarize import SummarizeRequest
 from catalyst_ai.contract.translate import TranslateRequest
+from catalyst_ai.contract.translate_drafts import DraftsRequest
 from catalyst_ai.contract.unfurl import UnfurlRequest
 from catalyst_ai.platform.budgets import TenantBudgets
 from catalyst_ai.platform.cache import MemoryCache
@@ -238,6 +240,7 @@ REGISTRY: dict[str, SetSpec] = {
     "unfurl": SetSpec(UnfurlRequest, unfurl_run),
     "interpret-query": SetSpec(InterpretQueryRequest, interpret_query_run),
     "brief": SetSpec(BriefRequest, brief_run),
+    "translate-drafts": SetSpec(DraftsRequest, run_drafts),
 }
 
 

@@ -1,0 +1,11 @@
+machine_draft_only: 1.0
+keys_and_counts: 1.0
+empty_skipped: 1.0
+target_script: 1.0
+latin_digits: 1.0
+glossary_exact: 1.0
+facts_kept_or_reported: 1.0
+no_forbidden_content: 1.0
+overall: 1.0
+p95_latency_ms: 30000
+p95_cost_micros: 10000
