@@ -2,7 +2,9 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := verify
 
-UV ?= uv
+# `uv run` exports UV as its own path; on Windows a recipe would mangle it. Only the command line
+# (make UV=...) may name another uv, never an inherited environment variable.
+UV := uv
 RUN := $(UV) run --frozen
 TOOLS_BIN := $(shell $(RUN) python -c "from tools.install import target_dir; print(target_dir())" 2>/dev/null || echo .tools/bin/unknown)
 export PATH := $(CURDIR)/$(TOOLS_BIN):$(PATH)

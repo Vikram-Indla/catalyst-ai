@@ -8,6 +8,7 @@ older than a day: the full pipeline. Any SOURCE or CONFIG file: the full pipelin
 workflow on `main` never reads this; it always runs everything.
 """
 
+import os
 import subprocess
 import sys
 import time
@@ -62,20 +63,40 @@ def plan(
     return Plan(targets, reason if changed else "the tree is the last green tree", changed)
 
 
+INHERITED_TOOL = "UV"
+
+
+def child_env() -> dict[str, str]:
+    """Return the environment for the nested make, without the runner's own `UV`.
+
+    `uv run` exports `UV` as the path of its own executable; a nested make reads it through
+    `UV ?= uv`, and on Windows bash strips that path's backslashes. Without it the nested make uses
+    the `uv` on PATH, as a make started by hand does.
+    """
+    return {key: value for key, value in os.environ.items() if key != INHERITED_TOOL}
+
+
+def decide() -> Plan:
+    """Return the plan for the tree as it is against the last full green run."""
+    image = ci_image.tag()
+    return plan(stamp.read_base(), stamp.tree_manifest(), stamp.image_digest(image), time.time())
+
+
 def main(argv: list[str]) -> int:
     """Print the plan; with `--run`, run it (the full pipeline, a scoped one, or nothing)."""
-    image = ci_image.tag()
-    decided = plan(stamp.read_base(), stamp.tree_manifest(), stamp.image_digest(image), time.time())
+    decided = decide()
     print(f"ci-aware: {decided.reason} -> {' '.join(decided.targets) or 'nothing to run'}")
     for path in decided.changed[:20]:
         print(f"  {change_map.class_of(path) or change_map.CONFIG:7} {path}")
     if "--run" not in argv or not decided.targets:
         return 0
     if decided.targets == ["ci"]:
-        return subprocess.run(["make", "--no-print-directory", "ci"], check=False).returncode
+        return subprocess.run(
+            ["make", "--no-print-directory", "ci"], check=False, env=child_env()
+        ).returncode
     scope = ",".join(sorted(change_map.classes_of(decided.changed)))
     command = ["make", "--no-print-directory", "ci-scoped", f"TARGETS={' '.join(decided.targets)}"]
-    return subprocess.run([*command, f"SCOPE={scope}"], check=False).returncode
+    return subprocess.run([*command, f"SCOPE={scope}"], check=False, env=child_env()).returncode
 
 
 if __name__ == "__main__":

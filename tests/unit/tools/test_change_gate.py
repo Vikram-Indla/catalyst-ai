@@ -1,5 +1,11 @@
 """The change-aware plan: the full pipeline unless the last green tree is a usable base."""
 
+import os
+import subprocess
+from pathlib import Path
+
+import pytest
+
 from tools import change_gate
 
 NOW = 1_000_000.0
@@ -64,3 +70,30 @@ def test_a_scoped_run_is_never_a_base_so_a_chain_cannot_outlive_its_full_run() -
     decided = change_gate.plan(full_a, docs_c, DIGEST, NOW)
     assert decided.targets == ["ci"]
     assert decided.reason == "the last green run is older than a day"
+
+
+def test_the_nested_make_never_inherits_the_runners_uv_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    seen: list[dict[str, str] | None] = []
+
+    def fake_run(argv: list[str], check: bool, env: dict[str, str] | None = None) -> object:
+        del argv, check
+        seen.append(env)
+        return type("Done", (), {"returncode": 0})()
+
+    docs_only = change_gate.Plan(["verify-docs"], "1 file(s) differ", ["docs/02-rules/r.md"])
+    monkeypatch.setenv("UV", r"C:\Users\someone\AppData\Local\uv.exe")
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(change_gate, "decide", lambda: docs_only)
+    assert change_gate.main(["--run"]) == 0
+    assert seen
+    assert seen[0] is not None
+    assert "UV" not in seen[0]
+    assert seen[0].get("PATH") == os.environ.get("PATH")
+
+
+def test_the_makefile_names_uv_itself_so_no_parent_can_inherit_a_path_into_it() -> None:
+    lines = [line.strip() for line in Path("Makefile").read_text(encoding="utf-8").splitlines()]
+    assert "UV := uv" in lines
+    assert "UV ?= uv" not in lines
