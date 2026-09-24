@@ -129,3 +129,21 @@ def test_the_served_archive_is_the_pinned_one_whichever_second_it_is_built_in(
     first = _archive(GENUINE)
     monkeypatch.setattr(time, "time", lambda: 4_102_444_800.0)
     assert _archive(GENUINE) == first
+
+
+def test_the_scanner_is_its_own_group_with_the_vendor_archive_names(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    assert "trivy" not in install.GATE_TOOLS
+    assert install.SCAN_TOOLS == ("trivy",)
+    monkeypatch.setattr(platform, "system", lambda: "Linux")
+    monkeypatch.setattr(platform, "machine", lambda: "x86_64")
+    assert install._url("trivy", "0.72.0").endswith("/v0.72.0/trivy_0.72.0_Linux-64bit.tar.gz")
+    monkeypatch.setattr(platform, "system", lambda: "Windows")
+    assert install._url("trivy", "0.72.0").endswith("trivy_0.72.0_windows-64bit.zip")
+
+
+def test_every_scanner_archive_the_url_names_has_its_vendor_line() -> None:
+    pinned = install.pinned_digests()
+    for name in ("Linux-64bit.tar.gz", "Linux-ARM64.tar.gz", "windows-64bit.zip"):
+        assert f"trivy_0.72.0_{name}" in pinned

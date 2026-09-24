@@ -4,6 +4,10 @@ A binary reaches .tools/bin/<os>-<arch> only by extraction from an archive whose
 its line in tools/checksums.sha256 (the vendor's own checksum lines, copied when a version moves).
 Nothing on PATH and nothing already in .tools/bin is trusted: the archive is verified and the
 binary extracted again on every run; the verified archive is kept in .tools/archives.
+
+Two groups: the gate's tools (`make tools`), and the scanner (`make scan-tools`, `--scan`), which
+only the image scan needs. The gate never downloads the scanner, so the pipeline stays offline
+after its first run.
 """
 
 import hashlib
@@ -24,9 +28,15 @@ GITHUB = "https://github.com"
 RELEASES = {
     "gitleaks": "{g}/gitleaks/gitleaks/releases/download/v{v}/gitleaks_{v}_{os}_{arch}.{ext}",
     "oasdiff": "{g}/oasdiff/oasdiff/releases/download/v{v}/oasdiff_{v}_{os}_{arch}.{ext}",
+    "trivy": "{g}/aquasecurity/trivy/releases/download/v{v}/trivy_{v}_{os}-{arch}.{ext}",
 }
+GATE_TOOLS = ("gitleaks", "oasdiff")
+SCAN_TOOLS = ("trivy",)
+ZIPPED_ON_WINDOWS = frozenset({"gitleaks", "trivy"})
 ARCHES = {"x86_64": "x64", "amd64": "x64", "arm64": "arm64", "aarch64": "arm64"}
 OASDIFF_ARCHES = {"x64": "amd64", "arm64": "arm64"}
+TRIVY_SYSTEMS = {"linux": "Linux", "darwin": "macOS", "windows": "windows"}
+TRIVY_ARCHES = {"x64": "64bit", "arm64": "ARM64"}
 
 
 def versions() -> dict[str, str]:
@@ -54,9 +64,11 @@ def binary_name(tool: str) -> str:
 def _url(tool: str, version: str) -> str:
     system = platform.system().lower()
     arch = ARCHES.get(platform.machine().lower(), platform.machine().lower())
-    ext = "zip" if system == "windows" and tool == "gitleaks" else "tar.gz"
+    ext = "zip" if system == "windows" and tool in ZIPPED_ON_WINDOWS else "tar.gz"
     if tool == "oasdiff":
         arch = OASDIFF_ARCHES.get(arch, arch)
+    if tool == "trivy":
+        system, arch = TRIVY_SYSTEMS.get(system, system), TRIVY_ARCHES.get(arch, arch)
     return RELEASES[tool].format(g=GITHUB, v=version, os=system, arch=arch, ext=ext)
 
 
@@ -115,13 +127,14 @@ def install(tool: str, version: str) -> Path:
     return destination
 
 
-def main() -> int:
-    """Install every pinned binary and print where it is."""
+def main(argv: list[str] | None = None) -> int:
+    """Install the gate's pinned binaries (or, with `--scan`, the scanner) and print where."""
     pinned = versions()
-    for tool in RELEASES:
+    group = SCAN_TOOLS if "--scan" in (argv or []) else GATE_TOOLS
+    for tool in group:
         print(f"{tool} {pinned[tool]} -> {install(tool, pinned[tool])}")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
