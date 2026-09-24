@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"status = \\\"Done\\\" AND issuetype = \\\"Epic\\\"\", \"explanation\": \"Filter: status = \\\"Done\\\" AND issuetype = \\\"Epic\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 289,
+      "candidatesTokenCount": 55
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

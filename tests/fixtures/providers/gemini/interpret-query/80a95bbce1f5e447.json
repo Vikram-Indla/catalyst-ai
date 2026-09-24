@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"assignee = currentUser() AND issuetype = \\\"Task\\\" ORDER BY priority DESC\", \"explanation\": \"Filter: assignee = currentUser() AND issuetype = \\\"Task\\\" ORDER BY priority DESC\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 293,
+      "candidatesTokenCount": 70
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

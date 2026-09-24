@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"issuetype = \\\"Bug\\\"\", \"explanation\": \"Filter: issuetype = \\\"Bug\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 295,
+      "candidatesTokenCount": 43
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

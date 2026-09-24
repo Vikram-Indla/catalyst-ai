@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"\", \"explanation\": \"Nothing in it maps to a filter\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 305,
+      "candidatesTokenCount": 39
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

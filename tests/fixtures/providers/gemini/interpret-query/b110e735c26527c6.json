@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"assignee = currentUser() AND status = \\\"In Progress\\\" AND issuetype = \\\"Story\\\"\", \"explanation\": \"Filter: assignee = currentUser() AND status = \\\"In Progress\\\" AND issuetype = \\\"Story\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 295,
+      "candidatesTokenCount": 73
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

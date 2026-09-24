@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"sprint IS EMPTY AND issuetype = \\\"Story\\\"\", \"explanation\": \"Filter: sprint IS EMPTY AND issuetype = \\\"Story\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 293,
+      "candidatesTokenCount": 54
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

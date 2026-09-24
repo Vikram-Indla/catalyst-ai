@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"status = \\\"In Review\\\" AND issuetype = \\\"Task\\\"\", \"explanation\": \"Filter: status = \\\"In Review\\\" AND issuetype = \\\"Task\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 290,
+      "candidatesTokenCount": 57
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"issuetype = \\\"Task\\\" AND duedate < \\\"2026-09-24\\\" AND status != \\\"Done\\\"\", \"explanation\": \"Filter: issuetype = \\\"Task\\\" AND duedate < \\\"2026-09-24\\\" AND status != \\\"Done\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 290,
+      "candidatesTokenCount": 70
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

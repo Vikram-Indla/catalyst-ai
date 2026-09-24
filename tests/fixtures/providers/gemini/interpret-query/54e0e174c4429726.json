@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"issuetype = \\\"Bug\\\" AND priority = \\\"High\\\"\", \"explanation\": \"Filter: issuetype = \\\"Bug\\\" AND priority = \\\"High\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 291,
+      "candidatesTokenCount": 55
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

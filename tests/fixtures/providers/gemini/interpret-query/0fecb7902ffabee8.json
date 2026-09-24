@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"priority IN (\\\"High\\\", \\\"Highest\\\")\", \"explanation\": \"Filter: priority IN (\\\"High\\\", \\\"Highest\\\")\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 294,
+      "candidatesTokenCount": 51
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

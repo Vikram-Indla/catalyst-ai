@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"status != \\\"Done\\\" ORDER BY created ASC\", \"explanation\": \"Filter: status != \\\"Done\\\" ORDER BY created ASC\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 292,
+      "candidatesTokenCount": 53
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

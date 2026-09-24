@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"priority = \\\"High\\\"\", \"explanation\": \"\u062a\u0635\u0641\u064a\u0629: priority = \\\"High\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 294,
+      "candidatesTokenCount": 43
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

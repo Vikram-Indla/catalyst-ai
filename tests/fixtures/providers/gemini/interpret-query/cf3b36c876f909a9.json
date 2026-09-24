@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"issuetype = \\\"Bug\\\" AND created >= \\\"-7d\\\"\", \"explanation\": \"\u062a\u0635\u0641\u064a\u0629: issuetype = \\\"Bug\\\" AND created >= \\\"-7d\\\"\", \"unresolved\": [], \"rationale\": \"Phrases matched against the grammar; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 295,
+      "candidatesTokenCount": 55
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
