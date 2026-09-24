@@ -21,9 +21,10 @@ from catalyst_ai.providers.recorded import (
 from tools import authored, evalkit, rules
 from tools.authored_envelope import sse_of
 
-KEY_VARIABLE = "CATALYST_AI_RECORD_PROVIDER_KEY"
+KEY_VARIABLE = "CATALYST_AI_RECORD_PROVIDER_TOKEN"
+PROJECT_VARIABLE = "CATALYST_AI_PROVIDER_VERTEX_PROJECT"
 MANIFEST = "_manifest.json"
-EMBED_SUFFIX = ":batchEmbedContents"
+EMBED_SUFFIX = ":predict"
 STREAM_MARKER = ":streamGenerateContent"
 
 
@@ -81,7 +82,10 @@ async def record(name: str, *, live: bool) -> int:
     settings = evalkit.inert_settings()
     if live:
         settings = settings.model_copy(
-            update={"provider_gemini_api_key": SecretStr(os.environ[KEY_VARIABLE])}
+            update={
+                "provider_access_token": SecretStr(os.environ[KEY_VARIABLE]),
+                "provider_vertex_project": os.environ[PROJECT_VARIABLE],
+            }
         )
     transport = RecordingTransport(directory, live=live)
     spec = evalkit.REGISTRY[name]
@@ -113,8 +117,8 @@ def main(argv: list[str]) -> int:
     """`--set <name>` and either `--authored` or `--live` (the key from the environment)."""
     name = argv[argv.index("--set") + 1] if "--set" in argv else "improve-story"
     live = "--live" in argv
-    if live and KEY_VARIABLE not in os.environ:
-        print(f"record: {KEY_VARIABLE} is not set; nothing recorded")
+    if live and not {KEY_VARIABLE, PROJECT_VARIABLE} <= os.environ.keys():
+        print(f"record: {KEY_VARIABLE} and {PROJECT_VARIABLE} must be set; nothing recorded")
         return 1
     return asyncio.run(record(name, live=live))
 

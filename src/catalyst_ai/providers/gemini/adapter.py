@@ -1,8 +1,6 @@
 """GeminiProvider: the port over Gemini's REST API with deadline, retries, breaker and cost."""
 
-import math
 from collections.abc import AsyncIterator
-from types import MappingProxyType
 from typing import Any
 
 import httpx
@@ -12,6 +10,8 @@ from catalyst_ai.contract.envelopes import Usage
 from catalyst_ai.platform.clock import Clock
 from catalyst_ai.platform.resilience import Breaker, BreakerOpenError, RetryPolicy, retry_async
 from catalyst_ai.providers.gemini import aliases, errors, streaming
+from catalyst_ai.providers.gemini.credentials import TokenSource, authorization, token_source
+from catalyst_ai.providers.gemini.embedding import EMBED_METHOD, build_embed_body, parse_embed
 from catalyst_ai.providers.gemini.models import ModelSpec, billed_output_tokens
 from catalyst_ai.providers.port import (
     EmbedRequest,
@@ -22,15 +22,9 @@ from catalyst_ai.providers.port import (
     StreamFrame,
 )
 
-API_VERSION = "v1beta"
-KEY_HEADER = "x-goog-api-key"
+API_VERSION = "v1"
 CHARS_PER_TOKEN = 4
-EMBED_METHOD = "batchEmbedContents"
 GENERATE_METHOD = "generateContent"
-EMBED_TASKS = MappingProxyType({"document": "RETRIEVAL_DOCUMENT", "query": "RETRIEVAL_QUERY"})
-EMBED_DIMENSIONS = 768
-SHAPE_NO_EMBEDDINGS = "no embeddings in the response"
-SHAPE_WRONG_SIZE = "an embedding of the wrong size"
 BREAKER_FAILURES = 5
 BREAKER_OPEN_SECONDS = 30
 MS_PER_SECOND = 1000
@@ -52,27 +46,6 @@ def _schema_for_provider(schema: dict[str, object]) -> dict[str, object]:
         else:
             cleaned[key] = value
     return cleaned
-
-
-def build_embed_body(request: EmbedRequest, model_id: str) -> dict[str, Any]:
-    """Build the batch body: one embed request per text, the task type and the dimensions."""
-    return {
-        "requests": [
-            {
-                "model": f"models/{model_id}",
-                "content": {"parts": [{"text": text}]},
-                "taskType": EMBED_TASKS[request.purpose],
-                "outputDimensionality": EMBED_DIMENSIONS,
-            }
-            for text in request.texts
-        ]
-    }
-
-
-def normalise(vector: list[float]) -> list[float]:
-    """Scale to unit length; the provider's reduced-dimension vectors are not normalised."""
-    norm = math.sqrt(sum(value * value for value in vector))
-    return [value / norm for value in vector] if norm else vector
 
 
 def build_body(request: GenerateRequest, spec: ModelSpec) -> dict[str, Any]:
@@ -114,6 +87,7 @@ class GeminiProvider:
         self._policy = policy or RetryPolicy()
         self._rng = self._policy.rng()
         self._breakers: dict[str, Breaker] = {}
+        self._tokens: TokenSource = token_source(settings, client, clock)
 
     def _breaker(self, model_id: str) -> Breaker:
         return self._breakers.setdefault(
@@ -121,17 +95,14 @@ class GeminiProvider:
         )
 
     def _url(self, spec: ModelSpec, method: str = GENERATE_METHOD) -> str:
-        base = self._settings.provider_gemini_base_url.rstrip("/")
-        return f"{base}/{API_VERSION}/models/{spec.model_id}:{method}"
-
-    def _headers(self) -> dict[str, str]:
-        key = self._settings.provider_gemini_api_key
-        return {KEY_HEADER: key.get_secret_value() if key else ""}
+        base = self._settings.provider_origin().rstrip("/")
+        location = self._settings.provider_location()
+        scope = f"projects/{self._settings.provider_vertex_project}/locations/{location}"
+        return f"{base}/{API_VERSION}/{scope}/publishers/google/models/{spec.model_id}:{method}"
 
     async def _post(self, url: str, body: dict[str, Any], timeout_s: float) -> httpx.Response:
-        response = await self._client.post(
-            url, json=body, headers=self._headers(), timeout=timeout_s
-        )
+        headers = await authorization(self._tokens)
+        response = await self._client.post(url, json=body, headers=headers, timeout=timeout_s)
         response.raise_for_status()
         return response
 
@@ -191,7 +162,7 @@ class GeminiProvider:
                 "POST",
                 url,
                 json=build_body(request, spec),
-                headers=self._headers(),
+                headers=await authorization(self._tokens),
                 timeout=request.timeout_ms / MS_PER_SECOND,
             ) as response:
                 if response.status_code >= HTTP_ERROR_FLOOR:
@@ -221,7 +192,7 @@ class GeminiProvider:
             response = await self._call_with_guards(
                 spec,
                 self._url(spec, EMBED_METHOD),
-                build_embed_body(request, spec.model_id),
+                build_embed_body(request),
                 request.timeout_ms,
                 request_id,
             )
@@ -229,7 +200,7 @@ class GeminiProvider:
             raise errors.from_transport(error, request_id) from error
         latency_ms = int((self._clock.now() - started).total_seconds() * MS_PER_SECOND)
         tokens = sum(self.count_tokens(request.alias, text) for text in request.texts)
-        return _parse_embed(response.json(), spec, tokens, latency_ms, request_id)
+        return parse_embed(response.json(), spec, tokens, latency_ms, request_id)
 
     def count_tokens(self, alias: ModelAlias, text: str) -> int:
         """Estimate tokens by characters; the provider's tokeniser earns a register row later."""
@@ -239,6 +210,10 @@ class GeminiProvider:
     def model_id(self, alias: ModelAlias) -> str:
         """Return the register's concrete id for the alias under the current settings."""
         return aliases.resolve(alias, self._settings).model_id
+
+    async def credentials_ready(self) -> bool:
+        """Return whether the token is current; red until the workload's first one arrives."""
+        return await self._tokens.ready()
 
 
 def _parse_generate(
@@ -267,25 +242,3 @@ def _parse_generate(
     return GenerateResult(
         text=text, model_id=str(payload.get("modelVersion") or spec.model_id), usage=usage
     )
-
-
-def _parse_embed(
-    payload: dict[str, Any], spec: ModelSpec, tokens: int, latency_ms: int, request_id: str
-) -> EmbedResult:
-    embeddings = payload.get("embeddings")
-    if not isinstance(embeddings, list) or not embeddings:
-        raise errors.from_shape(SHAPE_NO_EMBEDDINGS, request_id)
-    vectors = []
-    for entry in embeddings:
-        values = entry.get("values") if isinstance(entry, dict) else None
-        if not isinstance(values, list) or len(values) != EMBED_DIMENSIONS:
-            raise errors.from_shape(SHAPE_WRONG_SIZE, request_id)
-        vectors.append(normalise([float(v) for v in values]))
-    usage = Usage(
-        input_tokens=tokens,
-        output_tokens=0,
-        cost_micros=spec.cost_micros(tokens, 0),
-        latency_ms=latency_ms,
-        cache_hit=False,
-    )
-    return EmbedResult(vectors=vectors, model_id=spec.model_id, usage=usage)

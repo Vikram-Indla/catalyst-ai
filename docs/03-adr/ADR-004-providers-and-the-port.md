@@ -5,7 +5,7 @@ status: Accepted
 date: 2026-09-18
 deciders: AI service lead
 supersedes: —
-superseded_by: —
+superseded_by: ADR-008 (the provider's endpoint and credential only)
 level: 3
 ---
 

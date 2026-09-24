@@ -46,7 +46,7 @@ The backend's classification applies to every field of every request, declared i
 | --- | --- | --- | --- | --- | --- |
 | `PUBLIC` | type names, workflow state names, language codes | yes | yes | yes | yes |
 | `INTERNAL` | item keys, project keys, status names, sprint names | yes | yes | yes (per tenant) | IDs only |
-| `CONFIDENTIAL` | item titles and descriptions, comments, page text, document text, chat messages | yes | yes, under the retention rule (§4) | as embeddings and cache values, per tenant, with TTL | never the value |
+| `CONFIDENTIAL` | item titles and descriptions, comments, page text, document text, chat messages | yes | yes, under the retention rule (§4) | as indexed text, embeddings and cache values, per tenant, under RLS, with TTL (`ARCH-006 §1`) | never the value |
 | `RESTRICTED` | names, emails, IPs, credentials, tokens, secrets, anything the backend marks personal | **no** — `ai.input.rejected` | never | never | never |
 
 - Every request model declares each field's class in its schema metadata
@@ -68,6 +68,11 @@ The backend's classification applies to every field of every request, declared i
   configuration: the adapter sets the no-retention option the provider offers, and
   `catalyst-ai check` fails when the register row for a model lacks a documented retention
   setting (`docs/04-ledgers/providers.md`).
+- Tenant text is processed in the Kingdom and nowhere else (today `me-central2`, the one entry of
+  the in-Kingdom allowlist; the region itself is configuration): the provider is Vertex AI's
+  regional endpoint there, and staging and production refuse any other origin, a missing
+  project and a developer's token at settings load (`ADR-008`, `INV-072`, `ARCH-005 §6`). This
+  holds for embeddings too: every chunk that is indexed is tenant text.
 - Content is never logged (`ARCH-010`). Sampling content for quality review exists only as a
   per-organisation opt-in in configuration, off by default, with a retention limit (`Q-002`).
 

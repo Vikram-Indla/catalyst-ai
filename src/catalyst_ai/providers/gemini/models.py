@@ -6,7 +6,14 @@ output allowance before the answer is written.
 
 Prices are the published list prices (https://ai.google.dev/gemini-api/docs/pricing), read
 twice on 2026-09-23. The flash row's price doubles on 2027-01-01 (1 500 / 7 500 µ$ per 1k);
-the providers ledger carries the date.
+the providers ledger carries the date. They are re-read for the regional provider with its model
+list.
+
+Every row is served by the regional provider in the configured in-Kingdom location
+(`config/residency.py`), and every
+row is **unverified in-region** until the model list of the real account shows the region serves
+it there rather than routing it elsewhere. A row that turns out not to be regional changes, and
+every capability on it re-runs its eval; that is a model decision, never a silent swap.
 """
 
 from dataclasses import dataclass
@@ -16,9 +23,11 @@ from catalyst_ai.providers.port import ModelAlias
 
 PROVIDER = "gemini"
 RETENTION = (
-    "free tier of the Gemini API: the provider may use prompts and completions to improve its "
-    "products, so only authored inputs reach this key; the paid tier does not"
+    "Vertex AI in the in-Kingdom region under the project's data terms; the account's retention "
+    "settings are verified with its model list, and until then only authored inputs reach any "
+    "credential"
 )
+UNVERIFIED_IN_REGION = "unverified in-region"
 
 
 @dataclass(frozen=True)
@@ -30,6 +39,7 @@ class ModelSpec:
     output_micros_per_1k: int
     context_tokens: int
     thinking_level: str | None = None
+    residency: str = UNVERIFIED_IN_REGION
 
     def cost_micros(self, input_tokens: int, output_tokens: int) -> int:
         """Cost of one call from the provider's usage counts, rounded up to a micro-dollar."""

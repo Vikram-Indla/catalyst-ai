@@ -4,10 +4,18 @@ import pytest
 from pydantic import SecretStr, ValidationError
 
 from catalyst_ai.config import Environment, Settings, load_settings, parse_public_keys
+from catalyst_ai.config.residency import DEVELOPMENT_LOCATION, regional_endpoint
 from catalyst_ai.config.settings import ENV_PREFIX, PUBLIC_KEY_BYTES, LogLevel
 from tools import origin
 
 DB = "postgresql://u:p@h/d"
+PROJECT = "catalyst-ai-test"
+LOGINS: dict[str, object] = {
+    "database_url": SecretStr("postgresql://serve:p@h/d"),
+    "database_worker_url": SecretStr("postgresql://worker:p@h/d"),
+    "database_migrate_url": SecretStr("postgresql://owner:p@h/d"),
+    "provider_vertex_location": DEVELOPMENT_LOCATION,
+}
 
 
 def _settings(**overrides: object) -> Settings:
@@ -88,8 +96,56 @@ def test_production_requires_otel() -> None:
     with pytest.raises(ValidationError):
         _settings(environment=Environment.PRODUCTION)
     assert _settings(
-        environment=Environment.PRODUCTION, otel_exporter_endpoint="http://otel"
+        environment=Environment.PRODUCTION,
+        otel_exporter_endpoint="http://otel",
+        provider_vertex_project=PROJECT,
+        **LOGINS,
     ).otel_exporter_endpoint
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"provider_gemini_base_url": "https://generativelanguage.googleapis.com"},
+        {"provider_gemini_base_url": "https://aiplatform.googleapis.com"},
+        {"provider_vertex_project": ""},
+        {"provider_access_token": SecretStr("developer-token")},
+        {"provider_vertex_location": None},
+        {"provider_vertex_location": "us-central1"},
+    ],
+    ids=[
+        "developer api",
+        "global endpoint",
+        "no project",
+        "developer token",
+        "no location",
+        "outside the kingdom",
+    ],
+)
+@pytest.mark.parametrize("environment", [Environment.STAGING, Environment.PRODUCTION])
+def test_a_deployed_process_sends_tenant_text_only_to_the_region(
+    environment: Environment, overrides: dict[str, object]
+) -> None:
+    values: dict[str, object] = {
+        "environment": environment,
+        "otel_exporter_endpoint": "http://otel",
+        "provider_vertex_project": PROJECT,
+        **LOGINS,
+    }
+    assert _settings(**values).environment is environment
+    values.update(overrides)
+    with pytest.raises(ValidationError):
+        _settings(**values)
+
+
+def test_development_may_point_anywhere_with_a_developer_token() -> None:
+    settings = _settings(
+        provider_gemini_base_url="https://localhost:9000",
+        provider_access_token=SecretStr("developer-token"),
+    )
+    assert settings.provider_vertex_project == ""
+    assert _settings().provider_origin() == regional_endpoint(DEVELOPMENT_LOCATION)
+    assert settings.provider_origin() == "https://localhost:9000"
 
 
 def test_extra_variables_refused() -> None:
@@ -100,5 +156,22 @@ def test_extra_variables_refused() -> None:
 def test_load_settings_reads_the_environment(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv(f"{ENV_PREFIX}ENVIRONMENT", "staging")
     monkeypatch.setenv(f"{ENV_PREFIX}AUTH_PUBLIC_KEYS", origin.PUBLIC_KEYS)
-    monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_URL", DB)
+    monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_URL", "postgresql://serve:p@h/d")
+    monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_WORKER_URL", "postgresql://worker:p@h/d")
+    monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_MIGRATE_URL", "postgresql://owner:p@h/d")
+    monkeypatch.setenv(f"{ENV_PREFIX}PROVIDER_VERTEX_PROJECT", PROJECT)
+    monkeypatch.setenv(f"{ENV_PREFIX}PROVIDER_VERTEX_LOCATION", DEVELOPMENT_LOCATION)
     assert load_settings().environment is Environment.STAGING
+
+
+def test_a_deployed_process_needs_three_logins() -> None:
+    deployed: dict[str, object] = {
+        "environment": Environment.STAGING,
+        "provider_vertex_project": PROJECT,
+    }
+    with pytest.raises(ValidationError):
+        _settings(**deployed, database_worker_url=SecretStr(DB), database_migrate_url=SecretStr(DB))
+    three = _settings(**deployed, **LOGINS)
+    assert three.database_worker_url is not None
+    with pytest.raises(ValidationError):
+        _settings(database_worker_url=SecretStr("mysql://u:p@h/d"))

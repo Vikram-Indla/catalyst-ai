@@ -8,8 +8,10 @@ from pathlib import Path
 from tools import rules
 from tools.corpus_terms import DOMAINS, INJECTIONS, PARAPHRASES, ROLES
 from tools.evalsets_assistant import write_assistant
+from tools.evalsets_brief import write_brief
 from tools.evalsets_documents import write_documents
 from tools.evalsets_hubs import write_hub
+from tools.evalsets_query import write_query
 from tools.evalsets_threads import write_threads
 from tools.evalsets_workflow import write_workflow
 
@@ -267,6 +269,8 @@ def main(name: str) -> int:
         "documents-ingest": write_documents,
         "assistant": write_assistant,
         "unfurl": write_assistant,
+        "interpret-query": write_query,
+        "brief": write_brief,
     }
     return writers.get(name, write)(name)
 

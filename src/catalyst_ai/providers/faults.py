@@ -30,10 +30,12 @@ class FaultTransport(httpx.AsyncBaseTransport):
             raise ValueError(message)
         self._script = deque(script)
         self.calls = 0
+        self.requests: list[httpx.Request] = []
 
     async def handle_async_request(self, request: httpx.Request) -> httpx.Response:
-        """Consume the script."""
+        """Consume the script, keeping the request it answered."""
         self.calls += 1
+        self.requests.append(request)
         fault = self._script.popleft() if len(self._script) > 1 else self._script[0]
         if fault.raises is not None:
             raise fault.raises(INJECTED)

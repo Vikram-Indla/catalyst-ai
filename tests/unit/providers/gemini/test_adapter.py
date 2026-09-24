@@ -16,10 +16,9 @@ from catalyst_ai.platform.errors import Error
 from catalyst_ai.platform.resilience import RetryPolicy
 from catalyst_ai.providers.faults import Fault, FaultTransport
 from catalyst_ai.providers.gemini import GeminiProvider
-from catalyst_ai.providers.gemini.adapter import (
-    BREAKER_FAILURES,
+from catalyst_ai.providers.gemini.adapter import BREAKER_FAILURES, build_body
+from catalyst_ai.providers.gemini.embedding import (
     EMBED_DIMENSIONS,
-    build_body,
     build_embed_body,
     normalise,
 )
@@ -53,7 +52,8 @@ def _settings() -> Settings:
         environment=Environment.DEVELOPMENT,
         auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr("postgresql://u:p@h/d"),
-        provider_gemini_api_key=SecretStr("key"),
+        provider_access_token=SecretStr("developer-token"),
+        provider_vertex_project="catalyst-ai-test",
     )
 
 
@@ -163,8 +163,11 @@ def _embed_request(texts: list[str]) -> EmbedRequest:
     )
 
 
-def _embed_body(count: int) -> dict[str, object]:
-    return {"embeddings": [{"values": [1.0] + [0.0] * (EMBED_DIMENSIONS - 1)}] * count}
+def _embed_body(count: int, counted: int | None = None) -> dict[str, object]:
+    embeddings: dict[str, object] = {"values": [1.0] + [0.0] * (EMBED_DIMENSIONS - 1)}
+    if counted is not None:
+        embeddings["statistics"] = {"token_count": counted, "truncated": False}
+    return {"predictions": [{"embeddings": embeddings}] * count}
 
 
 def _sse(*texts: str, finish: str = "STOP") -> str:
@@ -215,12 +218,34 @@ async def test_stream_failures_map_to_the_catalog_and_never_retry(
 
 
 def test_embed_body_carries_the_task_type_and_the_dimensions() -> None:
-    body = build_embed_body(_embed_request(["a", "b"]), EMBEDDING.model_id)
-    requests = body["requests"]
-    assert len(requests) == 2
-    assert requests[0]["taskType"] == "RETRIEVAL_QUERY"
-    assert requests[0]["outputDimensionality"] == EMBED_DIMENSIONS
-    assert requests[1]["content"] == {"parts": [{"text": "b"}]}
+    body = build_embed_body(_embed_request(["a", "b"]))
+    instances = body["instances"]
+    assert instances == [
+        {"content": "a", "task_type": "RETRIEVAL_QUERY"},
+        {"content": "b", "task_type": "RETRIEVAL_QUERY"},
+    ]
+    assert body["parameters"] == {"outputDimensionality": EMBED_DIMENSIONS}
+
+
+async def test_the_embedding_is_priced_by_the_tokens_the_provider_counted() -> None:
+    adapter, _, _ = _adapter([Fault(body=_embed_body(2, counted=7))])
+    result = await adapter.embed(_embed_request(["a" * 400, "b" * 400]))
+    assert result.usage.input_tokens == 14
+
+
+async def test_every_call_goes_to_the_regional_endpoint_with_the_workload_token() -> None:
+    adapter, transport, _ = _adapter([Fault(body=OK_BODY)])
+    await adapter.generate(_request())
+    sent = transport.requests[0]
+    assert str(sent.url) == (
+        "https://me-central2-aiplatform.googleapis.com/v1/projects/catalyst-ai-test/locations/"
+        f"me-central2/publishers/google/models/{FLASH.model_id}:generateContent"
+    )
+    assert sent.headers["authorization"] == "Bearer developer-token"
+    assert "x-goog-api-key" not in sent.headers
+    embedder, embed_transport, _ = _adapter([Fault(body=_embed_body(1))])
+    await embedder.embed(_embed_request(["a"]))
+    assert str(embed_transport.requests[0].url).endswith(f"{EMBEDDING.model_id}:predict")
 
 
 async def test_embed_returns_unit_vectors_with_estimated_cost() -> None:
@@ -242,7 +267,11 @@ def test_normalise_scales_to_unit_length_and_leaves_a_null_vector() -> None:
 
 @pytest.mark.parametrize(
     "body",
-    [{"embeddings": []}, {"embeddings": [{"values": [1.0, 2.0]}]}, {"other": 1}],
+    [
+        {"predictions": []},
+        {"predictions": [{"embeddings": {"values": [1.0, 2.0]}}]},
+        {"other": 1},
+    ],
     ids=["empty", "wrong size", "no key"],
 )
 async def test_embed_refuses_an_unreadable_body(body: dict[str, object]) -> None:

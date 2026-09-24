@@ -17,6 +17,8 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from catalyst_ai.config.deployed import start_problem
+from catalyst_ai.config.residency import DEVELOPMENT_LOCATION, regional_endpoint
 from catalyst_ai.contract.models import TextAlias, available
 
 ENV_PREFIX = "CATALYST_AI_"
@@ -135,8 +137,16 @@ class Settings(BaseSettings):
     ] = 60
     database_url: Annotated[
         SecretStr,
-        Field(description="RESTRICTED · The service's own database; the application role"),
+        Field(description="RESTRICTED · serve's login: a member of the application role only"),
     ]
+    database_worker_url: Annotated[
+        SecretStr | None,
+        Field(description="RESTRICTED · The worker's login: application and maintenance roles"),
+    ] = None
+    database_migrate_url: Annotated[
+        SecretStr | None,
+        Field(description="RESTRICTED · The owner's login, for `catalyst-ai migrate` alone"),
+    ] = None
     database_pool_max: Annotated[
         int, Field(gt=0, description="PUBLIC · Connections in the pool at most")
     ] = 8
@@ -183,17 +193,24 @@ class Settings(BaseSettings):
         int,
         Field(gt=0, description="PUBLIC · The retention job forgets documents unseen this long"),
     ] = 400
-    provider_gemini_api_key: Annotated[
+    provider_access_token: Annotated[
         SecretStr | None,
-        Field(description="RESTRICTED · The first provider's key; read only by its adapter"),
+        Field(description="RESTRICTED · A developer's own short-lived token; development only"),
     ] = None
     provider_gemini_base_url: Annotated[
-        str,
+        str | None,
         Field(
             pattern=r"^https://",
-            description="INTERNAL · The provider's API origin; a proxy may replace it",
+            description="INTERNAL · Overrides the location's origin; development only",
         ),
-    ] = "https://generativelanguage.googleapis.com"
+    ] = None
+    provider_vertex_location: Annotated[
+        str | None,
+        Field(description="INTERNAL · The in-Kingdom region calls go to; required when deployed"),
+    ] = None
+    provider_vertex_project: Annotated[
+        str, Field(max_length=64, description="INTERNAL · The project the provider bills and runs")
+    ] = ""
     model_text_alias: Annotated[
         TextAlias,
         AfterValidator(available),
@@ -227,6 +244,14 @@ class Settings(BaseSettings):
     capability_unfurl: Annotated[
         CapabilitySettings,
         Field(description="PUBLIC · unfurl: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_interpret_query: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · interpret-query: enabled, cache TTL, timeout"),
+    ] = CapabilitySettings()
+    capability_brief: Annotated[
+        CapabilitySettings,
+        Field(description="PUBLIC · brief: enabled, cache TTL, timeout"),
     ] = CapabilitySettings()
     capability_generate_tests: Annotated[
         CapabilitySettings,
@@ -263,9 +288,11 @@ class Settings(BaseSettings):
         parse_public_keys(value)
         return value
 
-    @field_validator("database_url")
+    @field_validator("database_url", "database_worker_url", "database_migrate_url")
     @classmethod
-    def _postgres_url(cls, value: SecretStr) -> SecretStr:
+    def _postgres_url(cls, value: SecretStr | None) -> SecretStr | None:
+        if value is None:
+            return value
         raw = value.get_secret_value()
         if not raw.startswith(("postgres://", "postgresql://")) or "@" not in raw:
             message = "DATABASE_URL must be a postgres:// URL with a host"
@@ -279,13 +306,18 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _ports_differ(self) -> Self:
-        if self.http_addr == self.ops_addr:
-            message = "HTTP_ADDR and OPS_ADDR must differ"
-            raise ValueError(message)
-        if self.environment is Environment.PRODUCTION and self.otel_exporter_endpoint is None:
-            message = "OTEL_EXPORTER_ENDPOINT is required in production"
-            raise ValueError(message)
+        problem = start_problem(self)
+        if problem is not None:
+            raise ValueError(problem)
         return self
+
+    def provider_location(self) -> str:
+        """Return the configured region; development falls back to the first allowed one."""
+        return self.provider_vertex_location or DEVELOPMENT_LOCATION
+
+    def provider_origin(self) -> str:
+        """Return the provider's origin: the override (development), else the region's own."""
+        return self.provider_gemini_base_url or regional_endpoint(self.provider_location())
 
 
 def load_settings() -> Settings:

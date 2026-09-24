@@ -9,18 +9,21 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
+import asyncpg
 import httpx
 from pydantic import SecretStr
 from testcontainers.core.utils import inside_container
 from testcontainers.postgres import PostgresContainer
 
 from catalyst_ai.capabilities.assistant.pipeline import stream as assistant_stream
+from catalyst_ai.capabilities.brief.pipeline import run as brief_run
 from catalyst_ai.capabilities.documents import ask as documents_ask
 from catalyst_ai.capabilities.documents import generate as documents_generate
 from catalyst_ai.capabilities.documents import run_ingest
 from catalyst_ai.capabilities.generate_children import run as generate_children
 from catalyst_ai.capabilities.generate_tests import run as generate_tests
 from catalyst_ai.capabilities.improve_story import run as improve_story
+from catalyst_ai.capabilities.interpret_query.pipeline import run as interpret_query_run
 from catalyst_ai.capabilities.post_mortem import run as post_mortem
 from catalyst_ai.capabilities.propose_workflow import run as propose_workflow
 from catalyst_ai.capabilities.release_notes import run as release_notes
@@ -31,11 +34,13 @@ from catalyst_ai.capabilities.translate import run as translate
 from catalyst_ai.capabilities.unfurl.pipeline import run as unfurl_run
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.assistant import TurnRequest, TurnResponse
+from catalyst_ai.contract.brief import BriefRequest
 from catalyst_ai.contract.documents import AskRequest, DraftRequest, IngestRequest
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope
 from catalyst_ai.contract.generate_children import GenerateChildrenRequest
 from catalyst_ai.contract.generate_tests import GenerateTestsRequest
 from catalyst_ai.contract.improve_story import ImproveStoryRequest
+from catalyst_ai.contract.interpret_query import InterpretQueryRequest
 from catalyst_ai.contract.post_mortem import PostMortemRequest
 from catalyst_ai.contract.propose_workflow import ProposeWorkflowRequest
 from catalyst_ai.contract.release_notes import ReleaseNotesRequest
@@ -58,6 +63,8 @@ CLIENT_TIMEOUT_S = 30.0
 DATABASE_VARIABLE = "CATALYST_AI_EVAL_DATABASE_URL"
 DATABASE_IMAGE = rules.CI_DATABASE_IMAGE
 MIGRATIONS = Path("db/migrations")
+PROVISION = Path("db/provision")
+EXTENSIONS = "extensions.sql"
 CORPUS_FILE = "corpus.jsonl"
 UNTERMINATED = "the stream ended without done"
 UPSERT_BATCH = 100
@@ -104,6 +111,10 @@ def load_graders(directory: Path) -> ModuleType:
     return module
 
 
+INERT_ACCESS = "authored"
+INERT_PROJECT = "catalyst-ai-authored"
+
+
 def inert_settings(cache_ttl_seconds: int = 0) -> Settings:
     """Build settings that never reach a real provider; a zero cache TTL keeps every case a call."""
     return Settings(
@@ -111,6 +122,8 @@ def inert_settings(cache_ttl_seconds: int = 0) -> Settings:
         auth_public_keys=origin.PUBLIC_KEYS,
         database_url=SecretStr(INERT_DATABASE),
         tenant_budget_default_micros_per_day=UNLIMITED_MICROS,
+        provider_access_token=SecretStr(INERT_ACCESS),
+        provider_vertex_project=INERT_PROJECT,
         capability_improve_story=CapabilitySettings(cache_ttl_seconds=cache_ttl_seconds),
     )
 
@@ -223,6 +236,8 @@ REGISTRY: dict[str, SetSpec] = {
     "documents-ingest": SetSpec(IngestRequest, run_ingest),
     "assistant": SetSpec(TurnRequest, assistant_turn, setup=ingest_corpus),
     "unfurl": SetSpec(UnfurlRequest, unfurl_run),
+    "interpret-query": SetSpec(InterpretQueryRequest, interpret_query_run),
+    "brief": SetSpec(BriefRequest, brief_run),
 }
 
 
@@ -256,8 +271,19 @@ async def database(spec: SetSpec) -> AsyncIterator[Storage]:
             yield storage
 
 
+async def provision(url: str, root: Path, *files: str) -> None:
+    """Do for a throwaway database what the provisioner does for a real one, file by file."""
+    connection = await asyncpg.connect(url)
+    try:
+        for name in files:
+            await connection.execute((root / PROVISION / name).read_text(encoding="utf-8"))
+    finally:
+        await connection.close()
+
+
 @contextlib.asynccontextmanager
 async def _postgres(url: str, clock: SystemClock) -> AsyncIterator[PostgresStorage]:
+    await provision(url, Path.cwd(), EXTENSIONS)
     await migrate(url, MIGRATIONS)
     storage = PostgresStorage(url, clock, 4, COMMAND_TIMEOUT_S)
     await storage.connect()

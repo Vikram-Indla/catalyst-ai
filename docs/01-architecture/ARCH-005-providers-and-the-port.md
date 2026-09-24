@@ -75,3 +75,16 @@ A model change is a configuration change plus an eval run: the alias stays, the 
 in the register, every eval set that uses the alias runs, the numbers are pasted, and the
 decision is a `D-NNN`. A regression is a design error to fix in the prompt or the pipeline —
 never a threshold to lower (`RULE-004 §3`).
+
+## 6. Where the provider runs
+
+Every provider call — text, streaming and embeddings — goes to one origin, Vertex AI's regional
+endpoint of the configured in-Kingdom location (`PROVIDER_VERTEX_LOCATION`, one of the allowlist in
+`config/residency.py`, today `me-central2`; `ADR-008`), under the project the settings
+name. A deployed process authenticates as its own workload identity; one module,
+`providers/gemini/credentials.py`, obtains the token and forms the header. In staging and
+production the settings refuse any other origin, a missing project and a developer's token;
+`tools/checks/residency` refuses any other provider host in the source, the tooling and the
+operations files (`INV-072`). A register row is **unverified in-region** until the account's
+model list shows the region serves the model there; a row that is not served in-region changes
+model under §5, never silently.

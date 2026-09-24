@@ -6,15 +6,23 @@ this table fails `tools/checks/models`; a row without a retention setting fails 
 (`ARCH-002 §4`). Prices are the published list prices on the date of the row, in micro-dollars per
 1 000 tokens (input / output); they are re-verified at every live recording.
 
+**Region (`ADR-008`).** Every row is served by Vertex AI's regional endpoint for the configured
+in-Kingdom location (`PROVIDER_VERTEX_LOCATION`; today `me-central2`),
+and every row is **unverified in-region**: which models the region serves there, rather than
+routing them elsewhere, is read from the model list of the real account, which does not exist
+yet. A row the list confirms loses the mark; a row it does not changes model, and every
+capability on it re-runs its eval before the change is proposed. The prices below are the
+Developer API's list prices, re-read for the regional platform with the model list.
+
 ## Aliases
 
 | Alias | Provider | Concrete model id | Context (tokens) | Price (input / output, µ$ per 1k) | Retention setting | Measured on | Date |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| `text-default` | `gemini` | `gemini-3.6-flash` (stable), thinking `minimal` | 1 048 576 in / 65 536 out | 750 / 3 750 until 2026-12-31; 1 500 / 7 500 from 2027-01-01 — [https://ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing), read twice on 2026-09-23; thinking tokens are billed as output | **free tier** of the Gemini API: the provider may use prompts and completions to improve its products, so only authored inputs reach this key; the paid tier does not (`providers/gemini/models.py` `RETENTION`) | every text set, authored fixtures re-generated for this row (`023-the-register-moves`) | 2026-09-23 |
+| `text-default` | `gemini` | `gemini-3.6-flash` (stable), thinking `minimal` — **unverified in-region** | 1 048 576 in / 65 536 out | 750 / 3 750 until 2026-12-31; 1 500 / 7 500 from 2027-01-01 — [https://ai.google.dev/gemini-api/docs/pricing](https://ai.google.dev/gemini-api/docs/pricing), read twice on 2026-09-23; thinking tokens are billed as output | Vertex AI in `me-central2` under the project's data terms; the account's retention settings are verified with its model list, and until then only authored inputs reach any credential (`providers/gemini/models.py` `RETENTION`) | every text set, authored fixtures re-generated for this row (`023-the-register-moves`) | 2026-09-23 |
 | `text-fast` | `gemini` | = `text-default` | | | same | — | 2026-09-23 |
 | `text-long` | — | **unavailable** (`D-043`): no stable long-context model is reachable from this key; the provider offers only a preview, and a preview is never a row. Selecting it fails at settings load | | | | — | 2026-09-23 |
-| `embed-default` | `gemini` | `gemini-embedding-001` | 2 048 | 150 / 0 (tokens estimated by characters: the batch endpoint reports no usage) | same | `search` v1 (authored fixtures); 768 of the 3 072 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, vectors normalised by the adapter. Unchanged by the 2026-09-23 move: it still answers, and every stored vector depends on it | 2026-09-20 |
-| `grader-default` | = `text-default` | `gemini-3.6-flash`, moved on its own after the text rows (`D-044`); no set grades with a model today (every grader is code), so no number moved | | | same | every set, re-run after the move and labelled re-baselined (`023-the-register-moves`) | 2026-09-23 |
+| `embed-default` | `gemini` | `gemini-embedding-001` — **unverified in-region** | 2 048 | 150 / 0 (priced by the tokens the provider counts per vector; the character estimate when it reports none) | same | `search` v1 (authored fixtures); 768 of the 3 072 dimensions, task types `RETRIEVAL_DOCUMENT` / `RETRIEVAL_QUERY`, vectors normalised by the adapter. Unchanged by the 2026-09-23 move: it still answers, and every stored vector depends on it | 2026-09-20 |
+| `grader-default` | = `text-default` | `gemini-3.6-flash` — **unverified in-region** — moved on its own after the text rows (`D-044`); no set grades with a model today (every grader is code), so no number moved | | | same | every set, re-run after the move and labelled re-baselined (`023-the-register-moves`) | 2026-09-23 |
 
 **Availability, 2026-09-23 (`F-034`, closed).** The 2.5 text rows refuse a key created now. Eight rounds of one-line calls (15:19–16:40 UTC) found one stable 3.x text model that answers: `gemini-3.6-flash`, 7 of 8. `gemini-3.1-flash-lite` and `gemini-3.5-flash-lite` answered `503` or timed out on every call, `gemini-3.7-flash` and `gemini-3.8-flash` `503` every time, and the only long-context model is a preview (`429`: no free tier). So both text rows resolve to `gemini-3.6-flash` and `text-long` is unavailable (`D-043`). The free tier caps this model at 20 requests a day for the project.
 
@@ -22,7 +30,7 @@ this table fails `tools/checks/models`; a row without a retention setting fails 
 
 | Provider | Adapter | Transport | SDK row (`ADR-003 §3`) | No-retention option | Status |
 | --- | --- | --- | --- | --- | --- |
-| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `/v1beta/models/{id}:generateContent` and `:batchEmbedContents` (≤ 100 texts per call), key in `x-goog-api-key`, structured output via `responseSchema` | none — `httpx` suffices | the paid tier; this service's key is on the free tier, so only authored inputs reach it | built (`ADR-004`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
+| `gemini` | `providers/gemini/` (`adapter.py`, `models.py`, `errors.py`, `aliases.py`) | `httpx` against `https://me-central2-aiplatform.googleapis.com/v1/projects/{project}/locations/me-central2/publishers/google/models/{id}:generateContent`, `:streamGenerateContent` and `:predict` (embeddings, one instance per text), the workload's token as a bearer (`providers/gemini/credentials.py`), structured output via `responseSchema` | none — `httpx` suffices | the project's data terms; verified on the account with its model list | built (`ADR-004`, the endpoint and credential by `ADR-008`); retries 3 with jitter on 5xx/timeouts, breaker opens after 5 failures for 30 s |
 
 The previous system also used OpenAI (`gpt-4o-mini`, `text-embedding-3-small`), two Anthropic
 models and Groq through its gateways. None is a row here; each would be a second adapter under

@@ -1,7 +1,14 @@
 """Register rows: cost from usage counts rounds up; every available alias resolves to a known id."""
 
 from catalyst_ai.contract.models import UNAVAILABLE
-from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH, KNOWN_IDS, REGISTER, ModelSpec
+from catalyst_ai.providers.gemini.models import (
+    EMBEDDING,
+    FLASH,
+    KNOWN_IDS,
+    REGISTER,
+    UNVERIFIED_IN_REGION,
+    ModelSpec,
+)
 from catalyst_ai.providers.port import ModelAlias
 
 
@@ -32,3 +39,7 @@ def test_the_grader_is_the_text_row_it_measures_against() -> None:
 def test_the_index_keeps_its_model() -> None:
     assert REGISTER[ModelAlias.EMBED_DEFAULT] is EMBEDDING
     assert EMBEDDING.thinking_level is None
+
+
+def test_every_row_stays_unverified_in_region_until_the_model_list_is_read() -> None:
+    assert {spec.residency for spec in REGISTER.values()} == {UNVERIFIED_IN_REGION}

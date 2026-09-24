@@ -1,4 +1,4 @@
-"""The runtime context is frozen and carries the six seams."""
+"""The runtime context is frozen and carries its seams and the credential probe."""
 
 import dataclasses
 
@@ -18,6 +18,7 @@ def test_context_is_frozen_with_its_seams() -> None:
         "storage",
         "jobs",
         "metrics",
+        "credentials_ready",
     }
     with pytest.raises(dataclasses.FrozenInstanceError):
         RuntimeContext.__setattr__(RuntimeContext.__new__(RuntimeContext), "clock", None)

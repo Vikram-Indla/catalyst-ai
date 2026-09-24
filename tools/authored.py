@@ -6,9 +6,12 @@ import re
 from typing import Any
 
 from tools.authored_assistant import answer_turn, answer_unfurl
+from tools.authored_brief import answer_brief
+from tools.authored_comment import answer_comment, is_comment_mode
 from tools.authored_documents import answer_documents
 from tools.authored_envelope import envelope
 from tools.authored_hubs import answer_incident, answer_release, answer_tests
+from tools.authored_query import answer_query
 from tools.authored_threads import answer_summary, answer_translation
 from tools.authored_workflow import answer_workflow
 
@@ -108,6 +111,8 @@ def answer(body: dict[str, Any]) -> dict[str, Any]:
 
 def answer_rewrite(body: dict[str, Any]) -> dict[str, Any]:
     """Build the improve-story answer: the editorial operation the prompt names."""
+    if is_comment_mode(body):
+        return answer_comment(body)
     fields, mode = _segments(body)
     description = fields.get("description", "")
     title = fields.get("title", "")
@@ -263,15 +268,24 @@ def authored_vector(text: str) -> list[float]:
 
 
 def answer_embed(body: dict[str, Any]) -> dict[str, Any]:
-    """Build a provider-shaped batch embedding response: one vector per request, in order."""
-    texts = [
-        "".join(part.get("text", "") for part in entry.get("content", {}).get("parts", []))
-        for entry in body.get("requests", [])
-    ]
-    return {"embeddings": [{"values": authored_vector(text)} for text in texts]}
+    """Build a provider-shaped predict response: a vector per instance, in order, with tokens."""
+    texts = [str(instance.get("content", "")) for instance in body.get("instances", [])]
+    return {
+        "predictions": [
+            {
+                "embeddings": {
+                    "values": authored_vector(text),
+                    "statistics": {"token_count": max(1, len(text) // 4), "truncated": False},
+                }
+            }
+            for text in texts
+        ]
+    }
 
 
 DISPATCH = (
+    ("<<<sentence>>>", answer_query),
+    ("<<<chain>>>", answer_brief),
     ("<<<sources>>>", answer_turn),
     ("<<<child_level>>>", answer_children),
     ("<<<focus_hint>>>", answer_rewrite),
