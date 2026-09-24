@@ -12,6 +12,7 @@ from catalyst_ai.contract.improve_story import (
     ImproveStoryRequest,
     ImproveStoryResponse,
 )
+from catalyst_ai.platform.language import latin
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
 from catalyst_ai.providers.port import GenerateResult
 
@@ -31,7 +32,7 @@ def confidence(request: ImproveStoryRequest, output: ModelOutput) -> float:
     """Score deterministically: start at one, lose a fixed share per violated property."""
     score = 1.0
     source = source_text(request)
-    if not identifiers_preserved(source, output.description):
+    if not identifiers_preserved(latin(source), latin(output.description)):
         score -= PENALTY_IDENTIFIERS
     if output.changed and not MIN_RATIO <= length_ratio(source, output.description) <= MAX_RATIO:
         score -= PENALTY_LENGTH

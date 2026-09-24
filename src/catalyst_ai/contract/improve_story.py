@@ -4,6 +4,13 @@ Two modes work on a comment rather than the item: `polish_comment` rewrites the 
 its own language, and `reply` suggests a reply to it, with the item as context. People appear only
 as the backend's tokens: the comment's author is one, and every mention in the comment's text must
 be one (`@p1`); a comment that mentions anyone by name is refused at the door.
+
+A caller may send a governed record's `record` block, as data: the focus its kind is written to,
+the names around it (its theme, its objective, its period) and the glossary terms that must stay
+exactly as written. With a record, the rewrite keeps the facts: it adds no number, date, link,
+item key or participant the inputs do not already carry and drops none the text it rewrites
+states, its digits are Latin, and every glossary term of the source survives; an output that
+breaks this is refused, never returned.
 """
 
 import re
@@ -11,6 +18,7 @@ from enum import StrEnum
 from typing import Annotated, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic.json_schema import SkipJsonSchema
 
 from catalyst_ai.contract.envelopes import RequestEnvelope, ResponseEnvelope, classified
 
@@ -21,6 +29,12 @@ MAX_HINT = 500
 MAX_TYPE = 64
 MAX_LANGUAGE = 16
 MAX_COMMENT = 4_000
+MAX_FOCUS = 2_000
+MAX_CONTEXT = 12
+MAX_LABEL = 64
+MAX_CONTEXT_TEXT = 500
+MAX_TERMS = 200
+MAX_TERM = 200
 PARTICIPANT_SHAPE = r"^p[0-9]{1,4}$"
 MENTION = re.compile(r"(?<![\w.])@(?P<handle>[\w-]+(?:\.[\w-]+)*)")
 TOKEN = re.compile(PARTICIPANT_SHAPE)
@@ -80,6 +94,62 @@ class CommentInput(BaseModel):
         if named_mentions(value):
             raise ValueError(NAMED_MENTION)
         return value
+
+
+class ContextLine(BaseModel):
+    """One name around a governed record: its theme, its objective, its period."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    label: Annotated[
+        str,
+        Field(
+            min_length=1,
+            max_length=MAX_LABEL,
+            json_schema_extra=classified("INTERNAL", "What the line names, as the product says it"),
+        ),
+    ]
+    text: Annotated[
+        str,
+        Field(
+            min_length=1,
+            max_length=MAX_CONTEXT_TEXT,
+            json_schema_extra=classified("CONFIDENTIAL", "The name or short text"),
+        ),
+    ]
+
+
+class RecordInput(BaseModel):
+    """A governed record's kind-specific focus, its context and its glossary, all as data."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    focus: Annotated[
+        str,
+        Field(
+            min_length=1,
+            max_length=MAX_FOCUS,
+            json_schema_extra=classified(
+                "INTERNAL", "How a record of this kind reads, as the product words it"
+            ),
+        ),
+    ]
+    context: Annotated[
+        list[ContextLine],
+        Field(
+            max_length=MAX_CONTEXT,
+            json_schema_extra=classified("CONFIDENTIAL", "The names around the record"),
+        ),
+    ] = Field(default_factory=list)
+    glossary: Annotated[
+        list[Annotated[str, Field(min_length=1, max_length=MAX_TERM)]],
+        Field(
+            max_length=MAX_TERMS,
+            json_schema_extra=classified(
+                "INTERNAL", "Governed terms, in the record's language, kept exactly as written"
+            ),
+        ),
+    ] = Field(default_factory=list)
 
 
 class ImproveStoryRequest(RequestEnvelope):
@@ -157,6 +227,15 @@ class ImproveStoryRequest(RequestEnvelope):
         Field(
             json_schema_extra=classified(
                 "CONFIDENTIAL", "polish_comment: the comment; reply: the comment replied to"
+            ),
+        ),
+    ] = None
+    record: Annotated[
+        RecordInput | SkipJsonSchema[None],
+        Field(
+            json_schema_extra=classified(
+                "CONFIDENTIAL",
+                "A governed record's focus, context and glossary; its facts are kept",
             ),
         ),
     ] = None

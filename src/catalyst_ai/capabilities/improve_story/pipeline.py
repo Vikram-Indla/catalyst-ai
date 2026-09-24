@@ -5,11 +5,13 @@ from pathlib import Path
 
 from catalyst_ai.capabilities.improve_story import descriptor
 from catalyst_ai.capabilities.improve_story.comments import markup_problem
+from catalyst_ai.capabilities.improve_story.governed import problems
 from catalyst_ai.capabilities.improve_story.postprocess import from_cache, to_response
 from catalyst_ai.capabilities.improve_story.schema import ModelOutput, output_schema
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
 from catalyst_ai.contract.improve_story import ImproveStoryRequest, ImproveStoryResponse
 from catalyst_ai.platform.errors import Error
+from catalyst_ai.platform.language import latin
 from catalyst_ai.platform.pipeline import Door, Stages, admit, parse_with_repair, run_stages
 from catalyst_ai.platform.prompts import PromptFile, fill
 from catalyst_ai.platform.runtime import RuntimeContext
@@ -26,6 +28,7 @@ USER_FIELDS = (
     "parent_description",
     "comment",
 )
+RECORD_FIELDS = ("record_focus", "record_context", "glossary")
 ABSENT = "(none)"
 PRESERVE = "preserve the input's language"
 NO_AUTHOR = "(no comment)"
@@ -45,7 +48,21 @@ def parse(request: ImproveStoryRequest, request_id: str, idempotency: str | None
     """Stage 1: the typed request becomes the pipeline's input value."""
     texts = {name: getattr(request, name) for name in USER_FIELDS if name != "comment"}
     texts["comment"] = request.comment.text if request.comment else None
+    texts.update(_record_texts(request))
     return Parsed(request, request_id, idempotency, texts)
+
+
+def _record_texts(request: ImproveStoryRequest) -> dict[str, str | None]:
+    """Return a governed record's focus, context and glossary as texts; none without a record."""
+    record = request.record
+    if record is None:
+        return {}
+    context = "\n".join(f"{line.label}: {line.text}" for line in record.context)
+    return {
+        "record_focus": record.focus,
+        "record_context": context or None,
+        "glossary": "\n".join(record.glossary) or None,
+    }
 
 
 def validate(parsed: Parsed, runtime: RuntimeContext) -> str:
@@ -65,8 +82,19 @@ def validate(parsed: Parsed, runtime: RuntimeContext) -> str:
     return admit(door, runtime)
 
 
-def _focus_section(prompt: PromptFile, item_type: str) -> str:
-    return prompt.sections.get(f"focus:{item_type}", prompt.section("focus:default"))
+def _focus_section(prompt: PromptFile, request: ImproveStoryRequest) -> str:
+    if request.record is not None:
+        return prompt.section("focus:record")
+    return prompt.sections.get(f"focus:{request.item_type}", prompt.section("focus:default"))
+
+
+def _record_segments(prompt: PromptFile, parsed: Parsed) -> list[Segment]:
+    """Return the record's rule and its focus, context and glossary, each fenced as data."""
+    segments = [Segment(role="developer", name="record", text=prompt.section("developer:record"))]
+    for name in RECORD_FIELDS:
+        text = parsed.user_texts.get(name) or ABSENT
+        segments.append(Segment(role="user", name=name, text=fence(name, text)))
+    return segments
 
 
 def _operation_section(prompt: PromptFile, mode: str) -> str:
@@ -81,7 +109,7 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
         prompt.section("developer"),
         {
             "item_type": fence("item_type", request.item_type),
-            "type_focus": _focus_section(prompt, request.item_type),
+            "type_focus": _focus_section(prompt, request),
             "operation": request.mode.value,
             "language": request.language or PRESERVE,
             "comment_author": request.comment.participant if request.comment else NO_AUTHOR,
@@ -95,6 +123,8 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
     for name in USER_FIELDS:
         text = parsed.user_texts.get(name) or ABSENT
         segments.append(Segment(role="user", name=name, text=fence(name, text)))
+    if request.record is not None:
+        segments.extend(_record_segments(prompt, parsed))
     timeout = runtime.settings.capability_improve_story.timeout_ms or descriptor.timeout_ms
     return GenerateRequest(
         organization_id=request.organization_id,
@@ -124,7 +154,31 @@ async def validate_output(
     completion = output.description + "\n" + (output.acceptance_criteria or "")
     refuse_if_unsafe(completion, texts, parsed.request_id)
     _refuse_broken_markup(parsed, output.description)
+    if parsed.request.record is not None:
+        output = _in_latin_digits(output)
+        _refuse_changed_facts(parsed, output)
     return output, current
+
+
+def _in_latin_digits(output: ModelOutput) -> ModelOutput:
+    criteria = output.acceptance_criteria
+    return output.model_copy(
+        update={
+            "description": latin(output.description),
+            "acceptance_criteria": None if criteria is None else latin(criteria),
+        }
+    )
+
+
+def _refuse_changed_facts(parsed: Parsed, output: ModelOutput) -> None:
+    """Refuse a governed record's rewrite that adds a fact or loses a glossary term."""
+    found = problems(parsed.request, output.description + "\n" + (output.acceptance_criteria or ""))
+    if found:
+        details = [
+            ErrorDetail(field="improved_description", code=code, message=f"{code}: {what}")
+            for code, what in found
+        ]
+        raise Error(ErrorCode.OUTPUT_INVALID, "the record's facts were not kept", details=details)
 
 
 def _refuse_broken_markup(parsed: Parsed, text: str) -> None:
