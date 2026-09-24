@@ -1,6 +1,6 @@
 """Request ids, error rendering and the handlers the composition root installs."""
 
-from catalyst_ai.platform.httpserver.document import with_error_responses
+from catalyst_ai.platform.httpserver.document import with_error_responses, with_job_results
 from catalyst_ai.platform.httpserver.rendering import (
     REQUEST_ID_HEADER,
     RequestIdMiddleware,
@@ -19,4 +19,5 @@ __all__ = [
     "request_id_of",
     "stream_response",
     "with_error_responses",
+    "with_job_results",
 ]

@@ -25,11 +25,14 @@ from catalyst_ai.capabilities.propose_workflow import router as propose_workflow
 from catalyst_ai.capabilities.release_notes import router as release_notes_router
 from catalyst_ai.capabilities.search import router as search_router
 from catalyst_ai.capabilities.summarize import router as summarize_router
+from catalyst_ai.capabilities.translate import descriptor as translate_descriptor
 from catalyst_ai.capabilities.translate import router as translate_router
+from catalyst_ai.capabilities.translate.jobs import run_drafts_payload
 from catalyst_ai.capabilities.unfurl import router as unfurl_router
 from catalyst_ai.config import Settings
 from catalyst_ai.contract.errors import ErrorCode
 from catalyst_ai.contract.health import LiveResponse, ReadyResponse
+from catalyst_ai.contract.translate_drafts import DraftsResponse
 from catalyst_ai.platform.auth import (
     EXEMPT_PATHS,
     Bounds,
@@ -45,6 +48,7 @@ from catalyst_ai.platform.httpserver import (
     RequestIdMiddleware,
     install_error_handlers,
     with_error_responses,
+    with_job_results,
 )
 from catalyst_ai.platform.jobs import JobRunner, jobs_router
 from catalyst_ai.platform.observability import (
@@ -143,6 +147,9 @@ def _with_examples(document: dict[str, Any]) -> dict[str, Any]:
     return document
 
 
+JOB_RESULTS = MappingProxyType({"translate.drafts_job": DraftsResponse})
+
+
 def render_openapi(app: FastAPI) -> dict[str, Any]:
     """Render the contract document from the app; `make api` writes it, the drift check compares."""
     document = get_openapi(
@@ -152,7 +159,8 @@ def render_openapi(app: FastAPI) -> dict[str, Any]:
         routes=app.routes,
         description="One contract for the Go backend; see ENGINEERING.md.",
     )
-    return _with_open_catalog(with_error_responses(_with_security(_with_examples(document))))
+    published = with_job_results(document, JOB_RESULTS)
+    return _with_open_catalog(with_error_responses(_with_security(_with_examples(published))))
 
 
 def _with_open_catalog(document: dict[str, Any]) -> dict[str, Any]:
@@ -210,7 +218,10 @@ def default_runtime(
 
 def job_runners() -> dict[str, JobRunner]:
     """Return the capabilities a job may run, by name; assembled here so the worker imports none."""
-    return {documents_descriptor.name: run_ingest_payload}
+    return {
+        documents_descriptor.name: run_ingest_payload,
+        translate_descriptor.name: run_drafts_payload,
+    }
 
 
 @asynccontextmanager
