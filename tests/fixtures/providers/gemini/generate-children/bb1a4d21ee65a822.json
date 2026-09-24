@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"candidates\": [{\"type\": \"key_result\", \"title\": \"Residents complete permit applications online\", \"description\": \"Residents complete permit applications online, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": \"Residents complete permit applications online\"}, {\"type\": \"key_result\", \"title\": \"Inspections are booked without a phone call\", \"description\": \"Inspections are booked without a phone call, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}, {\"type\": \"key_result\", \"title\": \"Decisions reach applicants by message\", \"description\": \"Decisions reach applicants by message, as part of the parent.\", \"acceptance_criteria\": [], \"duplicate_of\": null}], \"empty_reason\": null, \"rationale\": \"Proposed children from the parent's text.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 406,
+      "candidatesTokenCount": 194
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

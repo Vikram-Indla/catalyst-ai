@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"This theme is about moving Digital Services so residents don't need to visit an office. Scope is permits and inspections. Licensing is out of scope for now.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 599,
+      "candidatesTokenCount": 77
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

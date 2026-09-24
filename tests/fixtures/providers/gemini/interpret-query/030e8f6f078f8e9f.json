@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"\", \"parameters\": {\"state\": \"pending\"}, \"sort\": \"-requestedAt\", \"explanation\": \"List filter: state=pending\", \"unresolved\": [], \"rationale\": \"Only the list's declared parameters and sorts; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 79,
+      "candidatesTokenCount": 56
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

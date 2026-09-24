@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"\", \"parameters\": {\"state\": \"planned\", \"startsOnFrom\": \"2026-10-01\"}, \"sort\": null, \"explanation\": \"\u062a\u0635\u0641\u064a\u0629 \u0627\u0644\u0642\u0627\u0626\u0645\u0629: state=planned, startsOnFrom=2026-10-01\", \"unresolved\": [], \"rationale\": \"Only the list's declared parameters and sorts; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 88,
+      "candidatesTokenCount": 68
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

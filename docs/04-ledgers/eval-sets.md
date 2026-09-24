@@ -28,6 +28,26 @@ falls between two rows without a `D-NNN` in the record column fails `tools/check
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `brief` | 1 | 14 (2 injection; 7 English, 7 Arabic) | 1 | `text-default` | citations_valid 1.0 · no_unseen_numbers 1.0 · health_kept_apart 1.0 · not_measured_kept 1.0 · language_kept 1.0 · injection_inert 1.0 · shape_kept 1.0 · overall 0.97 | 1.000 on every grader (authored fixtures — a stand-in that reads the rendered chain back: the citation and number refusals, the health and not-measured rules and the graders; not the model's prose) | 9 | 1 324 | 2026-09-24 |
 
+## 2026-09-24 — `translate-drafts` v1 (`039-arabic-drafts-for-seeded-records`)
+
+| Capability | Set version | Cases | Prompt version | Model alias | Graders and floors | Score | p95 latency (ms) | p95 cost (µ$) | Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `translate` (drafts job) | 1 | 9 batches, 24 items (1 injection; 7 empty or whitespace fields; 1 ambiguous glossary) | 2 | `text-fast` | machine_draft_only 1.0 · keys_and_counts 1.0 · empty_skipped 1.0 · target_script 1.0 · latin_digits 1.0 · glossary_exact 1.0 · facts_kept_or_reported 1.0 · no_forbidden_content 1.0 · overall 1.0 | 1.000 on every grader (authored: the keys, the empties, the glossary check, the fact report and the digits; not a model's Arabic) | 75 (per batch) | 877 (per batch) | 2026-09-24 |
+
+## 2026-09-24 — governed records: `improve-story` v3, `generate-children` v2, `summarize` v3 (`037-improve-for-governed-records`)
+
+| Capability | Set version | Cases | Prompt version | Model alias | Graders and floors | Score | p95 latency (ms) | p95 cost (µ$) | Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `improve-story` | 3 | 80 (9 injection / 3 leakage; 15 governed records, five kinds, English and Arabic) | 3 | `text-default` | the v2 graders and floors · record_facts_kept 1.0 · glossary_exact 1.0 · latin_digits 1.0 | 1.000 on every grader (authored fixtures: the facts guard, the digit normalisation, the glossary check and the graders; not the model's writing) | 12 | 743 | 2026-09-24 |
+| `generate-children` | 2 | 144 (5 draft-only record children, English and Arabic) | 2 | `text-default` | the v1 graders and floors · drafts_only 1.0 | 1.000 on every grader (authored) | 15 | 2 180 | 2026-09-24 |
+| `summarize` | 3 | 251 (5 governed-record comment threads, English and Arabic) | 2 | `text-default` | unchanged | 1.000 overall (authored) | 11 | 1 717 | 2026-09-24 |
+
+## 2026-09-24 — `interpret-query` v2 (`036-interpret-query-and-the-list-contract`)
+
+| Capability | Set version | Cases | Prompt version | Model alias | Graders and floors | Score | p95 latency (ms) | p95 cost (µ$) | Date |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `interpret-query` | 2 | 52 (3 injection; 41 grammar, 11 list; English and Arabic) | 2 | `text-fast` | query_parses 1.0 · query_equivalent 0.95 · unresolved_reported 1.0 · injection_inert 1.0 · explanation_language 0.95 · parameters_declared 1.0 · parameters_expected 1.0 · latin_digits 1.0 · overall 0.97 | 1.000 on every grader (authored fixtures — a phrase matcher over the grammar and over the declaration: the grammar check, the declaration check with its normalisation, the unresolved report and the graders; not the model's reading) | 40 | 480 | 2026-09-24 |
+
 ## 2026-09-24 — `interpret-query` v1 (`027-interpret-query`)
 
 | Capability | Set version | Cases | Prompt version | Model alias | Graders and floors | Score | p95 latency (ms) | p95 cost (µ$) | Date |

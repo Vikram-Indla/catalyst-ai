@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"We will build a booking page so that inspections can be booked online by applicants and the service level of 5 working days is met, the booking page also sends reminders.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 601,
+      "candidatesTokenCount": 80
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

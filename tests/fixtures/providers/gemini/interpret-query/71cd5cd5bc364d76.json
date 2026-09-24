@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"\", \"parameters\": {}, \"sort\": \"name\", \"explanation\": \"List filter: -\", \"unresolved\": [], \"rationale\": \"Only the list's declared parameters and sorts; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 71,
+      "candidatesTokenCount": 46
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"description\": \"\u064a\u062d\u0635\u0644 \u0627\u0644\u0633\u0643\u0627\u0646 \u0639\u0644\u0649 \u0627\u0644\u062a\u0635\u0631\u064a\u062d \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a \u062f\u0648\u0646 \u0632\u064a\u0627\u0631\u0629 \u0627\u064a \u0645\u0643\u062a\u0628 \u0648\u064a\u0634\u0639\u0631\u0648\u0646 \u0627\u0646 \u0627\u0644\u062e\u062f\u0645\u0629 \u0628\u0633\u064a\u0637\u0629.\", \"acceptance_criteria\": null, \"changed\": true, \"rationale\": \"Applied the clarify operation: tightened phrasing and kept every fact.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 593,
+      "candidatesTokenCount": 57
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

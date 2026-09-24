@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"query\": \"\", \"parameters\": {\"state\": \"active\"}, \"sort\": null, \"explanation\": \"\u062a\u0635\u0641\u064a\u0629 \u0627\u0644\u0642\u0627\u0626\u0645\u0629: state=active\", \"unresolved\": [], \"rationale\": \"Only the list's declared parameters and sorts; the rest left unresolved.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 73,
+      "candidatesTokenCount": 53
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}

@@ -304,6 +304,10 @@ components:
           maxLength: 20000
           title: Description
           type: string
+        draft:
+          default: false
+          title: Draft
+          type: boolean
         duplicate_of:
           anyOf:
           - maxLength: 500
@@ -575,6 +579,29 @@ components:
       - title
       title: ContextItem
       type: object
+    ContextLine:
+      additionalProperties: false
+      description: 'One name around a governed record: its theme, its objective, its period.'
+      properties:
+        label:
+          data_class: INTERNAL
+          description: What the line names, as the product says it
+          maxLength: 64
+          minLength: 1
+          title: Label
+          type: string
+        text:
+          data_class: CONFIDENTIAL
+          description: The name or short text
+          maxLength: 500
+          minLength: 1
+          title: Text
+          type: string
+      required:
+      - label
+      - text
+      title: ContextLine
+      type: object
     ContextPage:
       additionalProperties: false
       description: A page's text the backend supplies whole; shown as one numbered source.
@@ -763,6 +790,107 @@ components:
       - result
       title: DoneFrame
       type: object
+    Draft:
+      additionalProperties: false
+      description: 'One Arabic draft: never reviewed, whatever its quality.'
+      properties:
+        ar:
+          maxLength: 40000
+          title: Ar
+          type: string
+        field:
+          title: Field
+          type: string
+        glossary_hits:
+          items:
+            type: string
+          title: Glossary Hits
+          type: array
+        key:
+          pattern: ^[0-9a-f]{64}$
+          title: Key
+          type: string
+        record_ref:
+          title: Record Ref
+          type: string
+        status:
+          const: machine_draft
+          default: machine_draft
+          title: Status
+          type: string
+        unresolved:
+          items:
+            type: string
+          title: Unresolved
+          type: array
+      required:
+      - key
+      - record_ref
+      - field
+      - ar
+      title: Draft
+      type: object
+    DraftItem:
+      additionalProperties: false
+      description: One field of one record, in English, as the backend holds it.
+      properties:
+        en:
+          data_class: CONFIDENTIAL
+          description: The field's English text; may be empty
+          maxLength: 20000
+          title: En
+          type: string
+        field:
+          data_class: INTERNAL
+          description: 'Which field of the record: name, charter …'
+          pattern: ^[a-z][A-Za-z0-9_]{0,63}$
+          title: Field
+          type: string
+        record_ref:
+          data_class: INTERNAL
+          description: The backend's reference to the record
+          maxLength: 200
+          minLength: 1
+          title: Record Ref
+          type: string
+      required:
+      - record_ref
+      - field
+      - en
+      title: DraftItem
+      type: object
+    DraftProgress:
+      additionalProperties: false
+      description: 'The counts a seeding run reports: every item is in exactly one of the three.'
+      properties:
+        drafted:
+          minimum: 0
+          title: Drafted
+          type: integer
+        from_cache:
+          minimum: 0
+          title: From Cache
+          type: integer
+        remaining:
+          minimum: 0
+          title: Remaining
+          type: integer
+        skipped:
+          minimum: 0
+          title: Skipped
+          type: integer
+        total:
+          minimum: 0
+          title: Total
+          type: integer
+      required:
+      - total
+      - drafted
+      - skipped
+      - remaining
+      - from_cache
+      title: DraftProgress
+      type: object
     DraftRequest:
       additionalProperties: false
       description: A brief and the sources it may draw on; nothing outside them enters the draft.
@@ -900,6 +1028,104 @@ components:
       - text
       - sources
       title: DraftSection
+      type: object
+    DraftsRequest:
+      additionalProperties: false
+      description: A batch of fields and the glossary they are drafted under.
+      properties:
+        capability_version:
+          data_class: PUBLIC
+          description: The version the caller was built against
+          pattern: ^\d+\.\d+\.\d+$
+          title: Capability Version
+          type: string
+        glossary:
+          data_class: INTERNAL
+          description: Governed English → Arabic terms
+          items:
+            $ref: '#/components/schemas/GlossaryEntry'
+          maxItems: 100
+          title: Glossary
+          type: array
+        glossary_version:
+          data_class: INTERNAL
+          description: The glossary's version; part of every item's key
+          maxLength: 64
+          minLength: 1
+          title: Glossary Version
+          type: string
+        items:
+          data_class: CONFIDENTIAL
+          description: The fields to draft
+          items:
+            $ref: '#/components/schemas/DraftItem'
+          maxItems: 200
+          minItems: 1
+          title: Items
+          type: array
+        organization_id:
+          data_class: INTERNAL
+          description: The tenant every row is scoped by
+          format: uuid
+          title: Organization Id
+          type: string
+      required:
+      - organization_id
+      - capability_version
+      - items
+      - glossary_version
+      title: DraftsRequest
+      type: object
+    DraftsResponse:
+      additionalProperties: false
+      description: The drafts, the skipped and the remaining items, and the counts.
+      properties:
+        capability_version:
+          title: Capability Version
+          type: string
+        drafts:
+          items:
+            $ref: '#/components/schemas/Draft'
+          title: Drafts
+          type: array
+        eval_set_version:
+          title: Eval Set Version
+          type: string
+        model:
+          title: Model
+          type: string
+        progress:
+          $ref: '#/components/schemas/DraftProgress'
+        prompt_version:
+          title: Prompt Version
+          type: string
+        remaining:
+          items:
+            $ref: '#/components/schemas/Remaining'
+          title: Remaining
+          type: array
+        request_id:
+          title: Request Id
+          type: string
+        skipped:
+          items:
+            $ref: '#/components/schemas/Skipped'
+          title: Skipped
+          type: array
+        usage:
+          $ref: '#/components/schemas/Usage'
+      required:
+      - capability_version
+      - prompt_version
+      - model
+      - eval_set_version
+      - usage
+      - request_id
+      - drafts
+      - skipped
+      - remaining
+      - progress
+      title: DraftsResponse
       type: object
     Entry:
       additionalProperties: false
@@ -1197,6 +1423,14 @@ components:
           pattern: ^\d+\.\d+\.\d+$
           title: Capability Version
           type: string
+        child_focus:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          data_class: INTERNAL
+          description: How a child of this kind reads, as the product words it
+          title: Child Focus
         child_level:
           anyOf:
           - maxLength: 64
@@ -1205,6 +1439,12 @@ components:
           data_class: INTERNAL
           description: The wanted level; absent means the next one down
           title: Child Level
+        draft_only:
+          data_class: PUBLIC
+          default: false
+          description: 'Wording only: no criteria, and no number, date or link the inputs lack'
+          title: Draft Only
+          type: boolean
         focus_hint:
           anyOf:
           - maxLength: 500
@@ -1340,6 +1580,11 @@ components:
           type: string
         usage:
           $ref: '#/components/schemas/Usage'
+        withheld:
+          default: 0
+          minimum: 0.0
+          title: Withheld
+          type: integer
       required:
       - capability_version
       - prompt_version
@@ -1778,6 +2023,11 @@ components:
           data_class: CONFIDENTIAL
           description: The parent's title
           title: Parent Title
+        record:
+          $ref: '#/components/schemas/RecordInput'
+          data_class: CONFIDENTIAL
+          description: A governed record's focus, context and glossary; its facts are kept
+          title: Record
         title:
           data_class: CONFIDENTIAL
           description: The item title
@@ -2302,6 +2552,10 @@ components:
           $ref: '#/components/schemas/Grammar'
           data_class: INTERNAL
           description: The fields, operators and values allowed
+        listing:
+          $ref: '#/components/schemas/Listing'
+          data_class: INTERNAL
+          description: The list's declared parameters and sorts, instead of a grammar
         locale:
           data_class: PUBLIC
           default: en
@@ -2342,7 +2596,6 @@ components:
       - organization_id
       - capability_version
       - text
-      - grammar
       - now
       title: InterpretQueryRequest
       type: object
@@ -2369,6 +2622,12 @@ components:
         model:
           title: Model
           type: string
+        parameters:
+          additionalProperties:
+            type: string
+          description: 'For a list declaration: the parameters, by its names'
+          title: Parameters
+          type: object
         prompt_version:
           title: Prompt Version
           type: string
@@ -2379,6 +2638,12 @@ components:
         request_id:
           title: Request Id
           type: string
+        sort:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'For a list declaration: a declared sort'
+          title: Sort
         unresolved:
           items:
             maxLength: 120
@@ -2577,6 +2842,66 @@ components:
       - kind
       - count
       title: KindCount
+      type: object
+    Listing:
+      additionalProperties: false
+      description: 'A list''s declaration as the list contract serves it: its parameters, sorts and search.'
+      properties:
+        filters:
+          items:
+            $ref: '#/components/schemas/ListingFilter'
+          maxItems: 64
+          title: Filters
+          type: array
+        q:
+          default: false
+          title: Q
+          type: boolean
+        sorts:
+          items:
+            pattern: ^-?[a-z][A-Za-z0-9]{0,63}$
+            type: string
+          maxItems: 32
+          minItems: 1
+          title: Sorts
+          type: array
+      required:
+      - sorts
+      title: Listing
+      type: object
+    ListingFilter:
+      additionalProperties: false
+      description: 'One parameter a list reads: its query-string name, its type, its closed values if
+        any.'
+      properties:
+        param:
+          pattern: ^[a-z][A-Za-z0-9]{0,63}$
+          title: Param
+          type: string
+        type:
+          enum:
+          - enum
+          - date
+          - datetime
+          - text
+          - number
+          title: Type
+          type: string
+        values:
+          anyOf:
+          - items:
+              maxLength: 120
+              minLength: 1
+              type: string
+            maxItems: 200
+            type: array
+          - type: 'null'
+          description: The closed set, for an enum
+          title: Values
+      required:
+      - param
+      - type
+      title: ListingFilter
       type: object
     LiveResponse:
       additionalProperties: false
@@ -3027,6 +3352,39 @@ components:
       - checks
       title: ReadyResponse
       type: object
+    RecordInput:
+      additionalProperties: false
+      description: A governed record's kind-specific focus, its context and its glossary, all as data.
+      properties:
+        context:
+          data_class: CONFIDENTIAL
+          description: The names around the record
+          items:
+            $ref: '#/components/schemas/ContextLine'
+          maxItems: 12
+          title: Context
+          type: array
+        focus:
+          data_class: INTERNAL
+          description: How a record of this kind reads, as the product words it
+          maxLength: 2000
+          minLength: 1
+          title: Focus
+          type: string
+        glossary:
+          data_class: INTERNAL
+          description: Governed terms, in the record's language, kept exactly as written
+          items:
+            maxLength: 200
+            minLength: 1
+            type: string
+          maxItems: 200
+          title: Glossary
+          type: array
+      required:
+      - focus
+      title: RecordInput
+      type: object
     Release:
       additionalProperties: false
       description: The release as the backend describes it; nothing here is a person.
@@ -3197,6 +3555,34 @@ components:
       - confidence
       title: ReleaseNotesResponse
       type: object
+    Remaining:
+      additionalProperties: false
+      description: An item not reached in this run; resubmitted, it is drafted then.
+      properties:
+        field:
+          title: Field
+          type: string
+        key:
+          pattern: ^[0-9a-f]{64}$
+          title: Key
+          type: string
+        reason:
+          enum:
+          - budget_exhausted
+          - provider_unavailable
+          - time_exhausted
+          title: Reason
+          type: string
+        record_ref:
+          title: Record Ref
+          type: string
+      required:
+      - key
+      - record_ref
+      - field
+      - reason
+      title: Remaining
+      type: object
     Scheme:
       additionalProperties: false
       description: 'The scheme to extend: its statuses under either spelling and its transitions.'
@@ -3249,6 +3635,12 @@ components:
           maxItems: 100
           title: Exclude External Ids
           type: array
+        ids_only:
+          data_class: PUBLIC
+          default: false
+          description: 'Keys, kinds and scores only: no title, an empty snippet'
+          title: Ids Only
+          type: boolean
         k:
           data_class: PUBLIC
           default: 10
@@ -3374,6 +3766,39 @@ components:
       required:
       - title
       title: Sibling
+      type: object
+    Skipped:
+      additionalProperties: false
+      description: 'An item not drafted, and why: an empty field, or a text the service refused.'
+      properties:
+        code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Code
+        field:
+          title: Field
+          type: string
+        key:
+          pattern: ^[0-9a-f]{64}$
+          title: Key
+          type: string
+        reason:
+          enum:
+          - empty
+          - refused
+          title: Reason
+          type: string
+        record_ref:
+          title: Record Ref
+          type: string
+      required:
+      - key
+      - record_ref
+      - field
+      - reason
+      title: Skipped
       type: object
     Source:
       additionalProperties: false
@@ -5464,7 +5889,7 @@ paths:
       tags:
       - capabilities
       x-capability: generate-children
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -5688,7 +6113,7 @@ paths:
       tags:
       - capabilities
       x-capability: improve-story
-      x-capability-version: 1.1.0
+      x-capability-version: 1.2.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -5778,7 +6203,7 @@ paths:
       tags:
       - capabilities
       x-capability: search
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -5871,7 +6296,7 @@ paths:
       tags:
       - capabilities
       x-capability: search
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -5983,7 +6408,7 @@ paths:
       tags:
       - capabilities
       x-capability: interpret-query
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -6482,7 +6907,7 @@ paths:
       tags:
       - capabilities
       x-capability: search
-      x-capability-version: 1.0.0
+      x-capability-version: 1.1.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -6705,7 +7130,7 @@ paths:
       tags:
       - capabilities
       x-capability: translate
-      x-capability-version: 1.1.0
+      x-capability-version: 1.2.0
       x-error-codes:
       - ai.contract.version_mismatch
       - ai.capability.disabled
@@ -6718,6 +7143,86 @@ paths:
       - ai.provider.quota
       - ai.output.invalid
       - ai.output.unsafe
+  /v1/translate/drafts:jobs:
+    post:
+      description: 'Accept a batch of record fields as a job: Arabic drafts, never reviewed, per item.'
+      operationId: translate.drafts_job
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DraftsRequest'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobAccepted'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.contract.version_mismatch, validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.input.rejected'
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.disabled, auth.origin.unverifiable'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.budget.exceeded, ai.capability.disabled, ai.contract.version_mismatch,
+            ai.input.rejected, auth.origin.invalid'
+      summary: Drafts Job
+      tags:
+      - capabilities
+      x-capability: translate
+      x-capability-version: 1.2.0
+      x-error-codes:
+      - ai.contract.version_mismatch
+      - ai.capability.disabled
+      - ai.input.rejected
+      - ai.budget.exceeded
+      - auth.origin.invalid
+      x-job-result:
+        $ref: '#/components/schemas/DraftsResponse'
   /v1/unfurl:
     post:
       description: Turn a supplied item or page into a card; nothing is fetched, nothing is invented.

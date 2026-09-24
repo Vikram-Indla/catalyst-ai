@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "body": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "{\"summary\": \"2 comment(s) from p1, p2; the latest, by p2, says: Counter staff training is blocked until the review screen is ready.\\n\\n- p2 \u2014 blocker: Counter staff training is blocked until the review screen is ready.\", \"participants_mentioned\": [\"p1\", \"p2\"], \"empty_reason\": null, \"rationale\": \"Kept the latest position, the cued bullets and the recorded moves.\"}"
+            }
+          ]
+        },
+        "finishReason": "STOP"
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 236,
+      "candidatesTokenCount": 91
+    },
+    "modelVersion": "authored-stand-in"
+  }
+}
