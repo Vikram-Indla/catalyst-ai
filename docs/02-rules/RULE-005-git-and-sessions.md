@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.3.1
+version: 1.3.3
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -33,8 +33,16 @@ created: 2026-09-18
   working tree and the image digest (`tools/stamp`, in the common git directory) — only if the
   tree is still the one noted at the start; a tree edited during the run is not stamped. `pre-push`
   skips the run when the stamp matches the tree being pushed, the image, and is younger than a
-  day, printing it; otherwise it runs. The workflow file holds only checkout, setup, `make tools`,
-  `make hooks`, `make verify` (`tools/checks/ci`).
+  day, printing it; otherwise it runs `make ci-aware`. That compares the tree with the last full
+  green one, file by file (a full run keeps its manifest as the base; a scoped run proves its own
+  push and is never a base), and runs what the changed files oblige by the
+  map in `tools/change_map.py`: every check, the selftest and the secret scan for pages; those plus
+  lint, types and the tools' tests for a check; the full `make ci` for anything else, and whenever
+  there is no usable base (none, another image, older than a day). A step is skipped only when its
+  inputs are the same bytes as a green run's; `tools/checks/change_map` refuses a file without a
+  class and a page a test reads filed as a page. The hosted workflow on `main` always runs
+  everything. The workflow file holds only checkout, setup, `make tools`, `make hooks`,
+  `make verify` (`tools/checks/ci`).
 - **One workflow, one door to the database.** `.github/workflows/` holds `ci.yml` and nothing
   else. Its trigger (a push to `main`), its container, its one service and its env equal what
   `tools/rules.py` pins, and `tools/checks/ci` reads every file in the directory and all of
@@ -56,7 +64,11 @@ created: 2026-09-18
   ci-cold` runs online. Debian's mirror is a build argument whose default is upstream: a
   machine may pass a nearer one from its own environment, never from the repository, and it
   never changes the image's name. The hosted job keeps its setup step until the image has a
-  registry.
+  registry. It gets one in two commits: a push to `main` that changes `Dockerfile.ci` runs
+  `ci-image.yml`, which builds the image labelled with the file's hash, runs the gate inside it
+  and only then pushes it and prints its digest (the job alone holds `packages: write`); the
+  next `build(ci)` commit pins that digest and the hash it was built from, and
+  `tools/checks/images` refuses a `Dockerfile.ci` that no longer hashes to the pin.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast` (format, lint,
   the ⚡ checks, the eval sets a change can move, gitleaks on the staged tree — iteration, never
@@ -122,5 +134,8 @@ and whether it was accepted, and the next action. A session without a record did
 | `CRITICAL` | the boundary, tenancy, data classes, the port, retention, a threshold lowered, a budget widened, anything in `RULE-000 §6` | `SYSTEM` | Level-3 process; deployed alone, behind the kill switch |
 
 `tools/checks/prclass` derives the minimum class from the changed paths and the `INV-` rows
-named in the impact matrix, and fails a session record that claims a lower one (the name is
-historical; there are no pull requests).
+named in the impact matrix, and fails a branch whose highest record claim is lower (the name is
+historical; there are no pull requests). A branch carrying several records, one per proposed
+commit, is judged by the highest claim, since it lands as one push and is reviewed at that class;
+each record keeps its own change's true radius, and `tools/checks/commitclass` holds it to that
+at each commit, from the files staged with it; a record without a claim is red at both.

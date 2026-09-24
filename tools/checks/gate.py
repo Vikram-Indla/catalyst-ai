@@ -24,9 +24,11 @@ CHECKS = (
     "boundary",
     "readonly",
     "origin",
+    "residency",
     "vocabulary",
     "alerts",
     "latency",
+    "change_map",
     "classification",
     "routes",
     "contract",
@@ -53,6 +55,7 @@ CHECKS = (
     "commits",
     "sessions",
     "prclass",
+    "commitclass",
     "invariants",
     "mypy_overrides",
     "capabilities",
@@ -80,6 +83,7 @@ FAST = frozenset(
         "network",
         "mypy_overrides",
         "vocabulary",
+        "commitclass",
     }
 )
 

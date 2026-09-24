@@ -1,4 +1,12 @@
-"""RULE-005 §6, RULE-007 §1: the claimed blast radius is never lower than the derived one."""
+"""RULE-005 §6, RULE-007 §1: the claimed blast radius is never lower than the derived one.
+
+The derived radius is the branch's: every file that differs from `main`. A branch may carry several
+records, one per proposed commit, each claiming its own change's radius; the branch is judged by
+the highest of those claims, since the branch lands as one push and is reviewed at that class. A
+record keeps its own true radius, and a branch whose every claim is below the derived one is red.
+A changed record that claims no radius is red too, or one claim could stand for a silent rest; the
+per-record truth is judged at each commit, by `commitclass`.
+"""
 
 import re
 from pathlib import Path
@@ -25,19 +33,31 @@ def derive(changed: list[str]) -> str:
     return radius
 
 
+def claims(records: dict[str, str]) -> dict[str, str]:
+    """Return each record's claimed radius, for the records that claim a known one."""
+    found = {path: CLAIM.search(text) for path, text in records.items()}
+    return {
+        path: match.group("radius")
+        for path, match in found.items()
+        if match is not None and match.group("radius") in rules.RADII
+    }
+
+
 def check(changed: list[str], records: dict[str, str]) -> list[Violation]:
-    """Report a record whose claimed radius is below the derived one."""
+    """Report a branch whose highest claimed radius is below the one its changed paths derive."""
     derived = derive(changed)
-    violations = []
-    for path, text in records.items():
-        match = CLAIM.search(text)
-        if match is None:
-            continue
-        claimed = match.group("radius")
-        if claimed in rules.RADII and rules.RADII.index(claimed) < rules.RADII.index(derived):
-            message = f"claims {claimed} but the changed paths derive {derived}"
-            violations.append(Violation(path, 1, message))
-    return violations
+    claimed = claims(records)
+    unclaimed = [
+        Violation(path, 1, "a changed record claims no blast radius")
+        for path in sorted(set(records) - set(claimed))
+    ]
+    if not claimed:
+        return unclaimed
+    highest = max(claimed.values(), key=rules.RADII.index)
+    if rules.RADII.index(highest) >= rules.RADII.index(derived):
+        return unclaimed
+    message = f"the highest claim is {highest} but the changed paths derive {derived}"
+    return unclaimed + [Violation(path, 1, message) for path in sorted(claimed)]
 
 
 def run(root: Path) -> list[Violation]:
@@ -47,6 +67,9 @@ def run(root: Path) -> list[Violation]:
     records = {
         path: (root / path).read_text(encoding="utf-8")
         for path in changed
-        if path.startswith(prefix) and (root / path).exists()
+        if path.startswith(prefix)
+        and path.endswith(".md")
+        and "_TEMPLATE" not in path
+        and (root / path).exists()
     }
     return check(changed, records)

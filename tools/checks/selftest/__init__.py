@@ -7,8 +7,11 @@ from pathlib import Path
 from tools.checks import (
     alerts,
     budgets,
+    change_map,
     changelog,
     ci,
+    ci_image_job,
+    commitclass,
     commits,
     coverage,
     deprecations,
@@ -21,8 +24,10 @@ from tools.checks import (
     journeys,
     latency,
     licenses,
+    nightly_job,
     openapi,
     prclass,
+    residency,
     sessions,
     vocabulary,
 )
@@ -70,17 +75,26 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     "changelog": lambda: changelog.check(["api/openapi.yaml"]),
     "deps": lambda: deps.check({"leftpad"}, set()),
     "licenses": lambda: licenses.check([("evil", "AGPL-3.0")]),
-    "ci": lambda: ci.check("      - run: echo hi\n", "w"),
+    "ci": lambda: (
+        ci.check("      - run: echo hi\n", "w")
+        + ci_image_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w")
+        + nightly_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w", {})
+    ),
     "images": lambda: (
         images.check("FROM python:3.12\n", "CI_IMAGE := python:3.12\n", "")
         + images.setup_violations("RUN apt-get install -y make\n", "apt-get install -y make git")
+        + images.pin_violations("a" * 64, "b" * 64, "c" * 64)
+        + images.ci_image_violations("COPY . /src\n", "0")
     ),
     "commits": lambda: commits.check(
         [Commit("abc123def456", "x", ("uv.lock", "src/catalyst_ai/x.py"))]
     ),
     "sessions": lambda: sessions.check(["src/catalyst_ai/x.py"], {}),
     "prclass": lambda: prclass.check(
-        ["src/catalyst_ai/contract/envelopes.py"], {"r.md": "Blast radius: LOCAL"}
+        ["src/catalyst_ai/contract/envelopes.py"], {"r.md": "Blast radius: LOCAL", "s.md": "x"}
+    ),
+    "commitclass": lambda: commitclass.check(
+        ["tools/checks/x.py", "src/catalyst_ai/config/x.py"], {"r.md": "Blast radius: LOCAL"}
     ),
     "invariants": lambda: invariants.check(BAD_REGISTRY, set(), set(), "w"),
     "evals": lambda: (
@@ -104,6 +118,15 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
         latency.latency_rules(BAD_LATENCY, latency.REQUEST_SERIES, "operation"),
         {8.0},
         "w",
+    ),
+    "change_map": lambda: change_map.check(
+        ["notes.txt"], (("*", "docs"),), {"tests/t.py": {"docs/01-architecture/x.md"}}
+    ),
+    "residency": lambda: (
+        residency.host_violations(
+            "https://generative" + "language.googleapis.com", "w", frozenset({"x-1"})
+        )
+        + residency.kept_violations({})
     ),
     "vocabulary": lambda: vocabulary.check_lines(
         ["decided under " + "CA" + "T-0" + "07" + " by " + "il" + "ya-go"], "w"
