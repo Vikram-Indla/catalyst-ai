@@ -17,7 +17,9 @@ class ModelOutput(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    query: str = Field(max_length=MAX_QUERY)
+    query: str = Field(default="", max_length=MAX_QUERY)
+    parameters: dict[str, str] = Field(default_factory=dict, max_length=MAX_UNRESOLVED * 2)
+    sort: str | None = None
     explanation: str = Field(min_length=1, max_length=MAX_EXPLANATION)
     unresolved: list[str] = Field(default_factory=list, max_length=MAX_UNRESOLVED)
     rationale: str = Field(min_length=1, max_length=MAX_RATIONALE_CHARS)

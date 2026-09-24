@@ -48,3 +48,24 @@ def test_the_sentence_the_locale_and_the_zone_are_bounded() -> None:
         _request(locale="fr")
     with pytest.raises(ValidationError):
         _request(timezone="../etc/passwd")
+
+
+def test_a_request_carries_a_grammar_or_a_list_declaration_exactly_one() -> None:
+    listing = {"filters": [], "sorts": ["name"]}
+    base = {
+        "organization_id": "11111111-1111-7111-8111-111111111111",
+        "capability_version": "1.1.0",
+        "text": "themes by name",
+        "now": "2026-09-24T01:30:00+03:00",
+    }
+    assert InterpretQueryRequest.model_validate({**base, "listing": listing}).grammar is None
+    with pytest.raises(ValidationError):
+        InterpretQueryRequest.model_validate(base)
+    with pytest.raises(ValidationError):
+        InterpretQueryRequest.model_validate(
+            {
+                **base,
+                "listing": listing,
+                "grammar": {"fields": [{"name": "x", "type": "string", "operators": ["="]}]},
+            }
+        )

@@ -19,6 +19,9 @@ def test_an_explanation_and_a_rationale_are_required() -> None:
 
 
 def test_the_provider_gets_the_schema_it_must_answer_in() -> None:
-    required = output_schema()["required"]
+    schema = output_schema()
+    required, properties = schema["required"], schema["properties"]
     assert isinstance(required, list)
-    assert set(required) >= {"query", "explanation", "rationale"}
+    assert isinstance(properties, dict)
+    assert set(required) >= {"explanation", "rationale"}
+    assert {"query", "parameters", "sort"} <= set(properties)

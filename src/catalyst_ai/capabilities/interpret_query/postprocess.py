@@ -2,6 +2,7 @@
 
 from catalyst_ai.capabilities.interpret_query import descriptor
 from catalyst_ai.capabilities.interpret_query.grammar import canonical
+from catalyst_ai.capabilities.interpret_query.listing import normalise
 from catalyst_ai.capabilities.interpret_query.schema import ModelOutput
 from catalyst_ai.contract.interpret_query import InterpretQueryRequest, InterpretQueryResponse
 from catalyst_ai.platform.observability import ProviderCallRow, log_provider_call
@@ -26,7 +27,13 @@ def to_response(
 ) -> InterpretQueryResponse:
     """Write the checked query back canonically; log the content-free row."""
     log_provider_call(_row(result, request, request_id))
-    query = canonical(output.query, request.grammar) if output.query.strip() else ""
+    parameters: dict[str, str] = {}
+    sort: str | None = None
+    query = ""
+    if request.listing is not None:
+        parameters, sort, _ = normalise(output.parameters, output.sort, request.listing)
+    elif request.grammar is not None and output.query.strip():
+        query = canonical(output.query, request.grammar)
     unresolved = output.terms()
     return InterpretQueryResponse(
         capability_version=descriptor.version,
@@ -38,7 +45,9 @@ def to_response(
         query=query,
         explanation=output.explanation.strip(),
         unresolved=unresolved,
-        confidence=confidence(query, unresolved),
+        confidence=confidence(query or " ".join(parameters) or (sort or ""), unresolved),
+        parameters=parameters,
+        sort=sort,
     )
 
 

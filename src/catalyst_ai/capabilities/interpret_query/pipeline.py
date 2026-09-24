@@ -5,6 +5,7 @@ from pathlib import Path
 
 from catalyst_ai.capabilities.interpret_query import descriptor
 from catalyst_ai.capabilities.interpret_query.grammar import GrammarError, canonical
+from catalyst_ai.capabilities.interpret_query.listing import listing_lines, normalise
 from catalyst_ai.capabilities.interpret_query.postprocess import from_cache, to_response
 from catalyst_ai.capabilities.interpret_query.schema import ModelOutput, output_schema
 from catalyst_ai.contract.errors import ErrorCode, ErrorDetail
@@ -23,6 +24,7 @@ from catalyst_ai.providers.port import GenerateRequest, GenerateResult, ModelAli
 
 PROMPT_PATH = Path(__file__).with_name(f"prompt_v{descriptor.prompt_version}.md")
 NOT_IN_GRAMMAR = "query_not_in_grammar"
+NOT_DECLARED = "parameters_not_declared"
 ANY_VALUE = "any value of its type"
 
 
@@ -71,16 +73,22 @@ def assemble(parsed: Parsed, runtime: RuntimeContext) -> GenerateRequest:
     """Stage 4: the prompt file, filled with the grammar; the sentence fenced as data."""
     request = parsed.request
     prompt = PromptFile.load(PROMPT_PATH)
-    developer = fill(
-        prompt.section("developer"),
-        {
-            "now": request.now.isoformat(),
-            "timezone": request.timezone,
-            "locale": request.locale,
-            "grammar": grammar_lines(request.grammar),
-            "functions": ", ".join(f.name for f in request.grammar.functions) or "(none)",
-        },
-    )
+    moment = {
+        "now": request.now.isoformat(),
+        "timezone": request.timezone,
+        "locale": request.locale,
+    }
+    if request.listing is not None:
+        filled = {**moment, "listing": listing_lines(request.listing)}
+        developer = fill(prompt.section("developer:listing"), filled)
+    else:
+        grammar = request.grammar or Grammar.model_construct(fields=[], functions=[])
+        filled = {
+            **moment,
+            "grammar": grammar_lines(grammar),
+            "functions": ", ".join(f.name for f in grammar.functions) or "(none)",
+        }
+        developer = fill(prompt.section("developer"), filled)
     segments = [
         Segment(role="system", name="system", text=prompt.section("system")),
         Segment(role="developer", name="developer", text=developer),
@@ -106,6 +114,14 @@ async def call(generate: GenerateRequest, runtime: RuntimeContext) -> GenerateRe
         return await runtime.provider.generate(generate)
 
 
+def output_problems(output: ModelOutput, request: InterpretQueryRequest) -> list[str]:
+    """Return why the answer is outside what the request allows: its declaration or its grammar."""
+    if request.listing is not None:
+        return normalise(output.parameters, output.sort, request.listing)[2]
+    grammar = request.grammar or Grammar.model_construct(fields=[], functions=[])
+    return grammar_problems(output, grammar)
+
+
 def grammar_problems(output: ModelOutput, grammar: Grammar) -> list[str]:
     """Return why the query is not in the grammar; an empty query is allowed and has none."""
     if not output.query.strip():
@@ -126,17 +142,21 @@ async def validate_output(
         return await call(generate, runtime)
 
     output, current = await parse_with_repair(result, ModelOutput, repair)
-    grammar = parsed.request.grammar
-    if grammar_problems(output, grammar):
+    request = parsed.request
+    if output_problems(output, request):
         retried, again = await parse_with_repair(await repair(), ModelOutput, repair)
         output, current = retried, merge_usage(current, again)
-    problems = grammar_problems(output, grammar)
+    problems = output_problems(output, request)
     if problems:
+        listed = request.listing is not None
+        field, code = ("parameters", NOT_DECLARED) if listed else ("query", NOT_IN_GRAMMAR)
         details = [
-            ErrorDetail(field="query", code=NOT_IN_GRAMMAR, message=problem.split(":", 1)[0])
+            ErrorDetail(field=field, code=code, message=problem.split(":", 1)[0])
             for problem in problems
         ]
-        raise Error(ErrorCode.OUTPUT_INVALID, "the query is not in the grammar", details=details)
+        raise Error(
+            ErrorCode.OUTPUT_INVALID, "the answer is outside what the list allows", details=details
+        )
     refuse_if_unsafe(output.explanation, [parsed.request.text], parsed.request_id)
     return output, current
 
