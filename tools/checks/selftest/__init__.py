@@ -112,8 +112,7 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     "commitsize": lambda: commitsize.check(
         [commitsize.Staged("src/catalyst_ai/x.py", 401), commitsize.Staged("uv.lock", 900)],
         {"r.md": "**Ticket:** AI-001 · x", "s.md": "**Ticket:** AI-002 · y"},
-        "| D-001 | 2026-01-01 | lead (proposed) | RULE-005 | x |",
-        "gen: a mixed commit",
+        "gen: a mixed commit\n\nwith a body\n",
     ),
     "localrun": lambda: (
         localrun.env_violations("DB_PASSWORD=" + "hunter2\n# API_TOKEN=abc\n", "w")

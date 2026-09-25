@@ -8,10 +8,12 @@ import io
 import os
 import sys
 import tokenize
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path
 
 from tools import rules
+from tools.scope import scope_of, staged
 
 CHECKS = (
     "filebudget",
@@ -94,6 +96,21 @@ FAST = frozenset(
         "deployment",
     }
 )
+PER_FILE = frozenset(
+    {
+        "filebudget",
+        "funcbudget",
+        "comments",
+        "naming",
+        "globals",
+        "vocabulary",
+        "network",
+        "logs",
+        "inline",
+        "mypy_overrides",
+    }
+)
+SCOPE: ContextVar[frozenset[Path] | None] = ContextVar("scope", default=None)
 
 
 @dataclass(frozen=True)
@@ -107,6 +124,12 @@ class Violation:
     def render(self) -> str:
         """Return the one-line form the gate prints."""
         return f"{self.path}:{self.line}: {self.message}"
+
+
+def in_scope(path: Path) -> bool:
+    """Whether a per-file check may read the file: always, unless a commit's scope is set."""
+    scope = SCOPE.get()
+    return scope is None or path.resolve() in scope
 
 
 def relative(path: Path, root: Path) -> str:
@@ -123,7 +146,11 @@ def walk(root: Path, *subdirs: Path, suffix: str = ".py") -> list[Path]:
             continue
         for directory, names, files in os.walk(base):
             names[:] = sorted(n for n in names if n not in rules.SKIP_DIRS)
-            found.extend(Path(directory) / f for f in sorted(files) if f.endswith(suffix))
+            found.extend(
+                Path(directory) / f
+                for f in sorted(files)
+                if f.endswith(suffix) and in_scope(Path(directory) / f)
+            )
     return sorted(found)
 
 
@@ -154,16 +181,25 @@ def logical_lines(text: str) -> int:
     return count
 
 
-def run_check(name: str, root: Path) -> list[Violation]:
-    """Import the check module by name and run it against the root."""
+def run_check(name: str, root: Path, scope: frozenset[Path] | None = None) -> list[Violation]:
+    """Import the check module by name and run it; a per-file check reads only the scope."""
     module = importlib.import_module(f"tools.checks.{name}")
-    result: list[Violation] = module.run(root)
+    token = SCOPE.set(scope if name in PER_FILE else None)
+    try:
+        result: list[Violation] = module.run(root)
+    finally:
+        SCOPE.reset(token)
     return result
 
 
 def main(argv: list[str]) -> int:
-    """Run every check (or the fast subset) in order; stop at the first red one."""
+    """Run every check (or the fast subset) in order; stop at the first red one.
+
+    `--staged` gives the per-file checks only the commit's staged files, unless the change moves
+    the ground (`tools/scope.py`); the cross-file checks read the whole repository either way.
+    """
     root = Path.cwd()
+    scope = scope_of(root, staged(root)) if "--staged" in argv else None
     fast = "--fast" in argv
     only = argv[argv.index("--only") + 1] if "--only" in argv else None
     skip = argv[argv.index("--skip") + 1].split(",") if "--skip" in argv else []
@@ -173,14 +209,15 @@ def main(argv: list[str]) -> int:
         if (not fast or name in FAST) and (only is None or name == only) and name not in skip
     ]
     for name in names:
-        violations = run_check(name, root)
+        violations = run_check(name, root, scope)
         if violations:
             for violation in violations:
                 print(violation.render())
             print(f"GATE RED at: {name} ({len(violations)} violations)")
             return 1
         print(f"ok   {name}")
-    print(f"GATE GREEN ({len(names)} checks)")
+    where = "" if scope is None else f", per-file checks on {len(scope)} staged files"
+    print(f"GATE GREEN ({len(names)} checks{where})")
     return 0
 
 

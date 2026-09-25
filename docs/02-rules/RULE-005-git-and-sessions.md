@@ -20,13 +20,12 @@ created: 2026-09-18
   proved, never the door a change goes through. A red hosted run is fixed forward on `main`
   with its own commit. Force-push, history rewriting of anything pushed, and `--no-verify` are
   banned.
-- A change is one ticket, ≤ 400 changed hand-written lines per commit (the lockfile, the
-  rendered document and recorded fixtures are committed separately and do not count), both
-  gates green, read by the lead before the yes. `tools/checks/commitsize` measures it at
-  commit: added plus deleted lines outside the generated paths, the ticket from the staged
-  records' `**Ticket:**` field; a `gen:` commit may hold generated paths only. The one
-  exception is a decision the lead has taken (a `D-NNN` decided by `lead`, naming RULE-005),
-  named in the commit's record as `**Size exception:** D-NNN`; there is no flag.
+- A change is one task in one commit with a one-line subject (the lockfile, the rendered
+  document and recorded fixtures go in their own `gen:` commit), both gates green, read by the
+  lead before the yes. There is no total of lines per commit; each file keeps its own budget
+  (`tools/checks/filebudget`, `funcbudget`). `tools/checks/commitsize` holds it at commit: one
+  ticket across the staged records' `**Ticket:**` fields, the message one subject line and
+  nothing after it, a `gen:` commit generated paths only; there is no flag (`D-067`).
 - Conventional Commits: `type(scope): imperative summary`, ≤ 80 characters, `scope` the
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,
@@ -74,9 +73,14 @@ created: 2026-09-18
   next `build(ci)` commit pins that digest and the hash it was built from, and
   `tools/checks/images` refuses a `Dockerfile.ci` that no longer hashes to the pin.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
-  no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast` (format, lint,
-  the ⚡ checks, the eval sets a change can move, gitleaks on the staged tree — iteration, never
-  evidence); `commit-msg` runs the message check; `pre-push` consults the stamp, then runs
+  no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast`
+  (`tools/precommit.py`, on the staged set: format and lint on the staged Python files, the type
+  check on the whole program on its incremental cache, the ⚡ checks — the per-file ones on the
+  staged files, the cross-file ones on the whole repository — the eval sets the staged files can
+  move, judged on their grader floors with the latency and cost budgets reported and left to the
+  full gate (`D-065`), gitleaks on the staged tree; a change to a shared configuration, a rule,
+  the lockfile, the hooks or a check's own code, or a commit with nothing staged, runs every file
+  (`tools/scope.py`, `D-066`) — iteration, never evidence); `commit-msg` runs the message check; `pre-push` consults the stamp, then runs
   `make ci` where Docker is available and otherwise the full `make verify`, printing that parity
   with the CI image is not proven. A red hook blocks. `make test-fast` (the unit tree, last
   failures first, no coverage) and `make evals-affected` exist for iteration; neither is evidence.

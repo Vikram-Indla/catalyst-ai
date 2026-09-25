@@ -14,6 +14,7 @@ from tools import evalkit, rules
 from tools.affected import affected_sets
 from tools.checks.evals import thresholds
 from tools.checks.gitinfo import changed_since_main
+from tools.scope import staged
 
 RUNS = Path(".evals")
 P95 = 0.95
@@ -99,8 +100,10 @@ async def _grade_set(directory: Path, runtime: RuntimeContext) -> dict[str, obje
     }
 
 
-def judge(result: dict[str, object], floors: dict[str, float]) -> list[str]:
-    """Return the floors the result falls under."""
+def judge(
+    result: dict[str, object], floors: dict[str, float], *, budgets: bool = True
+) -> list[str]:
+    """Return the floors the result falls under; the latency and cost budgets only when asked."""
     reds = []
     scores = result["scores"]
     if not isinstance(scores, dict):
@@ -110,10 +113,14 @@ def judge(result: dict[str, object], floors: dict[str, float]) -> list[str]:
             reds.append(f"{key} {float(scores[key]):.3f} < {floor}")
     if float(str(result["overall"])) < floors.get("overall", 0.0):
         reds.append(f"overall {float(str(result['overall'])):.3f} < {floors['overall']}")
-    for key in ("p95_latency_ms", "p95_cost_micros"):
+    for key in BUDGETS if budgets else ():
         if key in floors and float(str(result[key])) > floors[key]:
             reds.append(f"{key} {float(str(result[key])):.0f} > {floors[key]}")
     return reds
+
+
+BUDGETS = ("p95_latency_ms", "p95_cost_micros")
+BUDGETS_ELSEWHERE = "reported only; the full gate, the hosted run and the nightly enforce it"
 
 
 def selected(argv: list[str]) -> list[Path]:
@@ -122,26 +129,33 @@ def selected(argv: list[str]) -> list[Path]:
     if "--set" in argv:
         only = argv[argv.index("--set") + 1]
         return [d for d in directories if d.name == only]
-    if "--affected" in argv:
+    if "--affected" in argv or "--staged" in argv:
         root = Path.cwd()
-        names = affected_sets(changed_since_main(root), [d.name for d in directories], root)
+        changed = staged(root) if "--staged" in argv else changed_since_main(root)
+        names = affected_sets(changed, [d.name for d in directories], root)
         return [d for d in directories if d.name in names]
     return directories
 
 
 def main(argv: list[str]) -> int:
-    """Run the selected sets and write `.evals/<name>.json`; `--affected` is iteration only."""
+    """Run the selected sets and write `.evals/<name>.json`; `--affected` is iteration only.
+
+    `--affected` runs at commit time on a shared workstation, where a timing budget measures the
+    machine's load, not the change: it judges every grader floor but only reports the latency and
+    cost budgets, which the full gate enforces on a machine running nothing else.
+    """
     RUNS.mkdir(exist_ok=True)
     status = 0
+    budgets = "--affected" not in argv and "--staged" not in argv
     directories = selected(argv)
-    if "--affected" in argv:
+    if not budgets:
         print(
             f"evals: affected sets {[d.name for d in directories]} (iteration only, not evidence)"
         )
     for directory in directories:
         result = asyncio.run(run_set(directory))
         floors = thresholds((directory / "thresholds.yaml").read_text(encoding="utf-8"))
-        reds = judge(result, floors)
+        reds = judge(result, floors, budgets=budgets)
         (RUNS / f"{directory.name}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
         scores = result["scores"] if isinstance(result["scores"], dict) else {}
         print(f"-- {directory.name} v{_set_version(directory)} - {result['cases']} cases")
@@ -151,8 +165,11 @@ def main(argv: list[str]) -> int:
         latency = float(str(result["p95_latency_ms"]))
         cost = float(str(result["p95_cost_micros"]))
         print(f"   {'overall':<22} {overall:.3f}  (floor {floors.get('overall', 0.0)})")
-        print(f"   p95 latency {latency:.0f} ms (budget {floors.get('p95_latency_ms')})")
-        print(f"   p95 cost {cost:.0f} micro-dollars (budget {floors.get('p95_cost_micros')})")
+        where = "" if budgets else f"; {BUDGETS_ELSEWHERE}"
+        print(f"   p95 latency {latency:.0f} ms (budget {floors.get('p95_latency_ms')}{where})")
+        print(
+            f"   p95 cost {cost:.0f} micro-dollars (budget {floors.get('p95_cost_micros')}{where})"
+        )
         for failure in result["failures"] if isinstance(result["failures"], list) else []:
             print(f"   miss  {failure}")
         if reds:

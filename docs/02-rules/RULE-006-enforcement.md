@@ -25,7 +25,8 @@ for the same check is open.
 `make verify` runs every row below in order and stops at the first failure. CI runs `make
 verify` and nothing else; `tools/checks/ci` holds the workflow to that. `make ci` runs the CI
 job itself inside its image and is the push precondition. `make verify-fast` is the ⚡ subset for
-the pre-commit hook. The **Built in** column names the ticket that built the check; every check exists from the
+the pre-commit hook, narrowed to the staged set (`D-066`): the per-file checks read the staged
+files, the cross-file checks the whole repository, and a change to the ground runs every file. The **Built in** column names the ticket that built the check; every check exists from the
 scaffold and passes vacuously on an empty tree, and `selftest` proves each red on its plant.
 
 | Rule | Check | Tool | Built in |
@@ -94,7 +95,7 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | The deployment manifests (`deploy/run/*.yaml`) carry no location, no credential value and no rebuild: every per-environment value from the target (`# from-param:`); the image the release's placeholder; credentials only as secret references; every variable a setting the service reads; no probe path ending in `z`; one database login per process, the three distinct; a worker that cannot scale to zero ⚡ | zero findings | `tools/checks/deployment` | AI-036 |
 | The gate's image reads git and never writes it: every mount of the git common directory is `:ro`, and git runs there with `GIT_OPTIONAL_LOCKS=0`; the stamp is written on the host ⚡ | zero writable mounts | `tools/checks/gitmount` | AI-038 |
 | The local run leaks nothing and binds loopback: `.env.example` carries no value for a secret-shaped key (`*_PASSWORD`, `*_KEY`, `*_KEYS`, `*_TOKEN`, `*_SECRET`, commented or not) except a named public-by-design key; every port `docker-compose.yml` publishes is `127.0.0.1` on the agreed set (5434, 8090, 9091, 9092) ⚡ | zero values, zero open ports | `tools/checks/localrun` | AI-037 |
-| A commit is one ticket and ≤ 400 hand-written lines; a `gen:` commit holds generated paths only (RULE-005 §1) ⚡ | ≤ 400 added + deleted lines outside the generated paths; one ticket across the staged records; an exception only as a lead-decided `D-NNN` naming RULE-005, named in the staged record (`**Size exception:**`); no skip flag | `tools/checks/commitsize` (pre-commit, and `.githooks/commit-msg` with the message) | AI-035 |
+| A commit is one task with a one-line subject; a `gen:` commit holds generated paths only (RULE-005 §1, `D-067`) ⚡ | one ticket across the staged records; the message one non-comment line; no hand-written path in a `gen:` commit; no total of lines per commit (each file keeps its budget); no skip flag | `tools/checks/commitsize` (pre-commit, and `.githooks/commit-msg` with the message) | AI-035 |
 | Each committed record tells the truth about its own commit (RULE-005 §6): at pre-commit, every staged session record claims a radius at least the one its staged files derive ⚡ | claimed ≥ derived for the commit | `tools/checks/commitclass` | AI-021 |
 | Kill switch per capability; deprecations carry replacement and sunset; nothing survives its sunset (RULE-009) | zero missing; zero overdue | `tools/checks/capabilities`, `tools/checks/deprecations` | AI-002 |
 | Invariants registry: every row names an existing check; every architecture test is claimed (RULE-000 §6) | zero orphans | `tools/checks/invariants` | AI-002 |
@@ -116,7 +117,8 @@ make test         tests/architecture first, then pytest with coverage and the so
 make test-fast    the unit tree, last failures first, stop at the first, no coverage — iteration, never evidence
 make storage      tests/storage against testcontainers once db/migrations has a file
 make evals        every eval set against recorded fixtures once evals/ has a set
-make evals-affected   the sets a change since main can move (tools/affected) — iteration, never evidence
+make evals-affected   the sets a change since main can move (tools/affected) — iteration, never evidence;
+                      grader floors judged, latency and cost budgets reported only (D-065)
 make security     pip-audit on the exported lock · gitleaks · licences
 make selftest     every check red on its plant, one line per check
 make verify       lint · api-check · ledgers-check · test · coverage-check · storage · evals · security · selftest   (= CI)
@@ -125,7 +127,7 @@ make ci-cold      the same with the image's cache volumes dropped first (the col
 make stamp-check  whether this tree, in this image, has a green run younger than a day (what pre-push asks)
 make ci-image     build Dockerfile.ci (the pinned base with make, git, curl and uv baked in) and print its local id;
                   nothing is pushed, and the pipeline does not use it until the image has a registry (Q-018)
-make verify-fast  lint-fast · evals-affected · gitleaks on the staged tree                          (= pre-commit)
+make verify-fast  tools/precommit.py on the staged set · gitleaks on the staged tree               (= pre-commit)
 make image        build the runtime image · make image-scan: trivy on it (release candidate)
 make check        catalyst-ai check: toolchain agreement and settings
 make record · make new-capability   built with the first adapter and the golden capability

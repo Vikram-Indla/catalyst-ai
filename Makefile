@@ -125,7 +125,8 @@ verify-checks:
 	$(MAKE) --no-print-directory verify-docs
 	@echo "VERIFY-CHECKS GREEN"
 
-verify-fast: lint-fast evals-affected
+verify-fast:
+	$(RUN) python -m tools.precommit
 	gitleaks protect --staged --no-banner --redact
 	@echo "VERIFY-FAST GREEN (iteration, not evidence: make ci is the evidence)"
 
