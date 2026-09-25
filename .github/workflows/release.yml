@@ -1,0 +1,19 @@
+name: release
+on:
+  push:
+    branches: [main]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_REGISTRY: ${{ vars.RELEASE_REGISTRY }}
+      RELEASE_LOCATION: ${{ vars.RELEASE_LOCATION }}
+      RELEASE_WIF_PROVIDER: ${{ vars.RELEASE_WIF_PROVIDER }}
+      RELEASE_SERVICE_ACCOUNT: ${{ vars.RELEASE_SERVICE_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install uv==0.12.16
+      - run: make release RELEASE_FLAGS=--print

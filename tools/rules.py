@@ -248,6 +248,21 @@ CI_REGISTRY = "ghcr.io"
 CI_IMAGE_LABEL = "org.catalyst-ai.dockerfile-sha256"
 CI_IMAGE_BUILT_FROM: str | None = None
 
+RELEASE_WORKFLOW = WORKFLOWS / "release.yml"
+RELEASE_JOB = "release"
+RELEASE_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
+RELEASE_PERMISSIONS = {"contents": "read", "id-token": "write"}
+RELEASE_JOB_ENV = {
+    name: "${{ vars." + name + " }}"
+    for name in (
+        "RELEASE_REGISTRY",
+        "RELEASE_LOCATION",
+        "RELEASE_WIF_PROVIDER",
+        "RELEASE_SERVICE_ACCOUNT",
+    )
+}
+RELEASE_ALLOWED_RUNS = (CI_IMAGE_SETUP, "make release RELEASE_FLAGS=--print")
+
 CI_ALLOWED_USES = ("actions/checkout@v4",)
 CI_SETUP = (
     "apt-get update && apt-get install -y --no-install-recommends make git curl ca-certificates"

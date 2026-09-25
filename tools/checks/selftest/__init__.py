@@ -15,19 +15,23 @@ from tools.checks import (
     commits,
     commitsize,
     coverage,
+    deployment,
     deprecations,
     deps,
     evals,
     flags,
     gate,
+    gitmount,
     images,
     invariants,
     journeys,
     latency,
     licenses,
+    localrun,
     nightly_job,
     openapi,
     prclass,
+    release_job,
     residency,
     sessions,
     vocabulary,
@@ -36,6 +40,13 @@ from tools.checks.gate import Violation
 from tools.checks.gitinfo import Commit
 
 PLANTS = Path(__file__).parent / "plants"
+BAD_MANIFEST = (
+    "kind: Service\nspec:\n  template:\n    spec:\n      containers:\n"
+    "        - image: registry/catalyst-ai:latest\n          env:\n"
+    "            - name: CATALYST_AI_PROVIDER_VERTEX_LOCATION\n              value: us-central1\n"
+    "            - name: CATALYST_AI_DATABASE_URL\n              value: postgresql://u:p@h/d\n"
+    "          livenessProbe:\n            httpGet:\n              path: /healthz\n"
+)
 FAR_PAST = date(2020, 1, 1)
 LOW_COVERAGE = {
     "files": {"src/catalyst_ai/config/a.py": {"summary": {"percent_covered": 50.0}}},
@@ -80,6 +91,7 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
         ci.check("      - run: echo hi\n", "w")
         + ci_image_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w")
         + nightly_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w", {})
+        + release_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w")
     ),
     "images": lambda: (
         images.check("FROM python:3.12\n", "CI_IMAGE := python:3.12\n", "")
@@ -103,6 +115,12 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
         "| D-001 | 2026-01-01 | lead (proposed) | RULE-005 | x |",
         "gen: a mixed commit",
     ),
+    "localrun": lambda: (
+        localrun.env_violations("DB_PASSWORD=" + "hunter2\n# API_TOKEN=abc\n", "w")
+        + localrun.port_violations('    ports:\n      - "5433:5432"\n', "w")
+    ),
+    "gitmount": lambda: gitmount.check('docker run -v "$(G)":/gitcommon -e GIT_DIR=x img\n', "w"),
+    "deployment": lambda: deployment.check({"deploy/run/w.yaml": BAD_MANIFEST}),
     "invariants": lambda: invariants.check(BAD_REGISTRY, set(), set(), "w"),
     "evals": lambda: (
         [Violation("w", 1, k) for k in evals.loosened({"a": 0.8}, {"a": 0.7}, "a: 0.7")]

@@ -57,6 +57,9 @@ CHECKS = (
     "prclass",
     "commitclass",
     "commitsize",
+    "localrun",
+    "gitmount",
+    "deployment",
     "invariants",
     "mypy_overrides",
     "capabilities",
@@ -86,6 +89,9 @@ FAST = frozenset(
         "vocabulary",
         "commitclass",
         "commitsize",
+        "localrun",
+        "gitmount",
+        "deployment",
     }
 )
 
