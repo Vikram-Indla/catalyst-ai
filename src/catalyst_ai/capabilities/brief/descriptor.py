@@ -12,5 +12,5 @@ timeout_ms = 15_000
 cache_ttl_seconds = 900
 temperature = 0.2
 max_output_tokens = 2_000
-kill_switch = "CATALYST_AI_CAPABILITY_BRIEF_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_BRIEF__ENABLED"
 retires = ("alignment-story",)

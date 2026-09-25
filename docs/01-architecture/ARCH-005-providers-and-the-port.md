@@ -45,7 +45,7 @@ the capability never sees:
 | Fault injection | a test-only mode that fails, delays or truncates on demand, for the outage rehearsals runbooks name |
 
 Configuration selects an **alias**, never a model id: `MODEL_TEXT_ALIAS` (and a capability's
-own `CAPABILITY_<NAME>_MODEL_ALIAS`) carry one of `text-default`, `text-fast`, `text-long`,
+own `CAPABILITY_<NAME>__MODEL_ALIAS`) carry one of `text-default`, `text-fast`, `text-long`,
 and the register resolves it to the model and its price. An alias outside that vocabulary
 fails at settings load rather than at the first call, and no environment can reach a model
 the register has not priced (`D-040`). `embed-default` and `grader-default` are not

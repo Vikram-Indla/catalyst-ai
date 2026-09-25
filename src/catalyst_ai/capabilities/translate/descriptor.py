@@ -12,5 +12,5 @@ timeout_ms = 15_000
 cache_ttl_seconds = 86_400
 temperature = 0.1
 max_output_tokens = 8_000
-kill_switch = "CATALYST_AI_CAPABILITY_TRANSLATE_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_TRANSLATE__ENABLED"
 retires = ("ai-translate-field", "ai-translate-title", "ai-improve-story mode translate_text")

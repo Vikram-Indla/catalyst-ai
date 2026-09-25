@@ -6,7 +6,7 @@ capability's own alerts stop firing because no call reaches the provider.
 
 ## The mechanism
 
-Every capability has `CATALYST_AI_CAPABILITY_<NAME>_ENABLED`. Off, the door refuses before any
+Every capability has `CATALYST_AI_CAPABILITY_<NAME>__ENABLED`. Off, the door refuses before any
 retrieval or provider call with `ai.capability.disabled` (503); the backend surfaces the feature
 as unavailable and every other capability is untouched. The switch is read from configuration at
 process start, so **turning it takes a restart of the service, not a deploy**: the image, the
@@ -17,7 +17,7 @@ for a knob turned once a quarter.
 ## Turning one off
 
 ```
-CATALYST_AI_CAPABILITY_SUMMARIZE_ENABLED=false   # in the deployment's environment
+CATALYST_AI_CAPABILITY_SUMMARIZE__ENABLED=false   # in the deployment's environment
 ```
 then restart the API and the worker. Check:
 

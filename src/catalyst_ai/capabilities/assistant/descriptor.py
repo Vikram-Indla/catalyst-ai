@@ -12,5 +12,5 @@ timeout_ms = 20_000
 cache_ttl_seconds = 300
 temperature = 0.3
 max_output_tokens = 4_000
-kill_switch = "CATALYST_AI_CAPABILITY_ASSISTANT_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_ASSISTANT__ENABLED"
 retires = ("caty-chat", "ai-admin-assistant", "ai-tm-assist")

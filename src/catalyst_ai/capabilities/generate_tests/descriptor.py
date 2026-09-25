@@ -12,5 +12,5 @@ timeout_ms = 20_000
 cache_ttl_seconds = 3_600
 temperature = 0.3
 max_output_tokens = 8_000
-kill_switch = "CATALYST_AI_CAPABILITY_GENERATE_TESTS_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_GENERATE_TESTS__ENABLED"
 retires = ("ai-generate-story-test-cases", "ai-generate-test-artefacts")

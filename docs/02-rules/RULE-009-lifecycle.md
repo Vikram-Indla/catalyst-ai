@@ -19,7 +19,7 @@ a prompt version bump without a capability version bump.
 
 ## §2 The kill switch
 
-Every capability has `CATALYST_AI_CAPABILITY_<NAME>_ENABLED` in the settings tree, default
+Every capability has `CATALYST_AI_CAPABILITY_<NAME>__ENABLED` in the settings tree, default
 `true`; `false` makes stage 2 return `ai.capability.disabled` before any provider call, cache
 read or index query. The runbook line says what the backend shows. A capability without the
 setting fails `tools/checks/capabilities`; the contract test asserts the switch.

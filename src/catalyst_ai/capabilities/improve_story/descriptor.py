@@ -12,5 +12,5 @@ timeout_ms = 10_000
 cache_ttl_seconds = 3_600
 temperature = 0.3
 max_output_tokens = 3_000
-kill_switch = "CATALYST_AI_CAPABILITY_IMPROVE_STORY_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_IMPROVE_STORY__ENABLED"
 retires = ("ai-improve-story", "ai-improve-comment")

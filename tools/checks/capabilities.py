@@ -73,7 +73,7 @@ def check(descriptor: Descriptor, eval_files: set[str], settings: set[str]) -> l
             violations.append(Violation(descriptor.path, 1, f"no evals/{name}/{file}"))
     if f"capability_{snake}" not in settings:
         violations.append(Violation(descriptor.path, 1, f"no settings row capability_{snake}"))
-    expected_switch = f"CATALYST_AI_CAPABILITY_{snake.upper()}_ENABLED"
+    expected_switch = f"CATALYST_AI_CAPABILITY_{snake.upper()}__ENABLED"
     if values.get("kill_switch") != expected_switch:
         violations.append(Violation(descriptor.path, 1, f"kill_switch must be {expected_switch}"))
     timeout = values.get("timeout_ms")

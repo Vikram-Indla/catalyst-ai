@@ -12,5 +12,5 @@ timeout_ms = 10_000
 cache_ttl_seconds = 3_600
 temperature = 0.1
 max_output_tokens = 600
-kill_switch = "CATALYST_AI_CAPABILITY_UNFURL_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_UNFURL__ENABLED"
 retires = ("chat-unfurl",)

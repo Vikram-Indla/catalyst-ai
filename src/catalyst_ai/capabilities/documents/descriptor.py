@@ -12,7 +12,7 @@ timeout_ms = 20_000
 cache_ttl_seconds = 600
 temperature = 0.2
 max_output_tokens = 6_000
-kill_switch = "CATALYST_AI_CAPABILITY_DOCUMENTS_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_DOCUMENTS__ENABLED"
 retires = (
     "kb-train",
     "folio-ai-search",

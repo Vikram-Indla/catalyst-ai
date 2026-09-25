@@ -12,5 +12,5 @@ timeout_ms = 20_000
 cache_ttl_seconds = 900
 temperature = 0.3
 max_output_tokens = 6_000
-kill_switch = "CATALYST_AI_CAPABILITY_POST_MORTEM_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_POST_MORTEM__ENABLED"
 retires = ("ai-post-mortem",)

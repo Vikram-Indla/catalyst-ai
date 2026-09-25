@@ -12,5 +12,5 @@ timeout_ms = 20_000
 cache_ttl_seconds = 3_600
 temperature = 0.4
 max_output_tokens = 6_000
-kill_switch = "CATALYST_AI_CAPABILITY_GENERATE_CHILDREN_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_GENERATE_CHILDREN__ENABLED"
 retires = ("ai-generate-stories", "ai-generate-epics", "ai-suggest-children")

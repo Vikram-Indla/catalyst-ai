@@ -12,5 +12,5 @@ timeout_ms = 10_000
 cache_ttl_seconds = 600
 temperature = 0.0
 max_output_tokens = 400
-kill_switch = "CATALYST_AI_CAPABILITY_INTERPRET_QUERY_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_INTERPRET_QUERY__ENABLED"
 retires = ("ai-search-issues",)

@@ -12,5 +12,5 @@ timeout_ms = 20_000
 cache_ttl_seconds = 900
 temperature = 0.3
 max_output_tokens = 1_500
-kill_switch = "CATALYST_AI_CAPABILITY_SUMMARIZE_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_SUMMARIZE__ENABLED"
 retires = ("summarize-comments", "chat-summarize")

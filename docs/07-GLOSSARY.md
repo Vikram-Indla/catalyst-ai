@@ -31,7 +31,7 @@ organisation, project), this service uses that word and never a synonym.
 | **the door** | stage 2: where data classes, size, the scanner, the switch and the cap are enforced | guard, middleware |
 | **scanner** | `platform/safety`: the input scanner (secrets, control sequences) and the output scanner (foreign ids, secrets, URLs) | filter, moderation |
 | **degradation** | the documented error the backend receives when a capability cannot run | fallback (implies a substitute answer — there is none) |
-| **kill switch** | `CAPABILITY_<NAME>_ENABLED=false` | feature flag |
+| **kill switch** | `CAPABILITY_<NAME>__ENABLED=false` | feature flag |
 | **job** | a long capability run the backend polls (`ADR-007`) | task, background process |
 | **the job line** | 20 s: synchronous below, a job above | — |
 | **corpus** | a named set of things the service embeds for one tenant (`work_items`, `pages`, `documents`, `knowledge`) | index (that is the physical structure), collection |

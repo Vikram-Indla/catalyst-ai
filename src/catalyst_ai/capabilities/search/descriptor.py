@@ -10,6 +10,6 @@ p95_latency_ms = 800
 p95_cost_micros = 400
 timeout_ms = 10_000
 cache_ttl_seconds = 0
-kill_switch = "CATALYST_AI_CAPABILITY_SEARCH_ENABLED"
+kill_switch = "CATALYST_AI_CAPABILITY_SEARCH__ENABLED"
 retires = ("ai-similar-items", "ai-search-issues")
 corpus_default = "work_items"
