@@ -17,15 +17,20 @@ PYTEST_ITERATE := --import-mode=importlib --disable-socket --allow-hosts=127.0.0
 WORKDIR_HOST := $(shell pwd -W 2>/dev/null || pwd)
 GIT_COMMON_HOST := $(shell cd "$$(git rev-parse --git-common-dir)" && (pwd -W 2>/dev/null || pwd))
 GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]).replace(chr(92), chr(47)))" "$$(git rev-parse --absolute-git-dir)" "$$(git rev-parse --git-common-dir)")
+# The image reads git and never writes it: the common directory is mounted read-only and git takes
+# no optional lock, so nothing a step runs in there can change the repository's config or index.
+# The stamp is written on the host, after the container has exited.
+CI_GIT = -v "$(GIT_COMMON_HOST)":/gitcommon:ro -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) \
+	-e GIT_WORK_TREE=/work -e GIT_OPTIONAL_LOCKS=0
 
-.PHONY: budgets-check coverage-check image image-scan scan-tools tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load nightly nightly-fuzz nightly-repeat evals evals-affected security selftest verify verify-fast verify-docs verify-checks ci ci-scoped ci-aware ci-cold ci-image ci-image-push stamp-check serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan scan-tools tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load nightly nightly-fuzz nightly-repeat evals evals-affected security selftest verify verify-fast verify-docs verify-checks ci ci-scoped ci-aware ci-cold ci-image ci-image-push stamp-check release alert-policies serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
 	$(RUN) python -m tools.install
 
 hooks:
-	git config core.hooksPath .githooks
+	@test "$$(git config --get core.hooksPath)" = ".githooks" || git config core.hooksPath .githooks
 	@echo "hooks: core.hooksPath -> .githooks"
 
 fmt:
@@ -130,7 +135,7 @@ ci:
 	$(RUN) python -m tools.ci_postgres up
 	status=0; MSYS_NO_PATHCONV=1 docker run --rm -t $$($(RUN) python -m tools.ci_postgres args) \
 		-v "$(WORKDIR_HOST)":/work -w /work $(CI_VOLUMES) $(CI_CACHES) \
-		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
+		$(CI_GIT) \
 		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
 		-e UV_OFFLINE=$(CI_UV_OFFLINE) $(CI_LOCAL_IMAGE) bash -c "$$($(RUN) python -m tools.ci_steps --prebuilt)" || status=$$?; \
 	$(RUN) python -m tools.ci_postgres down; exit $$status
@@ -141,7 +146,7 @@ ci-scoped:
 	$(RUN) python -m tools.stamp begin
 	MSYS_NO_PATHCONV=1 docker run --rm -t \
 		-v "$(WORKDIR_HOST)":/work -w /work $(CI_VOLUMES) $(CI_CACHES) \
-		-v "$(GIT_COMMON_HOST)":/gitcommon -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) -e GIT_WORK_TREE=/work \
+		$(CI_GIT) \
 		-e HOME=/tmp -e UV_CACHE_DIR=/tmp/uv-cache -e UV_PROJECT_ENVIRONMENT=/tmp/venv -e UV_LINK_MODE=copy \
 		-e UV_OFFLINE=$(CI_UV_OFFLINE) $(CI_LOCAL_IMAGE) bash -c "make tools && make $(TARGETS)"
 	$(RUN) python -m tools.stamp write --image $(CI_LOCAL_IMAGE) --scope $(SCOPE)
@@ -161,6 +166,14 @@ ci-image-push:
 
 stamp-check:
 	@$(RUN) python -m tools.stamp check --image $(CI_LOCAL_IMAGE)
+
+release:
+	$(RUN) python -m tools.release $(RELEASE_FLAGS)
+
+# Print, never run: the command that turns ops/alerts.yaml into Cloud Monitoring alerting policies,
+# names and thresholds unchanged, once the metrics sidecar writes the numbers (the lead runs it).
+alert-policies:
+	@echo gcloud monitoring policies migrate --policies-from-prometheus-alert-rules-yaml=ops/alerts.yaml
 
 serve:
 	$(RUN) catalyst-ai serve
