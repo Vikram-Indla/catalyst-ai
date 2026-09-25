@@ -1,0 +1,14 @@
+# What the metrics sidecar scrapes: the service's own /metrics on its ops port, inside the instance.
+# Nothing here is secret; it reaches the sidecar as the Secret Manager secret
+# `catalyst-ai-run-gmp-config` (the platform's mechanism for this file), mounted at
+# /etc/rungmp/config.yaml. The metric names and labels are the service's own; the platform adds
+# only its resource labels.
+apiVersion: monitoring.googleapis.com/v1beta
+kind: RunMonitoring
+metadata:
+  name: catalyst-ai
+spec:
+  endpoints:
+    - port: 9091
+      path: /metrics
+      interval: 30s
