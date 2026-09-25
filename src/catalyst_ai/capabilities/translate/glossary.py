@@ -2,8 +2,12 @@
 
 Matching tolerates what a language does to a term without changing it: case in Latin script, and
 in Arabic the diacritics, the tatweel, the forms of alef and the clitics a word takes (a term
-inside "وبطاقة المشروع" is still "بطاقة المشروع"). A source the glossary lists with two different
-targets is ambiguous: it is reported and never enforced, since picking one would be a guess.
+inside "وبطاقة المشروع" is still "بطاقة المشروع", and "للمحور" is "ل" and "المحور"). A term is a
+whole word or words: it matches neither inside a longer Latin word ("Period" is not in "periodic")
+nor as a part of a longer term the text names ("Objective" is not checked inside "Project
+Objective"), and a Latin term is found in its plural. A source the glossary lists with two
+different targets is ambiguous: it is reported and never enforced, since picking one would be a
+guess.
 """
 
 import re
@@ -14,18 +18,37 @@ from catalyst_ai.contract.translate import GlossaryConflict, GlossaryEntry
 DIACRITICS = re.compile(r"[ً-ْٰـ]")
 ALEFS = str.maketrans({"أ": "ا", "إ": "ا", "آ": "ا", "ى": "ي"})
 SPACES = re.compile(r"\s+")
+CONTRACTED_ARTICLE = re.compile(r"(^|[\sو])لل")
+CONSUMED = " \x00 "
 AMBIGUOUS: Final = "ambiguous_glossary"
 NOT_RENDERED: Final = "term_not_rendered"
 
 
 def normalise(text: str) -> str:
     """Return the text as terms are compared: casefolded, Arabic marks and alef forms unified."""
-    return SPACES.sub(" ", DIACRITICS.sub("", text).translate(ALEFS)).casefold()
+    unified = SPACES.sub(" ", DIACRITICS.sub("", text).translate(ALEFS)).casefold()
+    return CONTRACTED_ARTICLE.sub(r"\1لال", unified)
+
+
+def _pattern(normalised_term: str) -> re.Pattern[str]:
+    return re.compile(rf"(?<![a-z0-9]){re.escape(normalised_term)}(?:e?s)?(?![a-z0-9])")
 
 
 def contains(text: str, term: str) -> bool:
-    """Return whether the term occurs in the text, as the glossary compares them."""
-    return normalise(term) in normalise(text)
+    """Return whether the term occurs in the text as a whole word, as the glossary compares them."""
+    return _pattern(normalise(term)).search(normalise(text)) is not None
+
+
+def named(glossary: list[GlossaryEntry], text: str) -> set[str]:
+    """Return the normalised sources the text names, the longest first, none inside another."""
+    remaining = normalise(text)
+    found: set[str] = set()
+    for key in sorted({normalise(entry.source) for entry in glossary}, key=len, reverse=True):
+        pattern = _pattern(key)
+        if pattern.search(remaining):
+            found.add(key)
+            remaining = pattern.sub(CONSUMED, remaining)
+    return found
 
 
 def ambiguous_sources(glossary: list[GlossaryEntry]) -> set[str]:
@@ -53,9 +76,10 @@ def enforce(
     applied: list[str] = []
     conflicts: list[GlossaryConflict] = []
     seen: set[str] = set()
+    in_text = named(glossary, source_text)
     for entry in glossary:
         key = normalise(entry.source)
-        if key in seen or not contains(source_text, entry.source):
+        if key in seen or key not in in_text:
             continue
         seen.add(key)
         if key in ambiguous:

@@ -4,6 +4,7 @@ from catalyst_ai.capabilities.translate.glossary import (
     ambiguous_sources,
     contains,
     enforce,
+    named,
     normalise,
     render,
 )
@@ -45,3 +46,27 @@ def test_enforced_terms_are_named_and_the_rest_reported_never_guessed() -> None:
 
 def test_a_term_absent_from_the_text_is_neither_applied_nor_reported() -> None:
     assert enforce([CARD], "Nothing governed here.", "لا شيء") == ([], [])
+
+
+def test_a_term_is_a_whole_word_found_in_its_plural_never_inside_a_longer_word() -> None:
+    assert contains("Two Themes were approved", "Theme")
+    assert contains("Every Approval tasks list", "Approval task")
+    assert not contains("A periodic review", "Period")
+    assert not contains("An inactive card", "Active")
+
+
+def test_the_contracted_article_still_carries_the_term() -> None:
+    assert contains("يعود للمحور الاستراتيجي", "المحور الاستراتيجي")
+    assert contains("وللمحور ميثاق", "المحور")
+
+
+def test_a_term_inside_a_longer_term_the_text_names_is_not_checked_again() -> None:
+    objective = GlossaryEntry(source="Objective", target="الهدف")
+    project_objective = GlossaryEntry(source="Project Objective", target="هدف المشروع")
+    text = "Each Project Objective aligns to one Objective."
+    assert named([objective, project_objective], "Each Project Objective aligns.") == {
+        "project objective"
+    }
+    assert named([objective, project_objective], text) == {"project objective", "objective"}
+    applied, conflicts = enforce([objective, project_objective], text, "يتسق هدف المشروع مع الهدف.")
+    assert (applied, conflicts) == (["Objective", "Project Objective"], [])
