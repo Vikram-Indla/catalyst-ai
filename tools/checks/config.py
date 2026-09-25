@@ -13,21 +13,38 @@ ENV_READS = ("os.environ", "os.getenv", "environ.get")
 LEDGER_ROW = re.compile(r"^\| `(?P<name>[A-Z0-9_<>]+)` \|", re.MULTILINE)
 
 
+def _classes(root: Path) -> dict[str, ast.ClassDef]:
+    """Return every class the config package defines, by name."""
+    folder = (root / SETTINGS_FILE).parent
+    found: dict[str, ast.ClassDef] = {}
+    for path in sorted(folder.glob("*.py")) if folder.is_dir() else []:
+        for node in ast.walk(parse(path)):
+            if isinstance(node, ast.ClassDef):
+                found[node.name] = node
+    return found
+
+
+def _own_fields(node: ast.ClassDef) -> set[str]:
+    return {
+        statement.target.id.upper()
+        for statement in node.body
+        if isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and statement.target.id != "model_config"
+    }
+
+
 def settings_fields(root: Path) -> set[str]:
-    """Return the upper-cased field names of the Settings class."""
-    path = root / SETTINGS_FILE
-    if not path.exists():
-        return set()
-    for node in ast.walk(parse(path)):
-        if isinstance(node, ast.ClassDef) and node.name == SETTINGS_CLASS:
-            return {
-                statement.target.id.upper()
-                for statement in node.body
-                if isinstance(statement, ast.AnnAssign)
-                and isinstance(statement.target, ast.Name)
-                and statement.target.id != "model_config"
-            }
-    return set()
+    """Return the upper-cased field names of the Settings class, its config-package bases' too."""
+    classes = _classes(root)
+    fields: set[str] = set()
+    pending = [SETTINGS_CLASS]
+    while pending:
+        node = classes.get(pending.pop())
+        if node is not None:
+            fields |= _own_fields(node)
+            pending += [base.id for base in node.bases if isinstance(base, ast.Name)]
+    return fields
 
 
 def ledger_rows(text: str) -> set[str]:

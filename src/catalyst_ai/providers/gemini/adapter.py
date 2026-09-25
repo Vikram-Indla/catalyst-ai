@@ -81,6 +81,7 @@ class GeminiProvider:
         policy: RetryPolicy | None = None,
     ) -> None:
         """Bind the settings, the client (its transport is the recording seam) and the clock."""
+        aliases.check_pins(settings)
         self._settings = settings
         self._client = client
         self._clock = clock

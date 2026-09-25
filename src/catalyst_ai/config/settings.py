@@ -19,6 +19,7 @@ from pydantic import (
 from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
 
 from catalyst_ai.config.deployed import start_problem
+from catalyst_ai.config.pins import ModelPins
 from catalyst_ai.config.residency import DEVELOPMENT_LOCATION, regional_endpoint
 from catalyst_ai.config.unknown import refuse_unknown
 from catalyst_ai.contract.models import TextAlias, available
@@ -114,7 +115,7 @@ class CapabilitySettings(BaseModel):
     ] = None
 
 
-class Settings(BaseSettings):
+class Settings(BaseSettings, ModelPins):
     """Hold the process configuration, read once at startup; the config ledger mirrors it."""
 
     model_config = SettingsConfigDict(

@@ -5,7 +5,7 @@ from pydantic import SecretStr, ValidationError
 
 from catalyst_ai.config import CapabilitySettings, Environment, Settings
 from catalyst_ai.contract.models import ModelAlias, TextAlias
-from catalyst_ai.providers.gemini.aliases import resolve, selected
+from catalyst_ai.providers.gemini.aliases import UnpricedModelError, check_pins, resolve, selected
 from catalyst_ai.providers.gemini.models import EMBEDDING, FLASH
 from tools import origin
 
@@ -64,3 +64,38 @@ def test_an_alias_outside_the_vocabulary_fails_at_settings_load() -> None:
         _settings(
             capability_summarize=CapabilitySettings.model_validate({"model_alias": "text-cheap"})
         )
+
+
+def test_each_alias_can_be_pinned_to_a_priced_id_and_unset_keeps_the_register_row() -> None:
+    pinned = _settings(
+        model_text_default=FLASH.model_id,
+        model_text_fast=FLASH.model_id,
+        model_grader_default=FLASH.model_id,
+        model_embed_default=EMBEDDING.model_id,
+    )
+    check_pins(pinned)
+    assert resolve(ModelAlias.TEXT_DEFAULT, pinned) == FLASH
+    assert resolve(ModelAlias.TEXT_FAST, pinned) == FLASH
+    assert resolve(ModelAlias.GRADER_DEFAULT, pinned) == FLASH
+    assert resolve(ModelAlias.EMBED_DEFAULT, pinned) == EMBEDDING
+    check_pins(_settings())
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("model_text_default", f"{FLASH.model_id}-preview"),
+        ("model_text_fast", "flash-latest"),
+        ("model_grader_default", "another-provider-model"),
+        ("model_embed_default", FLASH.model_id),
+        ("model_text_default", EMBEDDING.model_id),
+    ],
+)
+def test_an_id_the_register_does_not_price_refuses_the_start_by_name(
+    field: str, value: str
+) -> None:
+    with pytest.raises(UnpricedModelError) as refused:
+        check_pins(_settings(**{field: value}))
+    message = str(refused.value)
+    assert f"CATALYST_AI_{field.upper()}" in message
+    assert "is not a priced model" in message

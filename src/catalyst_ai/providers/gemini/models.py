@@ -67,3 +67,5 @@ REGISTER = MappingProxyType(
     }
 )
 KNOWN_IDS = MappingProxyType({spec.model_id: spec for spec in (FLASH, EMBEDDING)})
+TEXT_IDS = frozenset({FLASH.model_id})
+EMBEDDING_IDS = frozenset({EMBEDDING.model_id})

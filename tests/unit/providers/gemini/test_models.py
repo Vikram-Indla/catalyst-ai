@@ -3,9 +3,11 @@
 from catalyst_ai.contract.models import UNAVAILABLE
 from catalyst_ai.providers.gemini.models import (
     EMBEDDING,
+    EMBEDDING_IDS,
     FLASH,
     KNOWN_IDS,
     REGISTER,
+    TEXT_IDS,
     UNVERIFIED_IN_REGION,
     ModelSpec,
 )
@@ -43,3 +45,10 @@ def test_the_index_keeps_its_model() -> None:
 
 def test_every_row_stays_unverified_in_region_until_the_model_list_is_read() -> None:
     assert {spec.residency for spec in REGISTER.values()} == {UNVERIFIED_IN_REGION}
+
+
+def test_the_ids_an_environment_may_pin_are_exactly_the_registers_priced_ids() -> None:
+    assert frozenset(KNOWN_IDS) == TEXT_IDS | EMBEDDING_IDS
+    assert not TEXT_IDS & EMBEDDING_IDS
+    assert {REGISTER[ModelAlias.TEXT_DEFAULT].model_id} <= TEXT_IDS
+    assert {REGISTER[ModelAlias.EMBED_DEFAULT].model_id} <= EMBEDDING_IDS

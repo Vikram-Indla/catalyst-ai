@@ -21,6 +21,7 @@ from catalyst_ai.platform.logging import configure_logging
 from catalyst_ai.platform.observability import SecurityCounters
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresStorage, StorageUnavailableError, migrate
+from catalyst_ai.providers.gemini.aliases import UnpricedModelError, check_pins
 from catalyst_ai.retrieval import WORK_ITEMS, reembed, retention
 
 TOOL_VERSIONS = Path(".tool-versions")
@@ -97,7 +98,13 @@ def check(root: Path, *, load: bool) -> int:
         try:
             settings = load_settings()
             KeyRegistry.from_config(settings.auth_public_keys)
-        except (ValidationError, PublicKeyConfigError, UnknownSettingsError) as error:
+            check_pins(settings)
+        except (
+            ValidationError,
+            PublicKeyConfigError,
+            UnknownSettingsError,
+            UnpricedModelError,
+        ) as error:
             print(f"check: settings invalid\n{error}")
             return EXIT_FAIL
         print("check: settings valid; the backend's public keys load")
@@ -220,7 +227,8 @@ def main(argv: list[str] | None = None) -> int:
 def _with_settings(command: str) -> int:
     try:
         settings = load_settings()
-    except UnknownSettingsError as error:
+        check_pins(settings)
+    except (UnknownSettingsError, UnpricedModelError) as error:
         print(f"{command}: {error}")
         return EXIT_FAIL
     configure_logging(settings.log_level.value)
