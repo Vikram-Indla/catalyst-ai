@@ -2,6 +2,7 @@
 
 import base64
 import binascii
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Annotated, Self
@@ -15,13 +16,15 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, EnvSettingsSource, SettingsConfigDict
 
 from catalyst_ai.config.deployed import start_problem
 from catalyst_ai.config.residency import DEVELOPMENT_LOCATION, regional_endpoint
+from catalyst_ai.config.unknown import refuse_unknown
 from catalyst_ai.contract.models import TextAlias, available
 
 ENV_PREFIX = "CATALYST_AI_"
+NESTING = "__"
 MIN_KEYS = 1
 MAX_KEYS = 2
 PUBLIC_KEY_BYTES = 32
@@ -115,7 +118,7 @@ class Settings(BaseSettings):
     """Hold the process configuration, read once at startup; the config ledger mirrors it."""
 
     model_config = SettingsConfigDict(
-        env_prefix=ENV_PREFIX, env_nested_delimiter="__", extra="forbid", frozen=True
+        env_prefix=ENV_PREFIX, env_nested_delimiter=NESTING, extra="forbid", frozen=True
     )
 
     environment: Annotated[
@@ -157,6 +160,10 @@ class Settings(BaseSettings):
         Field(gt=0, description="PUBLIC · In-flight requests may finish after SIGTERM"),
     ] = 10
     log_level: Annotated[LogLevel, Field(description="PUBLIC · Minimum log level")] = LogLevel.INFO
+    capabilities_enabled: Annotated[
+        bool,
+        Field(description="PUBLIC · Every capability at once; off, each refuses as disabled"),
+    ] = True
     otel_exporter_endpoint: Annotated[
         str | None,
         Field(description="INTERNAL · Where traces and metrics go; required in production"),
@@ -320,6 +327,8 @@ class Settings(BaseSettings):
         return self.provider_gemini_base_url or regional_endpoint(self.provider_location())
 
 
-def load_settings() -> Settings:
-    """Read the environment once; a missing or invalid variable stops the process."""
+def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
+    """Read the environment once; a missing, invalid or unknown variable stops the process."""
+    read = EnvSettingsSource(Settings).env_vars if environ is None else environ
+    refuse_unknown(read, Settings, ENV_PREFIX, NESTING)
     return Settings()  # type: ignore[call-arg]  # pydantic-settings reads the environment

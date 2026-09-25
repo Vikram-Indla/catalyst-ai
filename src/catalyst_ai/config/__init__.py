@@ -8,12 +8,14 @@ from catalyst_ai.config.settings import (
     load_settings,
     parse_public_keys,
 )
+from catalyst_ai.config.unknown import UnknownSettingsError
 
 __all__ = [
     "CapabilitySettings",
     "Environment",
     "PublicKeyEntry",
     "Settings",
+    "UnknownSettingsError",
     "load_settings",
     "parse_public_keys",
 ]

@@ -1,5 +1,7 @@
 """Settings: every validator refuses what it must; the environment is read once."""
 
+import os
+
 import pytest
 from pydantic import SecretStr, ValidationError
 
@@ -161,7 +163,7 @@ def test_load_settings_reads_the_environment(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setenv(f"{ENV_PREFIX}DATABASE_MIGRATE_URL", "postgresql://owner:p@h/d")
     monkeypatch.setenv(f"{ENV_PREFIX}PROVIDER_VERTEX_PROJECT", PROJECT)
     monkeypatch.setenv(f"{ENV_PREFIX}PROVIDER_VERTEX_LOCATION", DEVELOPMENT_LOCATION)
-    assert load_settings().environment is Environment.STAGING
+    assert load_settings(os.environ).environment is Environment.STAGING
 
 
 def test_a_deployed_process_needs_three_logins() -> None:

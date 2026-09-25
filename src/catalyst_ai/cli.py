@@ -14,7 +14,7 @@ from fastapi import FastAPI
 from pydantic import SecretStr, ValidationError
 
 from catalyst_ai.app import create_app, create_ops_app, default_runtime, job_runners
-from catalyst_ai.config import Settings, load_settings
+from catalyst_ai.config import Settings, UnknownSettingsError, load_settings
 from catalyst_ai.platform.auth import KeyRegistry, PublicKeyConfigError
 from catalyst_ai.platform.jobs import Worker
 from catalyst_ai.platform.logging import configure_logging
@@ -97,7 +97,7 @@ def check(root: Path, *, load: bool) -> int:
         try:
             settings = load_settings()
             KeyRegistry.from_config(settings.auth_public_keys)
-        except (ValidationError, PublicKeyConfigError) as error:
+        except (ValidationError, PublicKeyConfigError, UnknownSettingsError) as error:
             print(f"check: settings invalid\n{error}")
             return EXIT_FAIL
         print("check: settings valid; the backend's public keys load")
@@ -218,7 +218,11 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _with_settings(command: str) -> int:
-    settings = load_settings()
+    try:
+        settings = load_settings()
+    except UnknownSettingsError as error:
+        print(f"{command}: {error}")
+        return EXIT_FAIL
     configure_logging(settings.log_level.value)
     try:
         return _run_command(command, settings)
