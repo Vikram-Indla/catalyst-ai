@@ -4927,6 +4927,117 @@ info:
   version: 0.1.0
 openapi: 3.1.0
 paths:
+  /health/live:
+    get:
+      description: Report that the process is up, on the path a platform's probe uses (none ends in `z`).
+      operationId: health.probe_live
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.unverifiable'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: '
+      security: []
+      summary: Probe Live
+      tags:
+      - health
+      x-capability: platform
+      x-capability-version: 0.1.0
+      x-error-codes: []
+  /health/ready:
+    get:
+      description: 'Report readiness as a probe reads it: 200 when ready, 503 with the same checks when
+        not.'
+      operationId: health.probe_ready
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadyResponse'
+          description: Successful Response
+          x-example: see the contract tests
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: validation.invalid_input'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.invalid'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: ai.capability.unknown'
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: internal.error'
+        '503':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: auth.origin.unverifiable'
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+          description: 'The error envelope; codes: '
+      security: []
+      summary: Probe Ready
+      tags:
+      - health
+      x-capability: platform
+      x-capability-version: 0.1.0
+      x-error-codes: []
   /healthz:
     get:
       description: Report that the process is up.
