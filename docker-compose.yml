@@ -4,10 +4,18 @@
 # itself on its first start as a provisioner would (`db/provision/`): the extensions the
 # migrations require, the three logins, and — here only — their development passwords. Each
 # process then logs in as its own: `migrate` the owner, `ai` serve, `worker` the worker.
+#
+# Copy `.env.example` to `.env` first (`env_file` is required: a missing `.env` stops compose with
+# its name rather than starting on guessed settings). Every port is published on 127.0.0.1 only —
+# the database 5434, the API 8090, the ops ports 9091 (ai) and 9092 (worker) — and inside the
+# containers the processes listen on every interface so the mapping reaches them. With no
+# provider credentials the capabilities stay off: /healthz answers 200, /readyz says why not.
 x-database: &database
   CATALYST_AI_DATABASE_URL: postgresql://catalyst_ai_serve:catalyst_ai_serve@db:5432/catalyst_ai
   CATALYST_AI_DATABASE_WORKER_URL: postgresql://catalyst_ai_worker:catalyst_ai_worker@db:5432/catalyst_ai
   CATALYST_AI_DATABASE_MIGRATE_URL: postgresql://catalyst_ai:catalyst_ai@db:5432/catalyst_ai
+  CATALYST_AI_HTTP_ADDR: ":8090"
+  CATALYST_AI_OPS_ADDR: ":9091"
 services:
   db:
     image: pgvector/pgvector:0.8.1-pg17@sha256:3e8b3adfd27b5707128f60956f62a793c3c9326ea8cfaf0eab7adccb5d700b21
@@ -16,7 +24,7 @@ services:
       POSTGRES_PASSWORD: catalyst_ai
       POSTGRES_DB: catalyst_ai
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5434:5432"
     volumes:
       - db:/var/lib/postgresql/data
       - ./db/provision/extensions.sql:/docker-entrypoint-initdb.d/10-extensions.sql:ro
@@ -42,8 +50,8 @@ services:
     env_file: .env
     environment: *database
     ports:
-      - "8090:8090"
-      - "9091:9091"
+      - "127.0.0.1:8090:8090"
+      - "127.0.0.1:9091:9091"
     depends_on:
       db:
         condition: service_healthy
@@ -56,7 +64,7 @@ services:
     env_file: .env
     environment: *database
     ports:
-      - "9092:9091"
+      - "127.0.0.1:9092:9091"
     depends_on:
       db:
         condition: service_healthy
