@@ -1,4 +1,8 @@
-"""Stage 2 for every capability: the switch, the contract version, the scanner, the tenant cap.
+"""Stage 2 for every capability: the switches, the contract version, the scanner, the tenant cap.
+
+The environment's switch (`capabilities_enabled`) comes first, then the capability's own: with the
+first off, every capability refuses `ai.capability.disabled` and nothing else about the service
+changes — health, readiness and the jobs' polling keep answering.
 
 A refusal on the cap is counted under the organisation and the capability, the two labels the
 budget alert names; the error the caller receives carries neither.
@@ -37,6 +41,8 @@ class Door:
 
 def admit(door: Door, runtime: RuntimeContext) -> str:
     """Refuse or admit; return the cache key the run resolves through."""
+    if not runtime.settings.capabilities_enabled:
+        raise Error(ErrorCode.CAPABILITY_DISABLED, "the capabilities are off in this environment")
     if not door.settings.enabled:
         raise Error(ErrorCode.CAPABILITY_DISABLED, f"{door.name} is disabled")
     if door.capability_version.split(".")[0] != door.version.split(".")[0]:
