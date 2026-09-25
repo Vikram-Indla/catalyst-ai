@@ -115,5 +115,6 @@ VERIFY GREEN in catalyst-ai-ci:d06a9811d6b3 — 56 checks · 1189 passed, 99.41%
 ## Commit
 - `build(deploy): Cloud Run manifests for the API, the worker and the migration`
   (the manifests, the Skaffold profile, the change map's `deploy/*` row, this record)
-- `build(gate): the deployment check holds every manifest to its placeholders and secrets`
+- `build(gate): the deployment check holds manifests to placeholders and secrets` (landed shortened
+  from the 86-character line first proposed here; the message check allows 80)
   (the check and its tests; two commits, since together they exceed RULE-005's 400 lines)
