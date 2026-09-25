@@ -29,6 +29,8 @@ MS_PER_SECOND = 1000
 UNJUDGED = {
     "health.live": "a probe; no capability runs behind it",
     "health.ready": "a probe; no capability runs behind it",
+    "health.probe_live": "a probe; no capability runs behind it",
+    "health.probe_ready": "a probe; no capability runs behind it",
     "jobs.get": "a poll of a stored row; no capability runs behind it",
     "documents.ingest_job": "answers 202 once the row is stored; the work is the job's",
 }

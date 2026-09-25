@@ -29,7 +29,7 @@ from catalyst_ai.platform.observability.security import (
     security_event,
 )
 
-EXEMPT_PATHS = frozenset({"/healthz", "/readyz"})
+EXEMPT_PATHS = frozenset({"/healthz", "/readyz", "/health/live", "/health/ready"})
 CAPABILITY_EXTRA = "x-capability"
 ORGANIZATION_FIELD = "organization_id"
 ENVELOPE_STATE = "envelope"

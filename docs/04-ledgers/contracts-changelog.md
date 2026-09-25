@@ -17,6 +17,11 @@ Entry template:
 
 ---
 
+## 2026-09-24 · AI-036 · platform — health on the paths a platform's probe uses
+**Kind:** CHANGE, additive (`health.probe_live` `GET /health/live`, `health.probe_ready` `GET /health/ready`; oasdiff against main: no breaking change, no warning)
+**What:** the same liveness and readiness as `health.live` / `health.ready`, on paths that do not end in `z` (Cloud Run reserves some such paths and recommends avoiding all of them). `health.probe_ready` answers **503** with the same `ReadyResponse` when not ready, because a probe reads the status code, not the body; `/readyz` keeps answering 200 with the verdict in the body, for local use. Both are exempt from the envelope, on the contract port and on the ops port. `X-Serverless-Authorization`, the platform's identity header, is never read as the envelope: only `Authorization` is.
+**Backend must:** nothing. For the deployment: probes point at `/health/live` (liveness) and `/health/ready` (startup, readiness).
+
 ## 2026-09-24 · AI-034 · translate — Arabic drafts of record fields, as a job
 **Kind:** CHANGE, additive (a new operation, `translate.drafts_job`, `POST /v1/translate/drafts:jobs` → `202` + `Location`; `translate` v1.2.0; oasdiff against main: no breaking change, no warning)
 **What:** `DraftsRequest {items[1..200] {record_ref ≤ 200, field (`^[a-z][A-Za-z0-9_]{0,63}$`), en ≤ 20 000, may be empty}, glossary[] ≤ 100 (as `translate`), glossary_version ≤ 64}`, signed with a job window like every job. The door runs at submission over every item (a `RESTRICTED` text refuses the batch before anything is stored). The poll's result is `DraftsResponse` (published under `x-job-result`): `drafts[] {key (sha256 of record_ref, field, sha256(en), glossary_version), record_ref, field, ar (Latin digits), status: "machine_draft" (the only value), glossary_hits[], unresolved[] ("ambiguous_glossary: …", "term_not_rendered: …", "fact_not_kept: …", "fact_added: …")}`, `skipped[] {key, record_ref, field, reason: empty | refused, code?}`, `remaining[] {key, record_ref, field, reason: budget_exhausted | provider_unavailable | time_exhausted}`, `progress {total, drafted, skipped, remaining, from_cache}`.

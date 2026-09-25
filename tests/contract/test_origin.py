@@ -2,6 +2,7 @@
 
 import json
 import logging
+from collections.abc import Generator
 from dataclasses import replace
 from uuid import UUID
 
@@ -147,3 +148,34 @@ async def test_a_replay_store_outage_is_a_retryable_refusal_not_a_verdict() -> N
     envelope = ErrorEnvelope.model_validate(response.json())
     assert envelope.error.code is ErrorCode.AUTH_ORIGIN_UNVERIFIABLE
     assert app.state.security.value(ORIGIN_REFUSED, "unverifiable") == 1
+
+
+class _PlatformHeader(httpx.Auth):
+    """Sign as the backend would, then move or add the platform's identity header."""
+
+    def __init__(self, inner: httpx.Auth, *, move: bool) -> None:
+        self._inner = inner
+        self._move = move
+
+    def auth_flow(self, request: httpx.Request) -> Generator[httpx.Request, httpx.Response, None]:
+        signed = next(self._inner.auth_flow(request))
+        if self._move:
+            signed.headers["X-Serverless-Authorization"] = signed.headers.pop("Authorization")
+        else:
+            signed.headers["X-Serverless-Authorization"] = "Bearer eyJhbGciOiJSUzI1NiJ9.e30."
+        yield signed
+
+
+async def test_the_platform_identity_header_is_never_taken_as_the_envelope() -> None:
+    client, app, _ = _app()
+    moved = _PlatformHeader(SigningAuth(capability_of(app), app.state.runtime.clock), move=True)
+    _refused(await client.post(PATH, json=_body(), auth=moved))
+    beside = _PlatformHeader(SigningAuth(capability_of(app), app.state.runtime.clock), move=False)
+    assert (await client.post(PATH, json=_body(), auth=beside)).status_code == 200
+
+
+async def test_the_probe_paths_need_no_proof() -> None:
+    client, app, _ = _app()
+    assert (await client.get("/health/live", auth=unsigned)).status_code == 200
+    assert (await client.get("/health/ready", auth=unsigned)).status_code == 200
+    assert app.state.security.value(ORIGIN_REFUSED) == 0

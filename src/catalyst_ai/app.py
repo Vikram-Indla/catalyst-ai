@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
 
 from catalyst_ai.capabilities.assistant import router as assistant_router
 from catalyst_ai.capabilities.brief import router as brief_router
@@ -126,6 +127,41 @@ async def ready(request: Request) -> ReadyResponse:
     }
     checks.update(_worker_check(request))
     return ReadyResponse(status="ready" if all(checks.values()) else "not_ready", checks=checks)
+
+
+PROBE_EXTRA = MappingProxyType(
+    {
+        "x-capability": PLATFORM_CAPABILITY,
+        "x-capability-version": CONTRACT_VERSION,
+        "x-error-codes": [],
+    }
+)
+NOT_READY = 503
+
+
+@health.get(
+    "/health/live",
+    operation_id="health.probe_live",
+    response_model=LiveResponse,
+    openapi_extra=dict(PROBE_EXTRA),
+)
+async def probe_live() -> LiveResponse:
+    """Report that the process is up, on the path a platform's probe uses (none ends in `z`)."""
+    return await live()
+
+
+@health.get(
+    "/health/ready",
+    operation_id="health.probe_ready",
+    response_model=ReadyResponse,
+    responses={NOT_READY: {"model": ReadyResponse, "description": "not ready; the checks say why"}},
+    openapi_extra=dict(PROBE_EXTRA),
+)
+async def probe_ready(request: Request) -> JSONResponse:
+    """Report readiness as a probe reads it: 200 when ready, 503 with the same checks when not."""
+    verdict = await ready(request)
+    code = 200 if verdict.status == "ready" else NOT_READY
+    return JSONResponse(status_code=code, content=verdict.model_dump(mode="json"))
 
 
 def _worker_check(request: Request) -> dict[str, bool]:

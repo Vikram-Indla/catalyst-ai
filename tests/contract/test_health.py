@@ -65,3 +65,33 @@ async def test_health_ready_stays_red_until_the_provider_credential_is_current()
     ready = ReadyResponse.model_validate(response.json())
     assert ready.status == "not_ready"
     assert ready.checks["provider_credentials"] is False
+
+
+async def test_health_probe_live_answers_on_a_path_that_ends_without_z(
+    client: httpx.AsyncClient,
+) -> None:
+    response = await client.get("/health/live")
+    assert response.status_code == 200
+    assert LiveResponse.model_validate(response.json()).status == "live"
+
+
+async def test_health_probe_ready_answers_200_when_ready(client: httpx.AsyncClient) -> None:
+    response = await client.get("/health/ready")
+    assert response.status_code == 200
+    assert ReadyResponse.model_validate(response.json()).status == "ready"
+
+
+async def test_health_probe_ready_answers_503_with_its_checks_when_not_ready() -> None:
+    settings = make_settings()
+    runtime = replace(
+        make_runtime(ScriptedProvider([""]), settings), credentials_ready=_no_identity
+    )
+    app = create_app(settings, runtime)
+    transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
+    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as bare:
+        probe = await bare.get("/health/ready")
+        local = await bare.get("/readyz")
+    assert probe.status_code == 503
+    assert ReadyResponse.model_validate(probe.json()).checks["provider_credentials"] is False
+    assert local.status_code == 200
+    assert local.json()["status"] == "not_ready"
