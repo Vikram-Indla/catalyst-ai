@@ -19,4 +19,5 @@ line to the capability runbook; a `built` capability without one is a finding (`
 | `origin-refusals.md` | the door is turning callers away: the reason table, what each one means, when to page | the origin middleware (present) |
 | `replay-store-down.md` | the replay store cannot answer and the door fails closed; every capability is down | the origin middleware (present) |
 | — (no page) | the nightly image scan is red: the same day, file a finding naming the package, the CVE, the fixed version and the database date the run printed; rebuild with the fix (`make image`, `make image-scan`) or record why it waits. A scan never gates a push | the nightly scan job |
+| `staging.md` | the staging environment on Cloud Run: start by promotion, stop, the capabilities switch, rollback, logs, why no alert fires yet, a process that refuses to start | the staging release (present) |
 | `index-unavailable.md` | `IndexUnavailable`: the index does not answer; what stops, what keeps answering, why a rebuild never helps | the observability review (present) |
