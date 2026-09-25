@@ -1,0 +1,27 @@
+# The migration's own pipeline (`catalyst-ai-migrate`), promoted before the service's: it deploys the
+# migration job on the release's digest, then its postdeploy action runs the job and waits. A failed
+# run fails this rollout, and the service's release is not promoted. The job's project and location
+# come from the platform (`CLOUD_RUN_PROJECT`, `CLOUD_RUN_LOCATION`); nothing is written here. The
+# action's image is the gcloud CLI; pin it by digest before the first promotion.
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: catalyst-ai-migrate
+profiles:
+  - name: staging
+    manifests:
+      rawYaml:
+        - run/migrate.yaml
+deploy:
+  cloudrun: {}
+customActions:
+  - name: migrate-execute
+    containers:
+      - name: migrate-execute
+        image: gcr.io/google.com/cloudsdktool/google-cloud-cli:slim
+        command: ["/bin/sh"]
+        args:
+          - "-c"
+          - >-
+            gcloud run jobs execute catalyst-ai-migrate --wait
+            --region="$CLOUD_RUN_LOCATION" --project="$CLOUD_RUN_PROJECT"
