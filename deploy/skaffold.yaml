@@ -1,0 +1,18 @@
+# What the service's release deploys: the API and the worker. The migration has its own pipeline
+# (`skaffold-migrate.yaml`), released from the same digest and promoted first.
+# The image name `catalyst-ai` is a placeholder: the release names the
+# digest the runtime image was pushed as (`make release`), and nothing is rebuilt. Where it runs,
+# and as whom, comes from the delivery target's deploy parameters (`# from-param:` in the
+# manifests); no location, project or credential is written here.
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: catalyst-ai
+profiles:
+  - name: staging
+    manifests:
+      rawYaml:
+        - run/api.yaml
+        - run/worker.yaml
+deploy:
+  cloudrun: {}

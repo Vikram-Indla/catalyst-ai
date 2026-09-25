@@ -1,0 +1,32 @@
+# The migration: a one-shot job on the release's image, as the owner login alone, deployed by its
+# own pipeline and run by that pipeline's postdeploy action before the service's release is
+# promoted. Migrations are forward-only.
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: catalyst-ai-migrate
+spec:
+  template:
+    spec:
+      template:
+        spec:
+          serviceAccountName: set-by-target # from-param: ${migrate_identity}
+          timeoutSeconds: 600
+          maxRetries: 0
+          containers:
+            - image: catalyst-ai
+              args: ["migrate"]
+              env:
+                - name: CATALYST_AI_ENVIRONMENT
+                  value: staging
+                - name: CATALYST_AI_PROVIDER_VERTEX_LOCATION
+                  value: set-by-target # from-param: ${provider_location}
+                - name: CATALYST_AI_PROVIDER_VERTEX_PROJECT
+                  value: set-by-target # from-param: ${provider_project}
+                - name: CATALYST_AI_AUTH_PUBLIC_KEYS
+                  value: set-by-target # from-param: ${auth_public_keys}
+                - name: CATALYST_AI_DATABASE_MIGRATE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: catalyst-ai-database-migrate-url
+                      key: latest

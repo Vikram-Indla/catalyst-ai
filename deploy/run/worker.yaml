@@ -1,0 +1,51 @@
+# The worker: a worker pool, which runs continuously with no endpoint and does not scale to zero
+# (a request-less service would, and the job queue would stop). The launch-stage annotation follows
+# the delivery tool's current example. If the location offers no worker pools, the fallback is a
+# service with `autoscaling.knative.dev/minScale: "1"` and `run.googleapis.com/cpu-throttling:
+# "false"`. Its `collector` sidecar scrapes the worker's ops port like the API's; whether a worker
+# pool takes a sidecar is to be confirmed before the first promotion.
+apiVersion: run.googleapis.com/v1
+kind: WorkerPool
+metadata:
+  name: catalyst-ai-worker
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/container-dependencies: '{"collector":["worker"]}'
+    spec:
+      serviceAccountName: set-by-target # from-param: ${worker_identity}
+      volumes:
+        - name: run-gmp-config
+          secret:
+            secretName: catalyst-ai-run-gmp-config
+            items:
+              - key: latest
+                path: config.yaml
+      containers:
+        - name: worker
+          image: catalyst-ai
+          args: ["worker"]
+          env:
+            - name: CATALYST_AI_ENVIRONMENT
+              value: staging
+            - name: CATALYST_AI_CAPABILITIES_ENABLED
+              value: "false" # from-param: ${capabilities_enabled}
+            - name: CATALYST_AI_PROVIDER_VERTEX_LOCATION
+              value: set-by-target # from-param: ${provider_location}
+            - name: CATALYST_AI_PROVIDER_VERTEX_PROJECT
+              value: set-by-target # from-param: ${provider_project}
+            - name: CATALYST_AI_AUTH_PUBLIC_KEYS
+              value: set-by-target # from-param: ${auth_public_keys}
+            - name: CATALYST_AI_DATABASE_WORKER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: catalyst-ai-database-worker-url
+                  key: latest
+        - name: collector
+          image: us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.2.0
+          volumeMounts:
+            - mountPath: /etc/rungmp/
+              name: run-gmp-config

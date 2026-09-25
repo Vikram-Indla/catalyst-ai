@@ -33,6 +33,7 @@ ROWS: tuple[tuple[str, str], ...] = (
     ("Dockerfile", CONFIG),
     ("Dockerfile.ci", CONFIG),
     ("docker-compose.yml", CONFIG),
+    ("deploy/*", CONFIG),
     ("pyproject.toml", CONFIG),
     ("uv.lock", CONFIG),
     (".tool-versions", CONFIG),

@@ -1,0 +1,73 @@
+# The API: the contract port only. Ingress stays open to the platform but every call needs the
+# invoker role (granted to the backend's identity alone) and the backend's signed envelope; the
+# platform's own identity header is never read as the envelope. The capabilities are off until the
+# location's models are confirmed: the target flips `capabilities_enabled`. The `collector`
+# sidecar scrapes the ops port's /metrics inside the instance (deploy/monitoring/run-gmp.yaml) and
+# writes it to Cloud Monitoring; pin its image by digest before the first promotion.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: catalyst-ai
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/cpu-throttling: "false"
+        run.googleapis.com/container-dependencies: '{"collector":["api"]}'
+    spec:
+      serviceAccountName: set-by-target # from-param: ${serve_identity}
+      volumes:
+        - name: run-gmp-config
+          secret:
+            secretName: catalyst-ai-run-gmp-config
+            items:
+              - key: latest
+                path: config.yaml
+      containers:
+        - name: api
+          image: catalyst-ai
+          args: ["serve"]
+          ports:
+            - containerPort: 8090
+          env:
+            - name: CATALYST_AI_ENVIRONMENT
+              value: staging
+            - name: CATALYST_AI_HTTP_ADDR
+              value: ":8090"
+            - name: CATALYST_AI_OPS_ADDR
+              value: ":9091"
+            - name: CATALYST_AI_CAPABILITIES_ENABLED
+              value: "false" # from-param: ${capabilities_enabled}
+            - name: CATALYST_AI_PROVIDER_VERTEX_LOCATION
+              value: set-by-target # from-param: ${provider_location}
+            - name: CATALYST_AI_PROVIDER_VERTEX_PROJECT
+              value: set-by-target # from-param: ${provider_project}
+            - name: CATALYST_AI_AUTH_PUBLIC_KEYS
+              value: set-by-target # from-param: ${auth_public_keys}
+            - name: CATALYST_AI_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: catalyst-ai-database-url
+                  key: latest
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: 8090
+            periodSeconds: 5
+            failureThreshold: 24
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8090
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8090
+        - name: collector
+          image: us-docker.pkg.dev/cloud-ops-agents-artifacts/cloud-run-gmp-sidecar/cloud-run-gmp-sidecar:1.2.0
+          volumeMounts:
+            - mountPath: /etc/rungmp/
+              name: run-gmp-config
