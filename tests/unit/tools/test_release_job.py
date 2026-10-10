@@ -40,3 +40,11 @@ def test_a_setting_written_in_the_file_or_a_wider_permission_is_refused() -> Non
 
 def test_the_file_exists_where_the_gate_reads_it() -> None:
     assert Path(WHERE).is_file()
+
+
+def test_the_job_is_skipped_until_a_deploy_target_exists_and_the_guard_is_required() -> None:
+    assert "if: ${{ vars.RELEASE_REGISTRY != '' }}" in COMMITTED
+    unguarded = COMMITTED.replace("    if: ${{ vars.RELEASE_REGISTRY != '' }}\n", "")
+    assert violations(unguarded) != []
+    widened = COMMITTED.replace("vars.RELEASE_REGISTRY != ''", "true")
+    assert violations(widened) != []

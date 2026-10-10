@@ -3,20 +3,23 @@
 `release.yml` runs on every push to `main`, in one job that alone holds `id-token: write` (the
 login by workload identity federation, no action), with the release's settings from the
 repository's variables and nothing written in the file. Its steps are the pinned setup line and
-`make release`, print-only until the lead approves the hosted login.
+`make release`, print-only until the lead approves the hosted login. Until a deploy target
+exists (the repository's `RELEASE_REGISTRY` variable), the job's guard skips it: a skipped
+job, never a red one, on every push to `main`.
 """
 
 from tools import rules
 from tools.checks.gate import Violation
 from tools.checks.workflow_rows import job_violations, runs, step_violations
 
-JOB_KEYS = frozenset({"runs-on", "permissions", "env", "steps"})
+JOB_KEYS = frozenset({"if", "runs-on", "permissions", "env", "steps"})
 WHAT = "the release workflow"
 
 
 def expected_job() -> dict[str, object]:
     """Return the release job's pinned shape, steps aside."""
     return {
+        "if": rules.RELEASE_GUARD,
         "runs-on": "ubuntu-latest",
         "permissions": rules.RELEASE_PERMISSIONS,
         "env": rules.RELEASE_JOB_ENV,

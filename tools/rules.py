@@ -252,6 +252,7 @@ RELEASE_WORKFLOW = WORKFLOWS / "release.yml"
 RELEASE_JOB = "release"
 RELEASE_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
 RELEASE_PERMISSIONS = {"contents": "read", "id-token": "write"}
+RELEASE_GUARD = "${{ vars.RELEASE_REGISTRY != '' }}"
 RELEASE_JOB_ENV = {
     name: "${{ vars." + name + " }}"
     for name in (
