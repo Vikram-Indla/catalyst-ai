@@ -45,7 +45,7 @@ catalyst-ai/
 │   ├── api.py  install.py  ci_steps.py   render the document · fetch pinned binaries · print the workflow steps for make ci
 ├── docs/                         00-START-HERE · 01-architecture · 02-rules · 03-adr · 04-ledgers · 05-threat-models · 06-runbooks · 07-GLOSSARY
 ├── brain/                        01-STATUS · 02-DECISIONS · 03-FINDINGS · 04-OPEN-QUESTIONS · sessions/
-├── .githooks/                    pre-commit (fast gate) · commit-msg (conventional) · pre-push (full gate + make ci)
+├── .githooks/                    pre-commit (fast gate) · commit-msg (conventional) · pre-push (main only + secret scan of the range)
 ├── .github/workflows/ci.yml      the only workflow: checkout · setup · make tools · make hooks · make verify; one pinned database service
 ├── Makefile  pyproject.toml  uv.lock  ruff.toml  mypy.ini  pytest.ini  .coveragerc  .importlinter
 ├── Dockerfile  docker-compose.yml  .env.example  .tool-versions

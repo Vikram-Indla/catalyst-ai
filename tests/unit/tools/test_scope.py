@@ -73,12 +73,11 @@ def test_the_staged_set_is_what_the_commit_holds_and_a_deleted_file_is_not_in_it
     del changed
 
 
-def test_only_the_staged_python_files_are_formatted_and_linted_and_types_stay_whole() -> None:
+def test_only_the_staged_python_files_are_formatted_and_linted_and_nothing_else_runs() -> None:
     assert precommit.commands(["docs/c.md"]) == []
     runs = precommit.commands(["src/catalyst_ai/cli.py", "docs/b.md", "evals/x/g.py"])
-    assert [run[2:4] for run in runs] == [["ruff", "format"], ["ruff", "check"], ["mypy", "src"]]
+    assert [run[2:4] for run in runs] == [["ruff", "format"], ["ruff", "check"]]
     assert runs[0][-1] == "src/catalyst_ai/cli.py"
-    assert runs[2][-3:] == ["src", "tools", "tests"]
     assert precommit.commands(["uv.lock"])[0][-3:] == ["src", "tests", "tools"]
 
 
@@ -97,10 +96,8 @@ def test_a_file_staged_in_part_is_found_and_a_whole_one_is_not(
     del untouched
 
 
-def test_a_deleted_module_still_runs_the_type_check_that_finds_its_importers() -> None:
-    assert precommit.commands([], ("src/catalyst_ai/capabilities/brief/facts.py",)) == [
-        [*precommit.commands(["src/catalyst_ai/x.py"])[2]]
-    ]
+def test_a_deletion_alone_runs_no_tool_and_its_importers_are_typed_after_the_push() -> None:
+    assert precommit.commands([], ("src/catalyst_ai/capabilities/brief/facts.py",)) == []
     assert precommit.commands([], ("docs/old.md",)) == []
 
 

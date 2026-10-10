@@ -29,11 +29,12 @@ When instructions conflict, the higher one wins. If two at the same level confli
    cannot fill is a `Q-NNN`, not a guess. An eval set that does not exist is the first thing you build.
 4. Work inside the capability or package the ticket names. Anything noticed outside it is an
    `F-NNN` or a `Q-NNN`, not a fix.
-5. Run `make verify` and `make ci` before claiming anything is done. Paste both. "Should work" is not done.
+5. Run the tests of what changed and name them in the record. The full gate runs on the hosted
+   runner after the push (per push and nightly, `RULE-006 §2`); a red run there is your next commit.
 6. Write the session record in `brain/sessions/<YYYY-MM>/NNN-<slug>.md` from the template, with
    the eval score, the p95 latency and the p95 cost when a capability was touched.
-7. Git is hybrid (`RULE-005`): list the files, propose one Conventional Commit line, and **ask**.
-   Commit only after an explicit yes in chat. Never push `main`. Never force.
+7. Land it in seconds (`RULE-005 §2`): stage exactly the slice's files, commit with one
+   Conventional Commit line, push `main`. Never another branch. Never force. Never `--no-verify`.
 
 ## Where things are
 
@@ -80,10 +81,11 @@ brain/             working memory: 01-STATUS · 02-DECISIONS · 03-FINDINGS · 0
 9. **Observability without content.** Every provider call logs organisation, capability, versions,
    model, tokens, cost, latency, cache hit and outcome — never the prompt or the completion. A
    content field in a logging call: CI red.
-10. **Zero tolerance, parity, hooks.** `make verify` is the gate and equals CI; `make ci` runs the
-    workflow verbatim in the CI image before any push; `.githooks` refuse red on commit and push;
+10. **Zero tolerance, hooks, the gate after the push.** The hooks take seconds — the staged set
+    at commit, `main` and a secret scan at push; the hosted runner runs `make verify-push` per push
+    and the nightly the rest; a red run is fixed by the next commit;
     no `noqa` or `type: ignore` without an allowlisted reason; coverage tiered — policy and safety
-    100%, pipelines 95%, adapters 80%, overall 90%. Nothing merges red.
+    100%, pipelines 95%, adapters 80%, overall 90%. Nothing stays red.
 
 The gate is the meanest reviewer on this team and the fairest. The model is an untrusted input
 generator; everything around it — the contract, the schema, the eval set, the budget, the

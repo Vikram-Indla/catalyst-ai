@@ -23,7 +23,7 @@ GIT_DIR_REL := $(shell $(RUN) python -c "import os,sys; print(os.path.relpath(sy
 CI_GIT = -v "$(GIT_COMMON_HOST)":/gitcommon:ro -e GIT_DIR=/gitcommon/$(GIT_DIR_REL) \
 	-e GIT_WORK_TREE=/work -e GIT_OPTIONAL_LOCKS=0
 
-.PHONY: budgets-check coverage-check image image-scan scan-tools tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load nightly nightly-fuzz nightly-repeat evals evals-affected security selftest verify verify-fast verify-docs verify-checks ci ci-scoped ci-aware ci-cold ci-image ci-image-push stamp-check release alert-policies serve worker migrate check record new-capability clean
+.PHONY: budgets-check coverage-check image image-scan scan-tools tools hooks fmt lint api api-check ledgers-check test test-fast storage drill drills load nightly nightly-fuzz nightly-repeat evals evals-affected security selftest verify verify-push verify-fast verify-docs verify-checks ci ci-scoped ci-aware ci-cold ci-image ci-image-push stamp-check release alert-policies serve worker migrate check record new-capability clean
 
 tools:
 	$(UV) sync --frozen --group dev
@@ -86,7 +86,7 @@ nightly-fuzz:
 nightly-repeat:
 	@for run in $$(seq $(or $(REPEATS),5)); do echo "nightly-repeat: storage run $$run of $(or $(REPEATS),5)"; $(RUN) pytest tests/storage -q || exit 1; done
 
-nightly: nightly-fuzz nightly-repeat
+nightly: drills evals budgets-check nightly-fuzz nightly-repeat
 	$(MAKE) --no-print-directory load N=64 ROUNDS=16
 	@echo "NIGHTLY GREEN"
 
@@ -108,7 +108,10 @@ selftest:
 coverage-check:
 	$(RUN) python -m tools.checks.gate --only coverage
 
-verify: lint api-check ledgers-check test coverage-check storage drills evals budgets-check security selftest
+verify-push: lint api-check ledgers-check test coverage-check security selftest
+	@echo "VERIFY-PUSH GREEN"
+
+verify: verify-push storage drills evals budgets-check
 	@echo "VERIFY GREEN"
 
 verify-docs:
@@ -128,7 +131,7 @@ verify-checks:
 verify-fast:
 	$(RUN) python -m tools.precommit
 	gitleaks protect --staged --no-banner --redact
-	@echo "VERIFY-FAST GREEN (iteration, not evidence: make ci is the evidence)"
+	@echo "VERIFY-FAST GREEN"
 
 ci:
 	@$(RUN) python -m tools.ci_image require

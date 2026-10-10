@@ -29,15 +29,9 @@ ADR:             none / ADR-NNN
 ## Changed
 - `path/to/file.py` — one line on what changed and why the ticket needed it
 
-## Verify
-```
-$ make verify
-<pasted output, verbatim>
-```
-```
-$ make ci
-<pasted output, verbatim>
-```
+## Tests run
+The tests of what changed (the touched packages; the touched capability's eval set), each command
+and its last line. The hosted runner runs the rest after the push (RULE-006 §2).
 
 ## Eval and budget numbers
 Score per grader, p95 latency, p95 cost on the named set — or "no capability touched".
@@ -47,8 +41,7 @@ Score per grader, p95 latency, p95 cost on the named set — or "no capability t
 
 ## Commit
 Files: <plain list>
-Proposed: `type(scope): summary`
-Green light: yes at HH:MM / no / not requested
+Line: `type(scope): summary` · commit and push in N s
 
 ## Next
 The single next action for this ticket.

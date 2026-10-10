@@ -2,7 +2,7 @@
 id: RULE-005
 title: Git, sessions and the brain
 status: Binding
-version: 1.3.3
+version: 1.4.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -11,18 +11,18 @@ created: 2026-09-18
 
 ## §1 Branches, hooks and the push precondition
 
-- Trunk-based, and **there is no pull-request flow** (`D-041`). `main` is always deployable and is
-  the only branch that is ever pushed; `.githooks/pre-push` refuses any other ref. A change reaches
-  `main` one way: a working session prepares it in a private working copy, `make verify` and
-  `make ci` are green on that tree and pasted in the record, and the lead commits it to `main` by
-  hand after an explicit yes (§2) and pushes `main`. The hosted workflow then runs the same job
-  on `main` after the fact: it is evidence that the pushed tree is what the local pipeline
-  proved, never the door a change goes through. A red hosted run is fixed forward on `main`
-  with its own commit. Force-push, history rewriting of anything pushed, and `--no-verify` are
-  banned.
+- Trunk-based, and **there is no pull-request flow** (`D-041`). `main` is the only branch, and
+  the only one ever pushed; `.githooks/pre-push` refuses any other ref. A contributor works on
+  `main` itself, commits a finished slice, and pushes it in seconds (`D-069`): `git add <files>`
+  (never `-A`), `git commit` (the pre-commit hook), `git pull --rebase` when `main` moved, then
+  the push of `main` (the pre-push hook). Before the commit the contributor runs the tests of
+  what changed — the touched packages, the touched capability's eval set when a capability
+  changed — and nothing more; `make verify` and `make ci` are never a precondition. The hosted
+  workflow runs on `main` after the push and nobody waits for it: a red push run is the
+  contributor's next commit, ahead of feature work, and a red night is the morning's first.
+  Force-push, history rewriting of anything pushed, and `--no-verify` are banned.
 - A change is one task in one commit with a one-line subject (the lockfile, the rendered
-  document and recorded fixtures go in their own `gen:` commit), both gates green, read by the
-  lead before the yes. There is no total of lines per commit; each file keeps its own budget
+  document and recorded fixtures go in their own `gen:` commit). There is no total of lines per commit; each file keeps its own budget
   (`tools/checks/filebudget`, `funcbudget`). `tools/checks/commitsize` holds it at commit: one
   ticket across the staged records' `**Ticket:**` fields, the message one subject line and
   nothing after it, a `gen:` commit generated paths only; there is no flag (`D-067`).
@@ -30,24 +30,17 @@ created: 2026-09-18
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,
   `gen` (rendered document, lockfile, fixtures only). `commit-msg` enforces it.
-- **A push is preceded by a green pipeline run of that tree; the stamp proves the tree.** `make ci`
-  notes the tree before the run (`tools/stamp begin`, in the worktree's own git directory), runs
-  the CI job verbatim inside the CI image and, green, writes a stamp keyed by the hash of the
-  working tree and the image digest (`tools/stamp`, in the common git directory) — only if the
-  tree is still the one noted at the start; a tree edited during the run is not stamped. `pre-push`
-  skips the run when the stamp matches the tree being pushed, the image, and is younger than a
-  day, printing it; otherwise it runs `make ci-aware`. That compares the tree with the last full
-  green one, file by file (a full run keeps its manifest as the base; a scoped run proves its own
-  push and is never a base), and runs what the changed files oblige by the
-  map in `tools/change_map.py`: every check, the selftest and the secret scan for pages; those plus
-  lint, types and the tools' tests for a check; the full `make ci` for anything else, and whenever
-  there is no usable base (none, another image, older than a day). A step is skipped only when its
-  inputs are the same bytes as a green run's; `tools/checks/change_map` refuses a file without a
-  class and a page a test reads filed as a page. The hosted workflow on `main` always runs
-  everything. The workflow file holds only checkout, setup, `make tools`, `make hooks`,
-  `make verify` (`tools/checks/ci`).
-- **One workflow, one door to the database.** `.github/workflows/` holds `ci.yml` and nothing
-  else. Its trigger (a push to `main`), its container, its one service and its env equal what
+- **A commit and its push take seconds; the gate runs after the push** (`D-069`). The pre-commit
+  hook checks the staged set, the pre-push hook admits `main` and scans the pushed range for
+  secrets, and neither runs a pipeline, a container or a stamp. Per push, the hosted `ci.yml`
+  runs `make verify-push` inside a budget of ten minutes, and a newer push cancels the run it
+  supersedes; every night, `nightly.yml` runs the evals with their budgets, the drills, the
+  storage suite repeated, the fuzz properties, the load run and the image scan. The workflow file
+  holds only checkout, setup, `make tools`, `make hooks`, `make verify-push`
+  (`tools/checks/ci`). `make ci`, `make ci-aware` and `make stamp-check` stay as tools a
+  contributor may run for the whole answer locally; no hook calls them.
+- **One door to the database.** `.github/workflows/` holds `ci.yml`, the nightly, the image
+  workflow and the release workflow, each on its own row. Its trigger (a push to `main`), its container, its one service and its env equal what
   `tools/rules.py` pins, and `tools/checks/ci` reads every file in the directory and all of
   those keys. The tests reach PostgreSQL the same way in both runs: the pinned `pgvector` image
   as a service named `postgres`, through `CATALYST_AI_EVAL_DATABASE_URL`. The hosted job declares
@@ -74,16 +67,14 @@ created: 2026-09-18
   `tools/checks/images` refuses a `Dockerfile.ci` that no longer hashes to the pin.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast`
-  (`tools/precommit.py`, on the staged set: format and lint on the staged Python files, the type
-  check on the whole program on its incremental cache, the ⚡ checks — the per-file ones on the
-  staged files, the cross-file ones on the whole repository — the eval sets the staged files can
-  move, judged on their grader floors with the latency and cost budgets reported and left to the
-  full gate (`D-065`), gitleaks on the staged tree; a change to a shared configuration, a rule,
-  the lockfile, the hooks or a check's own code, or a commit with nothing staged, runs every file
-  (`tools/scope.py`, `D-066`) — iteration, never evidence); `commit-msg` runs the message check; `pre-push` consults the stamp, then runs
-  `make ci` where Docker is available and otherwise the full `make verify`, printing that parity
-  with the CI image is not proven. A red hook blocks. `make test-fast` (the unit tree, last
-  failures first, no coverage) and `make evals-affected` exist for iteration; neither is evidence.
+  (`tools/precommit.py`, on the staged set: format and lint on the staged Python files, the ⚡
+  checks — the per-file ones on the staged files, the cross-file ones on the whole repository —
+  and gitleaks on the staged tree; a change to a shared configuration, a rule, the lockfile, the
+  hooks or a check's own code, or a commit with nothing staged, formats and lints every file
+  (`tools/scope.py`, `D-066`); no type check, test or eval, which run on the hosted runner);
+  `commit-msg` runs the message check; `pre-push` refuses every ref but `main` and runs gitleaks
+  on the pushed range. A red hook blocks. `make test-fast` (the unit tree, last failures first,
+  no coverage) and `make evals-affected` exist for iteration.
 - **The repository speaks of "the lead" and "a contributor" and of nothing behind them.** No
   id of the lead's private planning, no name of its files and no name of its people is written
   anywhere in the tree — records, ledgers, code, fixtures, commit lines alike.
@@ -91,23 +82,18 @@ created: 2026-09-18
   tree) in `verify-fast` and `verify`; a line that needs one of them is rewritten in the
   repository's own words.
 
-## §2 Sessions and git — the hybrid rule
+## §2 Sessions and git
 
-A working session prepares a change; the lead decides it enters history.
+A working session finishes a slice, records it, and lands it.
 
-1. The session works in its own working copy, never in the checkout of `main`.
-2. Before proposing a commit it runs `make verify` and `make ci` and pastes both in the record;
-   when a capability was touched, the eval numbers too.
-3. It lists the changed files (a plain list), proposes **one** Conventional Commit line, and
-   **asks in chat**. It does not stage, commit or push while waiting.
-4. On an explicit yes ("commit", "go ahead", "yes") the lead's hand stages exactly the listed
-   files and commits with exactly the proposed line. Any other reply is a no.
-5. Generated artefacts — `uv.lock`, `api/openapi.yaml`, recorded fixtures, ledgers — are their
-   own commit (`gen(...)`), never mixed with hand-written changes: two proposals, two yeses.
-6. Never pushes anything and never rewrites history; pushing `main` is the lead's hand alone.
-
-A commit found in history without its green light in a session record is a `RULE-000 §3`
-rejection and is reverted.
+1. The session works on `main` in the repository's own checkout.
+2. Before committing it runs the tests of what changed and names them in the record; when a
+   capability was touched, its eval numbers too.
+3. It stages exactly the files of the slice, commits with one Conventional Commit line and
+   pushes `main` (§1). No trailer follows the line.
+4. Generated artefacts — `uv.lock`, `api/openapi.yaml`, recorded fixtures, ledgers — are their
+   own commit (`gen(...)`), never mixed with hand-written changes.
+5. It never force-pushes and never rewrites pushed history.
 
 ## §3 Tickets
 
@@ -119,9 +105,9 @@ exists without a ticket; a ticket is claimed before code is written.
 ## §4 Session records
 
 `brain/sessions/<YYYY-MM>/NNN-<slug>.md` from `_TEMPLATE-session.md`, written before the session
-ends: ticket, the impact matrix, what changed (files), the pasted `make verify` and `make ci`,
-the eval and budget numbers, decisions made or needed, findings filed, the commit line proposed
-and whether it was accepted, and the next action. A session without a record did not happen.
+ends: ticket, the impact matrix, what changed (files), the tests run (`## Tests run`), the eval
+and budget numbers when a capability changed, decisions made or needed, findings filed, the commit
+line, and the next action. A session without a record did not happen.
 
 ## §5 The registers
 

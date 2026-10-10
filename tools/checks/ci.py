@@ -2,8 +2,9 @@
 
 Every file under .github/workflows/ is read against its own row (`ci_image_job` holds the image
 workflow's, `nightly_job` the nightly's); any other file is refused. `ci.yml` holds only
-checkout, setup, make tools, make hooks and make verify, and its trigger, container, services
-and env equal what
+checkout, setup, make tools, make hooks and make verify-push (the per-push budget; the evals,
+the drills and the storage suite run in the nightly), cancels a superseded run of the same ref,
+and its trigger, container, services and env equal what
 tools/rules.py pins — the same values `make ci` starts its own database with, so the hosted run
 and the local one reach PostgreSQL through the same door.
 """
@@ -19,7 +20,7 @@ from tools.checks.gate import Violation
 
 USES = re.compile(r"^\s*-?\s*uses:\s*(?P<value>\S+)", re.M)
 RUN = re.compile(r"^\s*-?\s*run:\s*(?P<value>.+)$", re.M)
-TOP_KEYS = frozenset({"name", "on", "jobs"})
+TOP_KEYS = frozenset({"name", "on", "concurrency", "jobs"})
 JOB_KEYS = frozenset({"runs-on", "container", "services", "env", "steps"})
 
 
@@ -51,8 +52,8 @@ def _step_violations(workflow: str, where: str) -> list[Violation]:
         for command in runs
         if command not in rules.CI_ALLOWED_RUNS
     ]
-    if "make verify" not in runs:
-        violations.append(Violation(where, 1, "workflow does not run `make verify`"))
+    if rules.CI_VERIFY not in runs:
+        violations.append(Violation(where, 1, f"workflow does not run `{rules.CI_VERIFY}`"))
     return violations
 
 
@@ -78,6 +79,9 @@ def _shape_violations(workflow: str, where: str) -> list[Violation]:
     ]
     if document.get("on") != rules.CI_TRIGGERS:
         violations.append(Violation(where, 1, f"workflow triggers are not {rules.CI_TRIGGERS}"))
+    if document.get("concurrency") != rules.CI_CONCURRENCY:
+        text = f"workflow concurrency is not {rules.CI_CONCURRENCY}"
+        violations.append(Violation(where, 1, text))
     jobs = document.get("jobs")
     if not isinstance(jobs, dict) or set(jobs) != {rules.CI_JOB}:
         return [*violations, Violation(where, 1, f"workflow must hold one job, {rules.CI_JOB!r}")]

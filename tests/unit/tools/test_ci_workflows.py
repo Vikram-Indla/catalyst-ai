@@ -79,3 +79,13 @@ def test_a_malformed_workflow_is_reported_not_raised(root: Path) -> None:
 def test_a_trigger_beyond_main_is_refused(root: Path) -> None:
     _plant(root, "on:\n", "on:\n  pull_request:\n")
     assert ci.run(root), "a pull-request trigger passed"
+
+
+def test_a_run_without_cancel_in_progress_is_refused(root: Path) -> None:
+    _plant(root, "  cancel-in-progress: true\n", "  cancel-in-progress: false\n")
+    assert ci.run(root), "a run that keeps a superseded push going passed"
+
+
+def test_the_whole_gate_on_every_push_is_refused(root: Path) -> None:
+    _plant(root, "      - run: make verify-push\n", "      - run: make verify\n")
+    assert ci.run(root), "the nightly's evals, drills and storage ran on every push"

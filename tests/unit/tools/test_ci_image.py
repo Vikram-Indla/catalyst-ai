@@ -42,9 +42,11 @@ def test_a_missing_image_is_refused_with_the_command_that_builds_it(
 
 
 def test_the_prebuilt_run_leaves_out_the_setup_step_and_nothing_else() -> None:
-    workflow = f"      - run: {rules.CI_SETUP}\n      - run: make tools\n      - run: make verify\n"
+    workflow = (
+        f"      - run: {rules.CI_SETUP}\n      - run: make tools\n      - run: make verify-push\n"
+    )
     assert ci_steps.local_steps(workflow, prebuilt=False)[0] == rules.CI_SETUP
-    assert ci_steps.local_steps(workflow, prebuilt=True) == ["make tools", "make verify"]
+    assert ci_steps.local_steps(workflow, prebuilt=True) == ["make tools", "make verify-push"]
 
 
 def test_the_image_and_the_hosted_setup_step_install_the_same_things() -> None:

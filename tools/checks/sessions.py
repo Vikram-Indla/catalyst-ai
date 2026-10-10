@@ -1,4 +1,4 @@
-"""RULE-007: a session that changed code left a record with the matrix, the gate and the numbers."""
+"""RULE-007: a session that changed code left a record with the matrix, its tests, the numbers."""
 
 from pathlib import Path
 
@@ -7,7 +7,7 @@ from tools.checks.gate import Violation
 from tools.checks.gitinfo import changed_since_main
 
 CODE_PREFIXES = ("src/", "tools/", "tests/", "evals/", "db/", "api/")
-REQUIRED_SECTIONS = ("## Impact matrix", "$ make verify", "$ make ci")
+REQUIRED_SECTIONS = ("## Impact matrix", "## Tests run")
 EVAL_SECTION = "## Eval and budget numbers"
 
 

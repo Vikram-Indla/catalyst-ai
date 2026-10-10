@@ -50,7 +50,7 @@ Criticality: **Critical** = a breach is a security, tenancy or data-integrity in
 | INV-037 | Every completion is validated against the capability's schema; at most one repair; then `ai.output.invalid` | capabilities | pipeline tests | High | ARCH-003 §2 |
 | INV-038 | A stream ends with exactly one terminal frame | contract | contract tests | High | ARCH-004 §4 |
 | INV-039 | Every contract change has a changelog entry with the "backend must" line; breaking changes are versioned | contract | `tools/checks/changelog`, `oasdiff` | High | ARCH-004 §6 |
-| INV-040 | `make verify` equals CI equals `make ci`; the workflow holds nothing else | build | `tools/checks/ci`, `.githooks/pre-push` | High | RULE-005 §1 |
+| INV-040 | The per-push workflow runs `make verify-push` and nothing else, the nightly `make nightly`; `make ci` runs the workflow's steps verbatim; the hooks run no pipeline | build | `tools/checks/ci` | High | RULE-005 §1 |
 | INV-041 | The platform holds no product noun; a package that gains one is a finding | platform | `test_platform_holds_no_product_noun` | High | ARCH-011 §2 |
 | INV-042 | Every capability package carries a descriptor and declares its budget | capabilities | `tools/checks/capabilities`, `test_every_capability_has_descriptor`, `test_every_capability_declares_budget` | High | ARCH-003 §1 |
 | INV-043 | Every operation lists its error codes and every code is catalogued | contract | `tools/checks/errors`, `tools/checks/openapi`, `test_every_operation_lists_error_codes`, `test_every_error_code_is_catalogued` | High | RULE-003 §2 |

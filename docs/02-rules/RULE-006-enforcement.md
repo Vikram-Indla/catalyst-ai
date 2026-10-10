@@ -2,7 +2,7 @@
 id: RULE-006
 title: Enforcement — every rule is a check
 status: Binding
-version: 1.4.0
+version: 1.5.0
 owner: AI service lead
 created: 2026-09-18
 ---
@@ -22,18 +22,33 @@ for the same check is open.
 
 ## §2 The gate
 
-`make verify` runs every row below in order and stops at the first failure. CI runs `make
-verify` and nothing else; `tools/checks/ci` holds the workflow to that. `make ci` runs the CI
-job itself inside its image and is the push precondition. `make verify-fast` is the ⚡ subset for
-the pre-commit hook, narrowed to the staged set (`D-066`): the per-file checks read the staged
-files, the cross-file checks the whole repository, and a change to the ground runs every file. The **Built in** column names the ticket that built the check; every check exists from the
+A commit and its push take seconds, and the full gate runs after the push, never before it
+(`D-069`). Three places run the rows below, and each row runs in at least one of them:
+
+1. **The commit** (`.githooks/pre-commit`, `make verify-fast`): the ⚡ rows, narrowed to the
+   staged set (`D-066`) — format and lint on the staged Python files, the per-file checks on the
+   staged files, the cross-file checks on the whole repository, a change to the ground formatting
+   and linting every file — and gitleaks on the staged tree. Seconds; no type check, no test, no eval.
+2. **The push** (`.githooks/pre-push`): only `main` is pushed, and gitleaks scans the pushed
+   range. Seconds; no stamp, no pipeline, no container.
+3. **The hosted runner**, after the push. Per push, `ci.yml` runs `make verify-push` (lint with the
+   type check, api-check, ledgers-check, the tests with coverage, security, selftest) inside a
+   budget of ten minutes, and a newer push to the same ref cancels the older run. Every night,
+   `nightly.yml` runs `make nightly`: the drills, every eval set with its budgets, the storage suite
+   repeated, the fuzz properties, the load run, and the image scan in its own job. `tools/checks/ci`
+   holds both workflows to that.
+
+Nobody waits on the hosted runner. A red push run is fixed by the next commit, ahead of feature
+work; a red night is the morning's first commit. `make verify` (the per-push set plus the storage
+suite, the drills, the evals and the budgets) and `make ci` (the workflow's steps inside its image)
+stay as tools for a contributor who wants the whole answer locally; neither is a precondition. The **Built in** column names the ticket that built the check; every check exists from the
 scaffold and passes vacuously on an empty tree, and `selftest` proves each red on its plant.
 
 | Rule | Check | Tool | Built in |
 | --- | --- | --- | --- |
 | Formatting (RULE-002 §1) ⚡ | `ruff format --check` diff empty | `ruff` | AI-002 |
 | Lint: hygiene, security, prints, commented code, annotations, docstrings, async, datetimes (RULE-001 §5, RULE-002) ⚡ | zero findings | `ruff check` with the select list | AI-002 |
-| Types (RULE-002 §2) ⚡ | zero errors | `mypy --strict` | AI-002 |
+| Types (RULE-002 §2) | zero errors | `mypy --strict` | AI-002 |
 | mypy overrides only under adapters and parsers (RULE-002 §1) ⚡ | zero overrides elsewhere | `tools/checks/mypy_overrides` | AI-002 |
 | Complexity, parameters, branches, returns, statements, nesting, magic values (RULE-001 §2) ⚡ | zero findings | `ruff` `C901`, `PLR0913`, `PLR0912`, `PLR0911`, `PLR0915`, `PLR1702`, `PLR2004` | AI-002 |
 | File ≤ 300 logical lines (RULE-001 §2) ⚡ | zero files over | `tools/checks/filebudget` | AI-002 |
@@ -86,11 +101,11 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Python version agrees across `.tool-versions`, `pyproject.toml`, the image (RULE-002 §1) | equal | `catalyst-ai check` | AI-002 |
 | Commit message format (RULE-005 §1) ⚡ | Conventional Commit, ≤ 80 chars | `.githooks/commit-msg` | AI-002 |
 | The change map classes every file, source is never a page, and no page a test, a grader or the service reads is filed as a page (`tools/change_map.py`) | zero files without a class; zero misfiled reads | `tools/checks/change_map` | AI-021 |
-| CI job equals the gate: `ci.yml`, `ci-image.yml`, `release.yml` (a push to `main`; one job `release`, skipped by its guard `if: vars.RELEASE_REGISTRY != ''` until a deploy target exists, with `contents: read` and `id-token: write`, its variables from the repository's; checkout, the pinned installer, `make release RELEASE_FLAGS=--print` and nothing else, no login action) and `nightly.yml` (a schedule; the gate's container running `make nightly`; a second job on the runner running `make tools`, `make scan-tools`, `make image-scan`, no scanner action), each held to its own row (the image workflow: triggered by `Dockerfile.ci` alone, `packages: write` in its one job, set up, build, gate, push, in that order); it holds only checkout, setup, `make tools`, `make hooks`, `make verify`, and its trigger, container, service and env equal the pins `make ci` starts its database from (RULE-005 §1) | zero other files, steps or keys; every value equal | `tools/checks/ci` | AI-002, AI-017, AI-036 |
+| CI job equals the gate: `ci.yml`, `ci-image.yml`, `release.yml` (a push to `main`; one job `release`, skipped by its guard `if: vars.RELEASE_REGISTRY != ''` until a deploy target exists, with `contents: read` and `id-token: write`, its variables from the repository's; checkout, the pinned installer, `make release RELEASE_FLAGS=--print` and nothing else, no login action) and `nightly.yml` (a schedule; the gate's container running `make nightly`; a second job on the runner running `make tools`, `make scan-tools`, `make image-scan`, no scanner action), each held to its own row (the image workflow: triggered by `Dockerfile.ci` alone, `packages: write` in its one job, set up, build, gate, push, in that order); `ci.yml` holds only checkout, setup, `make tools`, `make hooks`, `make verify-push` (never `make verify`: the evals, the drills and the storage suite are the nightly's), `concurrency` on the ref with `cancel-in-progress: true`, and its trigger, container, service and env equal the pins `make ci` starts its database from (RULE-005 §1) | zero other files, steps or keys; every value equal | `tools/checks/ci` | AI-002, AI-017, AI-036, AI-048 |
 | One image, pinned by digest: the `FROM` lines of `Dockerfile` and `Dockerfile.ci` name `BASE_IMAGE`, the Makefile's `CI_IMAGE` and the workflow's `container.image` name `CI_IMAGE`, both in `tools/rules.py`; `Dockerfile.ci` bakes the `uv` of `.tool-versions` and holds no `COPY` or `ADD`, so the published image never carries a file of the tree (RULE-005 §1) | every reference equal to the pin; a tag, a `COPY` or an `ADD` is red | `tools/checks/images` | AI-017 |
-| Push preceded by a green pipeline run of that tree; the stamp proves the tree (RULE-005 §1) | a stamp for this tree and image, younger than a day, else `make ci` green | `.githooks/pre-push` · `tools/stamp` | AI-002, AI-012 |
+| Push: only `main`, and no secret in what is pushed (RULE-005 §1) | every other ref refused; gitleaks finds nothing in the pushed range (`<remote>..<local>`, or the pushed commits when the ref is new); seconds, no stamp, no pipeline | `.githooks/pre-push` | AI-002, AI-048 |
 | Generated artefacts committed separately (RULE-005 §2) | no commit mixes `uv.lock`, `api/`, fixtures with hand-written files | `tools/checks/commits` (the gate, against `main`) | AI-002 |
-| Session record carries the impact matrix, the gate output and the eval numbers (RULE-007) | present for every session that changed code | `tools/checks/sessions` (the gate, against `main`) | AI-002 |
+| Session record carries the impact matrix, the tests it ran and the eval numbers (RULE-007) | present for every session that changed code | `tools/checks/sessions` (the gate, against `main`) | AI-002 |
 | Change risk class not understated (RULE-005 §6) | the branch's highest record claim ≥ derived | `tools/checks/prclass` | AI-002 |
 | The deployment manifests (`deploy/run/*.yaml`) carry no location, no credential value and no rebuild: every per-environment value from the target (`# from-param:`); the image the release's placeholder; credentials only as secret references; every variable a setting the service reads; no probe path ending in `z`; one database login per process, the three distinct; a worker that cannot scale to zero ⚡ | zero findings | `tools/checks/deployment` | AI-036 |
 | The gate's image reads git and never writes it: every mount of the git common directory is `:ro`, and git runs there with `GIT_OPTIONAL_LOCKS=0`; the stamp is written on the host ⚡ | zero writable mounts | `tools/checks/gitmount` | AI-038 |
@@ -118,16 +133,18 @@ make test-fast    the unit tree, last failures first, stop at the first, no cove
 make storage      tests/storage against testcontainers once db/migrations has a file
 make evals        every eval set against recorded fixtures once evals/ has a set
 make evals-affected   the sets a change since main can move (tools/affected) — iteration, never evidence;
-                      grader floors judged, latency and cost budgets reported only (D-065)
+                      grader floors judged, latency and cost budgets reported only (D-065); never in a hook
 make security     pip-audit on the exported lock · gitleaks · licences
 make selftest     every check red on its plant, one line per check
-make verify       lint · api-check · ledgers-check · test · coverage-check · storage · evals · security · selftest   (= CI)
-make ci           notes the tree · starts the pinned database as the workflow declares it · the workflow's run steps verbatim, inside the CI image · removes the database · green and the tree unchanged, it stamps it   (= pre-push)
+make verify-push  lint · api-check · ledgers-check · test · coverage-check · security · selftest   (= ci.yml, per push, ≤ 10 min)
+make verify       verify-push · storage · drills · evals · budgets-check   (the whole gate, on demand)
+make nightly      drills · evals · budgets-check · fuzz · storage repeated · load   (= nightly.yml)
+make ci           notes the tree · starts the pinned database as the workflow declares it · the workflow's run steps verbatim, inside the CI image · removes the database · green and the tree unchanged, it stamps it   (on demand)
 make ci-cold      the same with the image's cache volumes dropped first (the cold number of the record)
-make stamp-check  whether this tree, in this image, has a green run younger than a day (what pre-push asks)
+make stamp-check  whether this tree, in this image, has a green run younger than a day (on demand)
 make ci-image     build Dockerfile.ci (the pinned base with make, git, curl and uv baked in) and print its local id;
                   nothing is pushed, and the pipeline does not use it until the image has a registry (Q-018)
-make verify-fast  tools/precommit.py on the staged set · gitleaks on the staged tree               (= pre-commit)
+make verify-fast  tools/precommit.py on the staged set · gitleaks on the staged tree   (= pre-commit, seconds)
 make image        build the runtime image · make image-scan: trivy on it (release candidate)
 make check        catalyst-ai check: toolchain agreement and settings
 make record · make new-capability   built with the first adapter and the golden capability
