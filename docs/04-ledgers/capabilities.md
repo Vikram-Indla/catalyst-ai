@@ -110,6 +110,7 @@ stand-ins' until a provider key exists; the mapping is final, the evidence is no
 | `alignment-story` | retired | `brief` v1.0.0 · set `brief` v1, over the chain the backend's strategy module owns (`Q-012`, `D-055`) | authored |
 | `voice-transcribe` | dropped | audio (Arabic, Urdu, Hindi) transcribed and translated to English through a second provider's speech model with a fallback; a new modality and a new provider that no card cut (`Q-013`) | — |
 | `ai-theme-prewarm` | dropped | a nightly cache warmup of the digest's themes; the digest is on demand (`F-022`) | — |
+| `ai-generate-test-cases` (parked) | dropped | parked in the previous system and never served; it drafted test cases from a free description, which `generate-tests` v1.0.0 mode `cases` does from a story | — |
 | `kb-feedback` | dropped | no model call — the backend stores the thumbs; a future eval source | — |
 | `kb-cleanup` | dropped | no model call — the service's retention job covers its own tables (`RULE-009 §4`) | — |
 | `catyflow-clean`, `catyflow-token` | dropped | no model call — token issuance for a flow feature (`F-001`) | — |
