@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from tools import precommit
-from tools.checks.gate import PER_FILE, SCOPE, run_check
+from tools.checks.gate import PER_FILE, SCOPE, reads_staged, run_check
 from tools.checks.gitinfo import git_output
 from tools.scope import needs_full, partly_staged, reason, scope_of, staged
 
@@ -108,3 +108,20 @@ def test_every_run_says_why_it_is_scoped_or_whole() -> None:
         reason(["docs/a.md", "uv.lock"]) == "every file: uv.lock moves what every file is judged by"
     )
     assert reason(["docs/a.md", "src/catalyst_ai/cli.py"]) == "2 staged files"
+
+
+def test_a_cross_file_check_runs_only_when_a_staged_file_is_one_it_reads() -> None:
+    assert not reads_staged("deployment", ["docs/02-rules/r.md"])
+    assert reads_staged("deployment", ["deploy/run/api.yaml"])
+    assert not reads_staged("dupl", ["brain/new.md"])
+    assert reads_staged("dupl", ["src/catalyst_ai/app.py"])
+    assert reads_staged("commitsize", ["docs/02-rules/r.md"])
+    assert reads_staged("deployment", None)
+
+
+def test_the_text_scan_reads_the_scope_and_not_the_tree(tmp_path: Path) -> None:
+    changed, untouched = plant(tmp_path)
+    shape = "OUT" + "BOX-x"
+    untouched.write_text(f"# {shape}\n", encoding="utf-8")
+    assert run_check("vocabulary", tmp_path, frozenset({changed.resolve()})) == []
+    assert run_check("vocabulary", tmp_path, frozenset({untouched.resolve()})) != []

@@ -68,10 +68,11 @@ created: 2026-09-18
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast`
   (`tools/precommit.py`, on the staged set: format and lint on the staged Python files, the ⚡
-  checks — the per-file ones on the staged files, the cross-file ones on the whole repository —
-  and gitleaks on the staged tree; a change to a shared configuration, a rule, the lockfile, the
-  hooks or a check's own code, or a commit with nothing staged, formats and lints every file
-  (`tools/scope.py`, `D-066`); no type check, test or eval, which run on the hosted runner);
+  checks — the per-file ones on the staged files, a cross-file one on the whole repository when a
+  staged file is one it reads — and gitleaks on the staged tree; a change to a shared
+  configuration, a rule, the lockfile, the hooks or a check's own code, or a commit with nothing
+  staged, formats and lints every file and runs every cross-file check (`tools/scope.py`, `D-066`,
+  `D-070`); no type check, test or eval, which run on the hosted runner);
   `commit-msg` runs the message check; `pre-push` refuses every ref but `main` and runs gitleaks
   on the pushed range. A red hook blocks. `make test-fast` (the unit tree, last failures first,
   no coverage) and `make evals-affected` exist for iteration.

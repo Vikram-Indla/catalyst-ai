@@ -26,9 +26,11 @@ A commit and its push take seconds, and the full gate runs after the push, never
 (`D-069`). Three places run the rows below, and each row runs in at least one of them:
 
 1. **The commit** (`.githooks/pre-commit`, `make verify-fast`): the ⚡ rows, narrowed to the
-   staged set (`D-066`) — format and lint on the staged Python files, the per-file checks on the
-   staged files, the cross-file checks on the whole repository, a change to the ground formatting
-   and linting every file — and gitleaks on the staged tree. Seconds; no type check, no test, no eval.
+   staged set (`D-066`, `D-070`) — format and lint on the staged Python files, the per-file checks
+   on the staged files alone, a cross-file check (`dupl`, `structure`, `deployment`) on the whole
+   repository only when a staged file is one it reads, a change to the ground formatting and
+   linting every file and running every cross-file check — and gitleaks on the staged tree. Under
+   ten seconds; no type check, no test, no eval.
 2. **The push** (`.githooks/pre-push`): only `main` is pushed, and gitleaks scans the pushed
    range. Seconds; no stamp, no pipeline, no container.
 3. **The hosted runner**, after the push. Per push, `ci.yml` runs `make verify-push` (lint with the

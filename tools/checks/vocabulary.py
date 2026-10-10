@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 from tools import rules
-from tools.checks.gate import Violation, in_scope, relative
+from tools.checks.gate import SCOPE, Violation, in_scope, relative
 
 OWN_SOURCE = Path("tools") / "checks" / "vocabulary.py"
 TEXT_SUFFIXES = (
@@ -63,7 +63,8 @@ def check_lines(
 
 def _text_files(root: Path) -> list[Path]:
     found = []
-    for path in sorted(root.rglob("*")):
+    narrowed = SCOPE.get()
+    for path in sorted(root.rglob("*") if narrowed is None else narrowed):
         if any(part in rules.SKIP_DIRS for part in path.relative_to(root).parts):
             continue
         if not (path.is_file() and path.suffix in TEXT_SUFFIXES and in_scope(path)):

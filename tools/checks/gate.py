@@ -110,6 +110,12 @@ PER_FILE = frozenset(
         "mypy_overrides",
     }
 )
+CODE_PREFIXES = tuple(f"{code_root.as_posix()}/" for code_root in rules.CODE_ROOTS)
+CROSS_FILE_READS = {
+    "deployment": ("deploy/", "src/catalyst_ai/config/"),
+    "dupl": CODE_PREFIXES,
+    "structure": CODE_PREFIXES,
+}
 SCOPE: ContextVar[frozenset[Path] | None] = ContextVar("scope", default=None)
 
 
@@ -132,6 +138,21 @@ def in_scope(path: Path) -> bool:
     return scope is None or path.resolve() in scope
 
 
+def scoped(root: Path, sub: Path, suffix: str) -> list[Path] | None:
+    """Return the scope's files under `sub` with the suffix, or None when no scope is set."""
+    scope = SCOPE.get()
+    if scope is None:
+        return None
+    base = (root / sub).resolve()
+    return [p for p in scope if p.suffix == suffix and p.is_relative_to(base) and p.is_file()]
+
+
+def reads_staged(name: str, paths: list[str] | None) -> bool:
+    """Whether a cross-file check reads anything the commit stages; always, with no staged list."""
+    prefixes = CROSS_FILE_READS.get(name)
+    return paths is None or prefixes is None or any(p.startswith(prefixes) for p in paths)
+
+
 def relative(path: Path, root: Path) -> str:
     """Return a forward-slash path relative to the root, for messages and matching."""
     return path.relative_to(root).as_posix()
@@ -142,7 +163,9 @@ def walk(root: Path, *subdirs: Path, suffix: str = ".py") -> list[Path]:
     found: list[Path] = []
     for sub in subdirs:
         base = root / sub
-        if not base.exists():
+        narrowed = scoped(root, sub, suffix)
+        if narrowed is not None or not base.exists():
+            found.extend(narrowed or [])
             continue
         for directory, names, files in os.walk(base):
             names[:] = sorted(n for n in names if n not in rules.SKIP_DIRS)
@@ -195,11 +218,14 @@ def run_check(name: str, root: Path, scope: frozenset[Path] | None = None) -> li
 def main(argv: list[str]) -> int:
     """Run every check (or the fast subset) in order; stop at the first red one.
 
-    `--staged` gives the per-file checks only the commit's staged files, unless the change moves
-    the ground (`tools/scope.py`); the cross-file checks read the whole repository either way.
+    `--staged` gives the per-file checks only the commit's staged files. A cross-file check runs,
+    on the whole repository, when a staged file is one it reads (`CROSS_FILE_READS`) or the change
+    moves the ground (`tools/scope.py`). The hosted run reads everything.
     """
-    root = Path.cwd()
-    scope = scope_of(root, staged(root)) if "--staged" in argv else None
+    root = Path.cwd().resolve()
+    paths = staged(root) if "--staged" in argv else None
+    scope = None if paths is None else frozenset((root / path).resolve() for path in paths)
+    paths = None if paths is None or scope_of(root, paths) is None else paths
     fast = "--fast" in argv
     only = argv[argv.index("--only") + 1] if "--only" in argv else None
     skip = argv[argv.index("--skip") + 1].split(",") if "--skip" in argv else []
@@ -207,6 +233,7 @@ def main(argv: list[str]) -> int:
         name
         for name in CHECKS
         if (not fast or name in FAST) and (only is None or name == only) and name not in skip
+        if reads_staged(name, paths)
     ]
     for name in names:
         violations = run_check(name, root, scope)

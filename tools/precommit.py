@@ -1,10 +1,11 @@
 """The commit-time check: one scoped entry point for the pre-commit hook and a record's gate.
 
 It reads the staged set (`tools/scope.py`) and fits in seconds: formatting and lint on the staged
-Python files, the gate's per-file checks on the staged files and its cross-file checks on the whole
-repository. A change that moves the ground, or a commit with nothing staged, formats and lints every
-file. The type check, the tests and the evals run on the hosted runner after the push
-(`make verify-push`), and the eval budgets, the drills and the storage suite in the nightly.
+Python files, the gate's per-file checks on the staged files, and a cross-file check on the whole
+repository when a staged file is one it reads. A change that moves the ground, or a commit with
+nothing staged, formats and lints every file and runs every cross-file check. The type check, the
+tests and the evals run on the hosted runner after the push (`make verify-push`), and the eval
+budgets, the drills and the storage suite in the nightly.
 """
 
 import subprocess
