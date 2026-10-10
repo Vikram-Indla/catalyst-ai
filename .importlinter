@@ -8,7 +8,7 @@ name = Layers: capabilities above platform, retrieval and the port; contract at 
 type = layers
 layers =
     catalyst_ai.capabilities
-    catalyst_ai.retrieval | catalyst_ai.providers.gemini | catalyst_ai.providers.recorded | catalyst_ai.providers.faults
+    catalyst_ai.retrieval | catalyst_ai.providers.gemini | catalyst_ai.providers.recorded | catalyst_ai.providers.faults | catalyst_ai.providers.standin
     catalyst_ai.platform
     catalyst_ai.providers.port
     catalyst_ai.config

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 PORTS_SHARED = "HTTP_ADDR and OPS_ADDR must differ"
 NO_COLLECTOR = "OTEL_EXPORTER_ENDPOINT is required in production"
 PRODUCTION = "production"
+STAND_IN = "PROVIDER_STAND_IN is development only: a deployed process answers with a model"
 
 
 def _secret(value: object) -> str | None:
@@ -27,6 +28,7 @@ def start_problem(settings: "Settings") -> str | None:
     deployed = settings.environment.value != "development"
     problems = (
         PORTS_SHARED if settings.http_addr == settings.ops_addr else None,
+        STAND_IN if deployed and settings.provider_stand_in else None,
         NO_COLLECTOR
         if settings.environment.value == PRODUCTION and settings.otel_exporter_endpoint is None
         else None,

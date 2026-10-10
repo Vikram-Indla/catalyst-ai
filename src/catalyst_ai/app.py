@@ -61,6 +61,7 @@ from catalyst_ai.platform.observability import (
 from catalyst_ai.platform.runtime import RuntimeContext
 from catalyst_ai.platform.storage import PostgresJobStore, PostgresStorage, StorageUnavailableError
 from catalyst_ai.providers.gemini import GeminiProvider
+from catalyst_ai.providers.standin import StandInProvider
 
 CONTRACT_VERSION = "0.1.0"
 TITLE = "Catalyst One AI service"
@@ -237,7 +238,8 @@ def default_runtime(
         settings.database_pool_max,
         STORAGE_COMMAND_TIMEOUT_S,
     )
-    provider = GeminiProvider(settings, client, clock)
+    stand_in = settings.provider_stand_in
+    provider = StandInProvider() if stand_in else GeminiProvider(settings, client, clock)
     return RuntimeContext(
         settings=settings,
         provider=provider,

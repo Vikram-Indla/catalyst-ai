@@ -30,6 +30,7 @@ tooling's own variables, which the service never reads, are the allow-list in `c
 | `MODEL_TEXT_FAST` | model id | no | unset (the register's row) | as above | PUBLIC | The model `text-fast` resolves to |
 | `MODEL_GRADER_DEFAULT` | model id | no | unset (the register's row) | as above | PUBLIC | The model the eval graders use; no grader calls a model today (every grader is code) |
 | `MODEL_EMBED_DEFAULT` | model id | no | unset (the register's row) | one of the register's priced embedding ids (`D-064`) | PUBLIC | The index's embedding model; changing it means `catalyst-ai reembed`, since stored vectors keep the model they were made with |
+| `PROVIDER_STAND_IN` | bool | no | `false` | refused outside development | PUBLIC | Answer model calls with the development stand-in (`providers/standin.py`): fixed text marked as a stand-in, no model, nothing leaving the machine; the Improve menu (proposal, withheld refusal, draft children, summary) and the briefing can be walked end to end |
 | `CAPABILITY_<NAME>__MODEL_ALIAS` | enum | no | unset | as above; unset means the environment's default | PUBLIC | One capability's alias, over the environment's default — for the one capability that needs a longer context or a better model |
 | `CAPABILITY_IMPROVE_STORY` | group | no | — | nested keys below with `__` | PUBLIC | The per-capability knobs of `improve-story` |
 | `CAPABILITY_IMPROVE_STORY__ENABLED` | bool | no | `true` | — | PUBLIC | The kill switch (`RULE-009 §2`) |
