@@ -34,8 +34,8 @@ created: 2026-09-18
   hook checks the staged set, the pre-push hook admits `main` and scans the pushed range for
   secrets, and neither runs a pipeline, a container or a stamp. Per push, the hosted `ci.yml`
   runs `make verify-push` inside a budget of ten minutes, and a newer push cancels the run it
-  supersedes; every night, `nightly.yml` runs the evals with their budgets, the drills, the
-  storage suite repeated, the fuzz properties, the load run and the image scan. The workflow file
+  supersedes; `make nightly` runs by hand the evals with their budgets, the drills, the
+  storage suite repeated, the fuzz properties and the load run, and `make image-scan` the scan. The workflow file
   holds only checkout, setup, `make tools`, `make hooks`, `make verify-push`
   (`tools/checks/ci`). `make ci`, `make ci-aware` and `make stamp-check` stay as tools a
   contributor may run for the whole answer locally; no hook calls them.

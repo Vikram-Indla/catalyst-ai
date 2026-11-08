@@ -35,10 +35,10 @@ A commit and its push take seconds, and the full gate runs after the push, never
    range. Seconds; no stamp, no pipeline, no container.
 3. **The hosted runner**, after the push. Per push, `ci.yml` runs `make verify-push` (lint with the
    type check, api-check, ledgers-check, the tests with coverage, security, selftest) inside a
-   budget of ten minutes, and a newer push to the same ref cancels the older run. Every night,
-   `nightly.yml` runs `make nightly`: the drills, every eval set with its budgets, the storage suite
-   repeated, the fuzz properties, the load run, and the image scan in its own job. `tools/checks/ci`
-   holds both workflows to that.
+   budget of ten minutes, and a newer push to the same ref cancels the older run. By hand,
+   `make nightly` runs the drills, every eval set with its budgets, the storage suite repeated, the
+   fuzz properties and the load run, and `make image-scan` the scan; no scheduled hosted run exists.
+   `tools/checks/ci` holds the workflows to their rows.
 
 Nobody waits on the hosted runner. A red push run is fixed by the next commit, ahead of feature
 work; a red night is the morning's first commit. `make verify` (the per-push set plus the storage
@@ -98,12 +98,12 @@ scaffold and passes vacuously on an empty tree, and `selftest` proves each red o
 | Eval gate: every grader above its floor; no threshold loosened without a `D-NNN` — a floor lowered or a latency or cost budget raised; `injection` tag non-empty (ARCH-007, RULE-008 §3) | green | `make evals` + `tools/checks/evals` | AI-002, AI-018 |
 | Budgets: p95 latency and cost under the descriptor; budgets never widened without a `D-NNN` (ARCH-008 §1) | green | `tools/checks/budgets` | AI-002 |
 | Security: `pip-audit` on the exported lock, `gitleaks`, licences (ARCH-009 §5) ⚡ (gitleaks) | zero known vulnerabilities; zero secrets; allowlist only | `pip-audit`, `gitleaks`, `tools/checks/licenses` | AI-002 |
-| Image scan: zero fixable HIGH/CRITICAL in the runtime image (ARCH-009 §5) | `make image-scan` green on the release candidate, and every night in `nightly.yml`'s own job; a red night files a finding the same day and never gates a push | `trivy` (`--ignore-unfixed`), pinned in `.tool-versions` and verified against the vendor's checksum by `make scan-tools`; the run prints the vulnerability database's date | AI-002, AI-027 |
+| Image scan: zero fixable HIGH/CRITICAL in the runtime image (ARCH-009 §5) | `make image-scan` green on the release candidate, run by hand; a red scan files a finding the same day and never gates a push | `trivy` (`--ignore-unfixed`), pinned in `.tool-versions` and verified against the vendor's checksum by `make scan-tools`; the run prints the vulnerability database's date | AI-002, AI-027 |
 | Dependencies justified (RULE-001 §5) | every entry in `pyproject.toml` is a register row | `tools/checks/deps` | AI-002 |
 | Python version agrees across `.tool-versions`, `pyproject.toml`, the image (RULE-002 §1) | equal | `catalyst-ai check` | AI-002 |
 | Commit message format (RULE-005 §1) ⚡ | Conventional Commit, ≤ 80 chars | `.githooks/commit-msg` | AI-002 |
 | The change map classes every file, source is never a page, and no page a test, a grader or the service reads is filed as a page (`tools/change_map.py`) | zero files without a class; zero misfiled reads | `tools/checks/change_map` | AI-021 |
-| CI job equals the gate: `ci.yml`, `ci-image.yml`, `release.yml` (a push to `main`; one job `release`, skipped by its guard `if: vars.RELEASE_REGISTRY != ''` until a deploy target exists, with `contents: read` and `id-token: write`, its variables from the repository's; checkout, the pinned installer, `make release RELEASE_FLAGS=--print` and nothing else, no login action) and `nightly.yml` (a schedule; the gate's container running `make nightly`; a second job on the runner running `make tools`, `make scan-tools`, `make image-scan`, no scanner action), each held to its own row (the image workflow: triggered by `Dockerfile.ci` alone, `packages: write` in its one job, set up, build, gate, push, in that order); `ci.yml` holds only checkout, setup, `make tools`, `make hooks`, `make verify-push` (never `make verify`: the evals, the drills and the storage suite are the nightly's), `concurrency` on the ref with `cancel-in-progress: true`, and its trigger, container, service and env equal the pins `make ci` starts its database from (RULE-005 §1) | zero other files, steps or keys; every value equal | `tools/checks/ci` | AI-002, AI-017, AI-036, AI-048 |
+| CI job equals the gate: `ci.yml` and `ci-image.yml`, each held to its own row (the image workflow: triggered by `Dockerfile.ci` alone, `packages: write` in its one job, set up, build, gate, push, in that order); `ci.yml` holds only checkout, setup, `make tools`, `make hooks`, `make verify-push` (never `make verify`: the evals, the drills and the storage suite run by hand in `make nightly`), `concurrency` on the ref with `cancel-in-progress: true`, and its trigger, container, service and env equal the pins `make ci` starts its database from (RULE-005 §1) | zero other files, steps or keys; every value equal | `tools/checks/ci` | AI-002, AI-017, AI-036, AI-048 |
 | One image, pinned by digest: the `FROM` lines of `Dockerfile` and `Dockerfile.ci` name `BASE_IMAGE`, the Makefile's `CI_IMAGE` and the workflow's `container.image` name `CI_IMAGE`, both in `tools/rules.py`; `Dockerfile.ci` bakes the `uv` of `.tool-versions` and holds no `COPY` or `ADD`, so the published image never carries a file of the tree (RULE-005 §1) | every reference equal to the pin; a tag, a `COPY` or an `ADD` is red | `tools/checks/images` | AI-017 |
 | Push: only `main`, and no secret in what is pushed (RULE-005 §1) | every other ref refused; gitleaks finds nothing in the pushed range (`<remote>..<local>`, or the pushed commits when the ref is new); seconds, no stamp, no pipeline | `.githooks/pre-push` | AI-002, AI-048 |
 | Generated artefacts committed separately (RULE-005 §2) | no commit mixes `uv.lock`, `api/`, fixtures with hand-written files | `tools/checks/commits` (the gate, against `main`) | AI-002 |
@@ -140,7 +140,7 @@ make security     pip-audit on the exported lock · gitleaks · licences
 make selftest     every check red on its plant, one line per check
 make verify-push  lint · api-check · ledgers-check · test · coverage-check · security · selftest   (= ci.yml, per push, ≤ 10 min)
 make verify       verify-push · storage · drills · evals · budgets-check   (the whole gate, on demand)
-make nightly      drills · evals · budgets-check · fuzz · storage repeated · load   (= nightly.yml)
+make nightly      drills · evals · budgets-check · fuzz · storage repeated · load   (by hand)
 make ci           notes the tree · starts the pinned database as the workflow declares it · the workflow's run steps verbatim, inside the CI image · removes the database · green and the tree unchanged, it stamps it   (on demand)
 make ci-cold      the same with the image's cache volumes dropped first (the cold number of the record)
 make stamp-check  whether this tree, in this image, has a green run younger than a day (on demand)
