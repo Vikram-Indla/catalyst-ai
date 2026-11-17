@@ -29,8 +29,8 @@ When instructions conflict, the higher one wins. If two at the same level confli
    cannot fill is a `Q-NNN`, not a guess. An eval set that does not exist is the first thing you build.
 4. Work inside the capability or package the ticket names. Anything noticed outside it is an
    `F-NNN` or a `Q-NNN`, not a fix.
-5. Run the tests of what changed and name them in the record. The full gate runs on the hosted
-   runner after the push (per push and nightly, `RULE-006 §2`); a red run there is your next commit.
+5. Run the tests of what changed and name them in the record. The full gate runs by hand
+   (`make verify-push`, `make nightly`, `RULE-006 §2`); no hosted runner runs, and red found is your next commit.
 6. Write the session record in `brain/sessions/<YYYY-MM>/NNN-<slug>.md` from the template, with
    the eval score, the p95 latency and the p95 cost when a capability was touched.
 7. Land it in seconds (`RULE-005 §2`): stage exactly the slice's files, commit with one
@@ -82,8 +82,8 @@ brain/             working memory: 01-STATUS · 02-DECISIONS · 03-FINDINGS · 0
    model, tokens, cost, latency, cache hit and outcome — never the prompt or the completion. A
    content field in a logging call: CI red.
 10. **Zero tolerance, hooks, the gate after the push.** The hooks take seconds — the staged set
-    at commit, `main` and a secret scan at push; the hosted runner runs `make verify-push` per push
-    and the nightly the rest; a red run is fixed by the next commit;
+    at commit, `main` and a secret scan at push; `make verify-push` and `make nightly` run by hand,
+    no hosted runner; a red run is fixed by the next commit;
     no `noqa` or `type: ignore` without an allowlisted reason; coverage tiered — policy and safety
     100%, pipelines 95%, adapters 80%, overall 90%. Nothing stays red.
 

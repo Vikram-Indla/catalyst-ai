@@ -30,8 +30,9 @@ def test_the_committed_workflow_passes(root: Path) -> None:
     assert ci.run(root) == []
 
 
-def test_a_second_workflow_file_is_refused(root: Path) -> None:
-    second = root / ".github" / "workflows" / "nightly.yaml"
+def test_a_hosted_workflow_file_is_refused(root: Path) -> None:
+    second = root / rules.WORKFLOWS / "nightly.yaml"
+    second.parent.mkdir(parents=True)
     second.write_text("on: push\njobs:\n  x:\n    runs-on: ubuntu-latest\n", encoding="utf-8")
     found = ci.run(root)
     assert any("nightly.yaml" in v.path for v in found), f"a second workflow passed: {found}"

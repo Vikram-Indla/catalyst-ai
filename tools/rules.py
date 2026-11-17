@@ -14,7 +14,7 @@ ARCHITECTURE_TESTS = TESTS / "architecture"
 CONTRACT_TESTS = TESTS / "contract"
 UNIT_TESTS = TESTS / "unit"
 FIXTURES = TESTS / "fixtures"
-WORKFLOW = Path(".github/workflows/ci.yml")
+WORKFLOW = Path("tools/pipeline/ci.yml")
 SESSIONS = Path("brain/sessions")
 CHANGELOG = LEDGERS / "contracts-changelog.md"
 INVARIANTS = LEDGERS / "invariants.md"
@@ -212,7 +212,7 @@ BASE_IMAGE = (
 )
 CI_IMAGE = BASE_IMAGE
 
-WORKFLOWS = WORKFLOW.parent
+WORKFLOWS = Path(".github/workflows")
 CI_JOB = "verify"
 CI_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
 CI_DATABASE_IMAGE = (
@@ -235,34 +235,9 @@ CI_JOB_ENV = {
 }
 CI_NETWORK = "catalyst-ai-ci"
 
-CI_IMAGE_WORKFLOW = WORKFLOWS / "ci-image.yml"
-CI_IMAGE_JOB = "image"
-CI_IMAGE_TRIGGERS: dict[str, object] = {
-    "push": {"branches": ["main"], "paths": [DOCKERFILE_CI.as_posix()]}
-}
-CI_IMAGE_PERMISSIONS = {"contents": "read", "packages": "write"}
-CI_IMAGE_JOB_ENV = {"GITHUB_TOKEN": "${{ github.token }}"}
-CI_IMAGE_SETUP = "pip install uv==0.12.16"
-CI_IMAGE_ALLOWED_RUNS = (CI_IMAGE_SETUP, "make ci-image", "make ci-cold", "make ci-image-push")
 CI_REGISTRY = "ghcr.io"
 CI_IMAGE_LABEL = "org.catalyst-ai.dockerfile-sha256"
 CI_IMAGE_BUILT_FROM: str | None = None
-
-RELEASE_WORKFLOW = WORKFLOWS / "release.yml"
-RELEASE_JOB = "release"
-RELEASE_TRIGGERS: dict[str, object] = {"push": {"branches": ["main"]}}
-RELEASE_PERMISSIONS = {"contents": "read", "id-token": "write"}
-RELEASE_GUARD = "${{ vars.RELEASE_REGISTRY != '' }}"
-RELEASE_JOB_ENV = {
-    name: "${{ vars." + name + " }}"
-    for name in (
-        "RELEASE_REGISTRY",
-        "RELEASE_LOCATION",
-        "RELEASE_WIF_PROVIDER",
-        "RELEASE_SERVICE_ACCOUNT",
-    )
-}
-RELEASE_ALLOWED_RUNS = (CI_IMAGE_SETUP, "make release RELEASE_FLAGS=--print")
 
 CI_ALLOWED_USES = ("actions/checkout@v4",)
 CI_SETUP = (
@@ -277,15 +252,6 @@ CI_ALLOWED_RUNS = (
     "make hooks",
     CI_VERIFY,
 )
-NIGHTLY_WORKFLOW = WORKFLOWS / "nightly.yml"
-NIGHTLY_JOB = "nightly"
-NIGHTLY_TRIGGERS: dict[str, object] = {
-    "schedule": [{"cron": "0 2 * * *"}],
-    "workflow_dispatch": None,
-}
-NIGHTLY_ALLOWED_RUNS = (CI_SETUP, "make tools", "make nightly")
-NIGHTLY_SCAN_JOB = "image-scan"
-NIGHTLY_SCAN_RUNS = (CI_IMAGE_SETUP, "make tools", "make scan-tools", "make image-scan")
 
 LICENSE_ALLOWLIST = (
     "MIT",

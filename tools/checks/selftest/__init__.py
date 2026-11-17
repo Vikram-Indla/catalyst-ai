@@ -10,7 +10,6 @@ from tools.checks import (
     change_map,
     changelog,
     ci,
-    ci_image_job,
     commitclass,
     commits,
     commitsize,
@@ -28,10 +27,8 @@ from tools.checks import (
     latency,
     licenses,
     localrun,
-    nightly_job,
     openapi,
     prclass,
-    release_job,
     residency,
     sessions,
     vocabulary,
@@ -87,12 +84,7 @@ VALUE_PLANTS: dict[str, Callable[[], list[Violation]]] = {
     "changelog": lambda: changelog.check(["api/openapi.yaml"]),
     "deps": lambda: deps.check({"leftpad"}, set()),
     "licenses": lambda: licenses.check([("evil", "AGPL-3.0")]),
-    "ci": lambda: (
-        ci.check("      - run: echo hi\n", "w")
-        + ci_image_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w")
-        + nightly_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w", {})
-        + release_job.check({"on": {}, "jobs": {}}, "      - run: echo hi\n", "w")
-    ),
+    "ci": lambda: ci.check("      - run: echo hi\n", "w"),
     "images": lambda: (
         images.check("FROM python:3.12\n", "CI_IMAGE := python:3.12\n", "")
         + images.setup_violations("RUN apt-get install -y make\n", "apt-get install -y make git")

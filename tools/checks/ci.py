@@ -1,12 +1,10 @@
-"""RULE-005 §1: one workflow file, and it holds only what the local pipeline runs.
+"""RULE-005 §1: no hosted workflow, and the local pipeline holds only what the gate runs.
 
-Every file under .github/workflows/ is read against its own row (`ci_image_job` holds the image
-workflow's, `nightly_job` the nightly's); any other file is refused. `ci.yml` holds only
-checkout, setup, make tools, make hooks and make verify-push (the per-push budget; the evals,
-the drills and the storage suite run in the nightly), cancels a superseded run of the same ref,
-and its trigger, container, services and env equal what
-tools/rules.py pins — the same values `make ci` starts its own database with, so the hosted run
-and the local one reach PostgreSQL through the same door.
+Any file under .github/workflows/ is refused: no hosted runner starts a run. The pipeline `make ci`
+runs, tools/pipeline/ci.yml, holds only checkout, setup, make tools, make hooks and make
+verify-push (the evals, the drills and the storage suite run by hand in `make nightly`), and its
+container, services and env equal what tools/rules.py pins — the same values `make ci` starts its
+own database with.
 """
 
 import re
@@ -15,7 +13,6 @@ from pathlib import Path
 import yaml
 
 from tools import rules
-from tools.checks import ci_image_job, nightly_job, release_job
 from tools.checks.gate import Violation
 
 USES = re.compile(r"^\s*-?\s*uses:\s*(?P<value>\S+)", re.M)
@@ -103,49 +100,14 @@ def check(workflow: str, where: str) -> list[Violation]:
     return _step_violations(workflow, where) + _shape_violations(workflow, where)
 
 
-def _image_violations(workflow: str, where: str) -> list[Violation]:
-    document = _load(workflow)
-    if isinstance(document, str):
-        return [Violation(where, 1, document)]
-    return ci_image_job.check(document, workflow, where)
-
-
-def _release_violations(workflow: str, where: str) -> list[Violation]:
-    document = _load(workflow)
-    if isinstance(document, str):
-        return [Violation(where, 1, document)]
-    return release_job.check(document, workflow, where)
-
-
-def _nightly_violations(workflow: str, where: str) -> list[Violation]:
-    document = _load(workflow)
-    if isinstance(document, str):
-        return [Violation(where, 1, document)]
-    return nightly_job.check(document, workflow, where, expected_job())
-
-
 def run(root: Path) -> list[Violation]:
-    """Read every file in the workflow directory, each against its own row of the allowlist."""
+    """Refuse every hosted workflow, then hold the local pipeline to the gate."""
     directory = root / rules.WORKFLOWS
     present = sorted(p for p in directory.iterdir() if p.is_file()) if directory.is_dir() else []
-    allowed = {
-        rules.WORKFLOW.name,
-        rules.CI_IMAGE_WORKFLOW.name,
-        rules.NIGHTLY_WORKFLOW.name,
-        rules.RELEASE_WORKFLOW.name,
-    }
     violations = [
-        Violation(p.relative_to(root).as_posix(), 1, "a workflow the gate does not hold")
+        Violation(p.relative_to(root).as_posix(), 1, "a hosted workflow; none runs (RULE-005 §1)")
         for p in present
-        if p.name not in allowed
     ]
-    for row, rule in (
-        (rules.CI_IMAGE_WORKFLOW, _image_violations),
-        (rules.NIGHTLY_WORKFLOW, _nightly_violations),
-        (rules.RELEASE_WORKFLOW, _release_violations),
-    ):
-        if (root / row).exists():
-            violations += rule((root / row).read_text(encoding="utf-8"), row.as_posix())
     path = root / rules.WORKFLOW
     if not path.exists():
         return [*violations, Violation(rules.WORKFLOW.as_posix(), 1, "no workflow file")]

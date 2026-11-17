@@ -17,9 +17,9 @@ created: 2026-09-18
   (never `-A`), `git commit` (the pre-commit hook), `git pull --rebase` when `main` moved, then
   the push of `main` (the pre-push hook). Before the commit the contributor runs the tests of
   what changed — the touched packages, the touched capability's eval set when a capability
-  changed — and nothing more; `make verify` and `make ci` are never a precondition. The hosted
-  workflow runs on `main` after the push and nobody waits for it: a red push run is the
-  contributor's next commit, ahead of feature work, and a red night is the morning's first.
+  changed — and nothing more; `make verify` and `make ci` are never a precondition. No hosted
+  workflow runs; the gate runs by hand and nobody waits for it: red found in what landed is the
+  contributor's next commit, ahead of feature work.
   Force-push, history rewriting of anything pushed, and `--no-verify` are banned.
 - A change is one task in one commit with a one-line subject (the lockfile, the rendered
   document and recorded fixtures go in their own `gen:` commit). There is no total of lines per commit; each file keeps its own budget
@@ -30,40 +30,34 @@ created: 2026-09-18
   capability or package (`feat(improve-story): pipeline v2 with comments context`). Types:
   `feat`, `fix`, `refactor`, `perf`, `test`, `eval`, `prompt`, `docs`, `build`, `ci`, `chore`,
   `gen` (rendered document, lockfile, fixtures only). `commit-msg` enforces it.
-- **A commit and its push take seconds; the gate runs after the push** (`D-069`). The pre-commit
+- **A commit and its push take seconds; the gate runs by hand** (`D-069`). The pre-commit
   hook checks the staged set, the pre-push hook admits `main` and scans the pushed range for
-  secrets, and neither runs a pipeline, a container or a stamp. Per push, the hosted `ci.yml`
-  runs `make verify-push` inside a budget of ten minutes, and a newer push cancels the run it
-  supersedes; `make nightly` runs by hand the evals with their budgets, the drills, the
-  storage suite repeated, the fuzz properties and the load run, and `make image-scan` the scan. The workflow file
-  holds only checkout, setup, `make tools`, `make hooks`, `make verify-push`
-  (`tools/checks/ci`). `make ci`, `make ci-aware` and `make stamp-check` stay as tools a
+  secrets, and neither runs a pipeline, a container or a stamp. `make verify-push` is the
+  per-push share, inside a budget of ten minutes, and `make ci` runs it inside the pipeline's image;
+  `make nightly` runs by hand the evals with their budgets, the drills, the
+  storage suite repeated, the fuzz properties and the load run, and `make image-scan` the scan. The pipeline file,
+  `tools/pipeline/ci.yml`, holds only checkout, setup, `make tools`, `make hooks`, `make verify-push`
+  (`tools/checks/ci`), and `.github/workflows/` holds nothing: no hosted runner starts a run. `make ci`, `make ci-aware` and `make stamp-check` stay as tools a
   contributor may run for the whole answer locally; no hook calls them.
-- **One door to the database.** `.github/workflows/` holds `ci.yml`, the nightly, the image
-  workflow and the release workflow, each on its own row. Its trigger (a push to `main`), its container, its one service and its env equal what
-  `tools/rules.py` pins, and `tools/checks/ci` reads every file in the directory and all of
-  those keys. The tests reach PostgreSQL the same way in both runs: the pinned `pgvector` image
-  as a service named `postgres`, through `CATALYST_AI_EVAL_DATABASE_URL`. The hosted job declares
-  it under `services:`; `make ci` starts it from the same values on its own network
+- **One door to the database.** The pipeline file's container, its one service and its env equal
+  what `tools/rules.py` pins, and `tools/checks/ci` reads all of those keys. The tests reach PostgreSQL through the pinned `pgvector` image
+  as a service named `postgres`, through `CATALYST_AI_EVAL_DATABASE_URL`. The pipeline file declares
+  it under `services:`; `make ci` starts it from those values on its own network
   (`tools/ci_postgres`) and removes it afterwards, green or red. No Docker socket is mounted into
   the pipeline, and a throwaway container is only a local convenience outside it.
 - **One image, pinned by digest, never by tag.** `tools/rules.py` holds the pin. The Dockerfile's
-  `FROM` lines, the Makefile's `CI_IMAGE` and the workflow's `container.image` name it exactly,
-  so the local pipeline and the hosted job run the same bytes and the stamp's image is the one
-  that ran (`tools/checks/images`). The pin moves only in a `build(ci)` commit that changes it and
+  `FROM` lines, the Makefile's `CI_IMAGE` and the pipeline file's `container.image` name it exactly,
+  so the stamp's image is the one that ran (`tools/checks/images`). The pin moves only in a `build(ci)` commit that changes it and
   every reference together. `Dockerfile.ci` builds the pipeline's own image on the same base, with
-  the tools the hosted job installs in its setup step baked in, and `tools/checks/images` holds
+  the tools the pipeline's setup step installs baked in, and `tools/checks/images` holds
   the two to the same packages and uv pin. `make ci` runs in that image, named
   `catalyst-ai-ci:<hash of Dockerfile.ci>` (`tools/ci_image`); if it is missing on the machine,
   `make ci` refuses and names `make ci-image`, so an image is never built inside a push. The
   local run leaves out the setup step and runs uv offline against its warm volume; `make
   ci-cold` runs online. Debian's mirror is a build argument whose default is upstream: a
   machine may pass a nearer one from its own environment, never from the repository, and it
-  never changes the image's name. The hosted job keeps its setup step until the image has a
-  registry. It gets one in two commits: a push to `main` that changes `Dockerfile.ci` runs
-  `ci-image.yml`, which builds the image labelled with the file's hash, runs the gate inside it
-  and only then pushes it and prints its digest (the job alone holds `packages: write`); the
-  next `build(ci)` commit pins that digest and the hash it was built from, and
+  never changes the image's name. `make ci-image-push`, run by hand, pushes a built image to the registry and prints its digest;
+  a `build(ci)` commit pins that digest and the hash it was built from, and
   `tools/checks/images` refuses a `Dockerfile.ci` that no longer hashes to the pin.
 - Committed hooks in `.githooks/` (`make hooks` points `core.hooksPath` at them; git-native,
   no Node toolchain in a Python repository): `pre-commit` runs `make verify-fast`
@@ -72,7 +66,7 @@ created: 2026-09-18
   staged file is one it reads — and gitleaks on the staged tree; a change to a shared
   configuration, a rule, the lockfile, the hooks or a check's own code, or a commit with nothing
   staged, formats and lints every file and runs every cross-file check (`tools/scope.py`, `D-066`,
-  `D-070`); no type check, test or eval, which run on the hosted runner);
+  `D-070`); no type check, test or eval, which run with the gate);
   `commit-msg` runs the message check; `pre-push` refuses every ref but `main` and runs gitleaks
   on the pushed range. A red hook blocks. `make test-fast` (the unit tree, last failures first,
   no coverage) and `make evals-affected` exist for iteration.
